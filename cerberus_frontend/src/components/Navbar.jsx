@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, Activity, Search, Layers, Cpu, FileText, Server, User, LogOut, Lock } from 'lucide-react';
+import { ShieldCheck, Activity, Search, Layers, Cpu, FileText, Server, User, Lock } from 'lucide-react';
 
 export default function Navbar({ 
   activeTab, 
@@ -9,12 +9,10 @@ export default function Navbar({
   isStreamLive, 
   setIsStreamLive, 
   selectedTransaction,
-  currentUser,
+  currentOperator,
   onLogout
 }) {
-  const isCustomerRole = currentUser?.role === 'customer';
-
-  const analystTabs = [
+  const primaryTabs = [
     { id: 'monitor', label: 'Monitor', icon: Activity },
     { id: 'investigate', label: selectedTransaction ? `Investigate (${selectedTransaction.id})` : 'Investigate', icon: Search },
     { id: 'networks', label: 'Networks', icon: Layers },
@@ -24,7 +22,6 @@ export default function Navbar({
   const secondaryTabs = [
     { id: 'chargebacks', label: 'Chargebacks', icon: FileText },
     { id: 'system', label: 'System', icon: Server },
-    { id: 'customer', label: 'Customer Portal', icon: User },
   ];
 
   return (
@@ -68,7 +65,7 @@ export default function Navbar({
               </span>
             </div>
             <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-              Payment Risk Intelligence
+              Payment Risk Operations
             </div>
           </div>
         </div>
@@ -128,23 +125,23 @@ export default function Navbar({
             {isStreamLive ? 'Stream: Live' : 'Stream: Paused'}
           </button>
 
-          {/* AUTHENTICATED USER BADGE & LOGOUT */}
-          {currentUser && (
+          {/* AUTHENTICATED OPERATOR BADGE & LOGOUT */}
+          {currentOperator && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: '6px',
-                background: currentUser.role === 'customer' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(16, 185, 129, 0.15)',
-                border: `1px solid ${currentUser.role === 'customer' ? 'rgba(59, 130, 246, 0.3)' : 'rgba(16, 185, 129, 0.3)'}`,
+                background: 'rgba(59, 130, 246, 0.15)',
+                border: '1px solid rgba(59, 130, 246, 0.3)',
                 padding: '2px 8px',
                 borderRadius: '4px',
                 fontSize: '11px',
-                color: currentUser.role === 'customer' ? '#60a5fa' : '#34d399'
+                color: '#60a5fa'
               }}>
                 <User size={12} />
-                <span style={{ fontWeight: 600 }}>{currentUser.name}</span>
-                <span className="mono" style={{ opacity: 0.75 }}>({currentUser.user_id})</span>
+                <span style={{ fontWeight: 600 }}>{currentOperator.name}</span>
+                <span className="mono" style={{ opacity: 0.75 }}>({currentOperator.operator_id})</span>
               </div>
 
               <button
@@ -154,7 +151,7 @@ export default function Navbar({
                 style={{ padding: '3px 8px', fontSize: '11px', color: '#f87171', borderColor: 'rgba(239,68,68,0.3)' }}
               >
                 <Lock size={11} />
-                <span>Lock / Sign Out</span>
+                <span>Sign Out</span>
               </button>
             </div>
           )}
@@ -175,9 +172,9 @@ export default function Navbar({
         overflowX: 'auto'
       }}>
         
-        {/* PRIMARY TABS (FOR ANALYST / OPERATORS) */}
+        {/* PRIMARY TABS */}
         <div style={{ display: 'flex', gap: '0.25rem' }}>
-          {analystTabs.map(item => {
+          {primaryTabs.map(item => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
             return (
@@ -212,7 +209,6 @@ export default function Navbar({
           {secondaryTabs.map(item => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
-            const isCustomerTab = item.id === 'customer';
             return (
               <button
                 key={item.id}
@@ -220,8 +216,8 @@ export default function Navbar({
                 style={{
                   background: 'none',
                   border: 'none',
-                  borderBottom: isActive ? (isCustomerTab ? '2px solid #3b82f6' : '2px solid var(--text-muted)') : '2px solid transparent',
-                  color: isActive ? '#fff' : (isCustomerTab ? '#60a5fa' : 'var(--text-muted)'),
+                  borderBottom: isActive ? '2px solid var(--text-muted)' : '2px solid transparent',
+                  color: isActive ? '#fff' : 'var(--text-muted)',
                   fontWeight: isActive ? 600 : 500,
                   fontSize: '12px',
                   padding: '0.65rem 0.65rem',
@@ -232,7 +228,7 @@ export default function Navbar({
                   whiteSpace: 'nowrap'
                 }}
               >
-                <Icon size={13} color={isCustomerTab ? '#60a5fa' : undefined} />
+                <Icon size={13} />
                 {item.label}
               </button>
             );

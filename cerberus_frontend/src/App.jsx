@@ -7,21 +7,20 @@ import NetworksView from './components/NetworksView';
 import ModelsView from './components/ModelsView';
 import ChargebacksView from './components/ChargebacksView';
 import SystemStatusView from './components/SystemStatusView';
-import CustomerPortal from './components/CustomerPortal';
 
 export default function App() {
-  // Authentication Gate State
-  const [currentUser, setCurrentUser] = useState(() => {
+  // Operator Authentication Session State
+  const [currentOperator, setCurrentOperator] = useState(() => {
     try {
-      const saved = localStorage.getItem('cerberus_auth_user');
+      const saved = localStorage.getItem('cerberus_operator_session');
       return saved ? JSON.parse(saved) : null;
     } catch {
       return null;
     }
   });
 
-  const [authToken, setAuthToken] = useState(() => {
-    return localStorage.getItem('cerberus_auth_token') || null;
+  const [operatorToken, setOperatorToken] = useState(() => {
+    return localStorage.getItem('cerberus_operator_token') || null;
   });
 
   const [activeTab, setActiveTab] = useState('monitor');
@@ -34,30 +33,26 @@ export default function App() {
   const [focusedNetworkTxn, setFocusedNetworkTxn] = useState(null);
 
   // Authentication Handlers
-  const handleAuthSuccess = (userObj, tokenStr, roleType) => {
-    const fullUser = { ...userObj, role: roleType || userObj.role || 'analyst' };
-    setCurrentUser(fullUser);
-    setAuthToken(tokenStr);
-    localStorage.setItem('cerberus_auth_user', JSON.stringify(fullUser));
-    localStorage.setItem('cerberus_auth_token', tokenStr);
-
-    if (fullUser.role === 'customer') {
-      setActiveTab('customer');
-    } else {
-      setActiveTab('monitor');
-    }
+  const handleAuthSuccess = (operatorObj, tokenStr) => {
+    setCurrentOperator(operatorObj);
+    setOperatorToken(tokenStr);
+    localStorage.setItem('cerberus_operator_session', JSON.stringify(operatorObj));
+    localStorage.setItem('cerberus_operator_token', tokenStr);
+    setActiveTab('monitor');
   };
 
   const handleLogout = () => {
-    setCurrentUser(null);
-    setAuthToken(null);
-    localStorage.removeItem('cerberus_auth_user');
-    localStorage.removeItem('cerberus_auth_token');
+    setCurrentOperator(null);
+    setOperatorToken(null);
+    localStorage.removeItem('cerberus_operator_session');
+    localStorage.removeItem('cerberus_operator_token');
     setActiveTab('monitor');
   };
 
   // Initial Fetch of Shared Unified Transactions & Metrics from FastAPI
   useEffect(() => {
+    if (!currentOperator) return;
+
     fetch('http://127.0.0.1:8000/api/risk/transactions?limit=60')
       .then(res => res.json())
       .then(data => {
@@ -74,11 +69,13 @@ export default function App() {
       .then(res => res.json())
       .then(data => setMetrics(data))
       .catch((err) => console.error('[CerberusPay] Failed to fetch metrics:', err));
-  }, []);
+  }, [currentOperator]);
 
-  // Background Stream Ingestion
+  // Background Stream Ingestion (Simulates payment gateway traffic)
   useEffect(() => {
-    if (!isStreamLive) return;
+    if (!isStreamLive || !currentOperator) return;
+
+    const customers = ["USR_8921", "USR_1049", "USR_3410", "USR_5192", "USR_7820", "USR_9941"];
 
     const interval = setInterval(() => {
       const isFraud = Math.random() < 0.25;
@@ -86,9 +83,10 @@ export default function App() {
       const geo = isFraud ? Math.floor(Math.random() * 7200 + 1800) : Math.floor(Math.random() * 25 + 2);
       const vel = isFraud ? Math.floor(Math.random() * 11 + 5) : Math.floor(Math.random() * 2 + 1);
       const proxy = isFraud ? (Math.random() < 0.85 ? 1 : 0) : 0;
+      const randomUser = customers[Math.floor(Math.random() * customers.length)];
 
       const payload = {
-        user_id: isFraud ? `USR_8921` : `USR_${Math.floor(Math.random() * 8999 + 1000)}`,
+        user_id: randomUser,
         amount: amount,
         category: isFraud ? 'electronics' : 'ecommerce',
         velocity_1h: vel,
@@ -116,7 +114,7 @@ export default function App() {
     }, 3800);
 
     return () => clearInterval(interval);
-  }, [isStreamLive, mode]);
+  }, [isStreamLive, mode, currentOperator]);
 
   // Select transaction from Monitor
   const handleSelectTransaction = (tx) => {
@@ -178,12 +176,12 @@ export default function App() {
     setActiveTab('investigate');
   };
 
-  // 1. MANDATORY AUTHENTICATION GATE: NO ACCESS UNTIL LOGGED IN
-  if (!currentUser) {
+  // 1. MANDATORY OPERATOR AUTHENTICATION GATE
+  if (!currentOperator) {
     return <AuthGate onAuthSuccess={handleAuthSuccess} />;
   }
 
-  // 2. AUTHENTICATED PLATFORM CONSOLE
+  // 2. AUTHENTICATED FRAUD OPERATIONS PLATFORM
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
       
@@ -196,7 +194,7 @@ export default function App() {
         isStreamLive={isStreamLive}
         setIsStreamLive={setIsStreamLive}
         selectedTransaction={selectedTransaction}
-        currentUser={currentUser}
+        currentOperator={currentOperator}
         onLogout={handleLogout}
       />
 
@@ -240,15 +238,6 @@ export default function App() {
           <SystemStatusView mode={mode} />
         )}
 
-        {activeTab === 'customer' && (
-          <CustomerPortal
-            user={currentUser}
-            token={authToken}
-            onLoginSuccess={handleAuthSuccess}
-            onLogout={handleLogout}
-          />
-        )}
-
       </main>
 
       {/* FOOTER */}
@@ -260,7 +249,7 @@ export default function App() {
         color: 'var(--text-muted)',
         background: 'var(--bg-secondary)'
       }}>
-        CERBERUSPAY • Unified Payment Risk Intelligence Platform • Enterprise Authentication Gate Active
+        CERBERUSPAY • Internal Payment Risk Operations Platform • Authorized Personnel Only
       </footer>
 
     </div>
