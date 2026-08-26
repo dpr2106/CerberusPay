@@ -11,31 +11,32 @@ export default function AuthGate({ onAuthSuccess }) {
   const [successMsg, setSuccessMsg] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // 1-Click Quick Demo Sign In
-  const handleQuickSignIn = (roleType) => {
+  // 1-Click Quick Demo Sign In - Calls REAL FastAPI endpoint
+  const handleQuickSignIn = async (roleType) => {
     setIsLoading(true);
-    setTimeout(() => {
-      if (roleType === 'analyst') {
-        const analystUser = {
-          user_id: 'OPR_CHIEF_ANALYST',
-          name: 'Chief Risk Officer',
-          email: 'security.operator@cerberuspay.internal',
-          role: 'analyst'
-        };
-        const token = 'eyJhbGciOiAiSFMyNTYiLCAidHlwIjoiSldUIn0.mock_analyst_token';
-        onAuthSuccess(analystUser, token, 'analyst');
-      } else {
-        const customerUser = {
-          user_id: 'USR_8921',
-          name: 'Alex Mercer',
-          email: 'alex.mercer@example.com',
-          role: 'customer'
-        };
-        const token = 'eyJhbGciOiAiSFMyNTYiLCAidHlwIjoiSldUIn0.mock_customer_token';
-        onAuthSuccess(customerUser, token, 'customer');
+    setErrorMsg(null);
+
+    const demoEmail = roleType === 'analyst' ? 'security.operator@cerberuspay.internal' : 'alex.mercer@example.com';
+    const demoPass = roleType === 'analyst' ? 'operator123' : 'password123';
+
+    try {
+      const res = await fetch('http://127.0.0.1:8000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: demoEmail, password: demoPass })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.detail || 'Login failed');
       }
+
+      onAuthSuccess(data.user, data.access_token, roleType);
+    } catch (err) {
+      setErrorMsg(`Backend connection failed: ${err.message}. Ensure FastAPI is running on port 8000.`);
+    } finally {
       setIsLoading(false);
-    }, 400);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -60,14 +61,14 @@ export default function AuthGate({ onAuthSuccess }) {
       }
 
       if (mode === 'register') {
-        setSuccessMsg('Account created successfully! Please sign in with your credentials.');
+        setSuccessMsg(`Account created for ${data.user?.name} (${data.user?.user_id})! Please sign in.`);
         setMode('login');
         setPassword('');
       } else {
         onAuthSuccess(data.user, data.access_token, role);
       }
     } catch (err) {
-      setErrorMsg(err.message || 'Authentication service unreachable. Ensure FastAPI backend is running.');
+      setErrorMsg(err.message || 'Authentication service unreachable. Ensure FastAPI backend is running on port 8000.');
     } finally {
       setIsLoading(false);
     }
@@ -168,7 +169,7 @@ export default function AuthGate({ onAuthSuccess }) {
         {mode === 'login' && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '1.25rem' }}>
             <div
-              onClick={() => setRole('analyst')}
+              onClick={() => { setRole('analyst'); setEmail('security.operator@cerberuspay.internal'); setPassword('operator123'); }}
               style={{
                 padding: '8px 10px',
                 borderRadius: '6px',
@@ -184,7 +185,7 @@ export default function AuthGate({ onAuthSuccess }) {
               🛡️ Fraud Analyst
             </div>
             <div
-              onClick={() => setRole('customer')}
+              onClick={() => { setRole('customer'); setEmail('alex.mercer@example.com'); setPassword('password123'); }}
               style={{
                 padding: '8px 10px',
                 borderRadius: '6px',
@@ -288,38 +289,40 @@ export default function AuthGate({ onAuthSuccess }) {
             className="btn-primary-fintech"
             style={{ width: '100%', justifyContent: 'center', marginTop: '0.25rem', opacity: isLoading ? 0.7 : 1 }}
           >
-            {isLoading ? 'Authenticating...' : (mode === 'login' ? 'Sign In & Open Console' : 'Create Account')}
+            {isLoading ? 'Authenticating with Backend...' : (mode === 'login' ? 'Sign In & Open Console' : 'Create Account')}
             <ArrowRight size={14} />
           </button>
 
         </form>
 
-        {/* QUICK DEMO ACCESS (1-CLICK UNLOCK) */}
+        {/* QUICK DEMO ACCESS (REAL API DISPATCH) */}
         {mode === 'login' && (
           <div style={{ marginTop: '1.5rem', borderTop: '1px solid var(--border-subtle)', paddingTop: '1rem' }}>
             <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.65rem', textAlign: 'center' }}>
-              ⚡ QUICK-ACCESS DEMO LOGIN
+              ⚡ 1-CLICK REAL BACKEND DEMO LOGIN
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <button
                 type="button"
                 onClick={() => handleQuickSignIn('analyst')}
+                disabled={isLoading}
                 className="btn-secondary-fintech"
                 style={{ width: '100%', justifyContent: 'center', fontSize: '12px', borderColor: 'rgba(59,130,246,0.3)' }}
               >
                 <ShieldCheck size={13} color="#60a5fa" />
-                <span>Enter as <strong>Fraud Operations Analyst</strong></span>
+                <span>Enter as <strong>Fraud Analyst</strong> (Operator Console)</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => handleQuickSignIn('customer')}
+                disabled={isLoading}
                 className="btn-secondary-fintech"
                 style={{ width: '100%', justifyContent: 'center', fontSize: '12px' }}
               >
                 <User size={13} />
-                <span>Enter as <strong>Customer (Alex Mercer)</strong></span>
+                <span>Enter as <strong>Customer (Alex Mercer)</strong> (Portal)</span>
               </button>
             </div>
           </div>
@@ -329,7 +332,7 @@ export default function AuthGate({ onAuthSuccess }) {
 
       {/* FOOTER */}
       <div style={{ marginTop: '1.5rem', fontSize: '11px', color: 'var(--text-muted)' }}>
-        CERBERUSPAY • Zero-Trust Enterprise Risk Platform • 256-bit Encrypted Gate
+        CERBERUSPAY • Real FastAPI Backend Authentication • PBKDF2 Hashed Tokens
       </div>
 
     </div>

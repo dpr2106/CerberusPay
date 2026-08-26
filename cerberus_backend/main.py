@@ -101,6 +101,15 @@ USERS: List[Dict[str, Any]] = [
         "password_hash": hash_password("password123"),
         "created_at": (datetime.now() - timedelta(days=35)).isoformat(),
         "is_active": True
+    },
+    {
+        "id": "2",
+        "user_id": "OPR_CHIEF_ANALYST",
+        "name": "Chief Risk Officer",
+        "email": "security.operator@cerberuspay.internal",
+        "password_hash": hash_password("operator123"),
+        "created_at": (datetime.now() - timedelta(days=90)).isoformat(),
+        "is_active": True
     }
 ]
 
@@ -540,7 +549,10 @@ def register(payload: RegisterPayload):
     }
 
     USERS.append(new_user)
-    print(f"[CERBERUS AUTH] Registered new user: {new_user_id} ({email_clean})", flush=True)
+    print(f"\n==================================================", flush=True)
+    print(f"[AUTH REGISTER] New User Created: {new_user_id} ({email_clean})", flush=True)
+    print(f"Name: {name_clean} | Hashed: PBKDF2-HMAC-SHA256 (100,000 rounds)", flush=True)
+    print(f"==================================================\n", flush=True)
 
     return {
         "status": "success",
@@ -567,7 +579,10 @@ def login(payload: LoginPayload):
         "name": user["name"]
     })
 
-    print(f"[CERBERUS AUTH] Logged in user: {user['user_id']} ({email_clean})", flush=True)
+    print(f"\n==================================================", flush=True)
+    print(f"[AUTH LOGIN] User Authenticated: {user['user_id']} ({email_clean})", flush=True)
+    print(f"Name: {user['name']} | Time: {datetime.now().strftime('%H:%M:%S')}", flush=True)
+    print(f"==================================================\n", flush=True)
 
     return {
         "status": "success",
