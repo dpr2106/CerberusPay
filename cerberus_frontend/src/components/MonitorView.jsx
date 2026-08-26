@@ -7,7 +7,6 @@ import {
 export default function MonitorView({ transactions, mode, onSelectTransaction }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterDecision, setFilterDecision] = useState('ALL');
-  const [hoveredCard, setHoveredCard] = useState(null);
   const [hoveredTx, setHoveredTx] = useState(null);
   const [popoverPos, setPopoverPos] = useState({ x: 0, y: 0 });
 
@@ -67,208 +66,166 @@ export default function MonitorView({ transactions, mode, onSelectTransaction })
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
       
-      {/* 1. PREMIUM SUMMARY CARDS (SECTION 1) */}
+      {/* 1. PREMIUM SUMMARY CARDS (CLEAN, FULLY VISIBLE & NO CLIPPING) */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
         
         {/* BLOCKED CARD */}
         <div 
           className="fintech-card fintech-card-interactive card-glow-red"
           onClick={() => setFilterDecision(filterDecision === 'BLOCKED' ? 'ALL' : 'BLOCKED')}
-          onMouseEnter={() => setHoveredCard('blocked')}
-          onMouseLeave={() => setHoveredCard(null)}
           style={{ 
             padding: '1.25rem', 
             borderLeft: '4px solid #ef4444',
-            position: 'relative',
             background: filterDecision === 'BLOCKED' ? 'rgba(239, 68, 68, 0.08)' : 'var(--bg-card)',
-            boxShadow: filterDecision === 'BLOCKED' ? 'var(--shadow-glow-red)' : 'var(--shadow-sm)'
+            boxShadow: filterDecision === 'BLOCKED' ? 'var(--shadow-glow-red)' : 'var(--shadow-sm)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            minHeight: '140px'
           }}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ fontSize: '11px', color: '#f87171', fontWeight: 800, letterSpacing: '0.04em' }}>
-                BLOCKED THREATS
-              </span>
-              <span style={{ fontSize: '10px', background: 'rgba(239,68,68,0.15)', color: '#fca5a5', padding: '1px 5px', borderRadius: '3px', fontWeight: 700 }}>
-                {blockedPct}%
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontSize: '11px', color: '#f87171', fontWeight: 800, letterSpacing: '0.04em' }}>
+                  BLOCKED THREATS
+                </span>
+                <span style={{ fontSize: '10px', background: 'rgba(239,68,68,0.15)', color: '#fca5a5', padding: '1px 5px', borderRadius: '3px', fontWeight: 700 }}>
+                  {blockedPct}%
+                </span>
+              </div>
+              <span style={{ fontSize: '12px', color: '#f87171', fontWeight: 700 }}>
+                ₹{blockedSum.toLocaleString('en-IN')}
               </span>
             </div>
-            <span style={{ fontSize: '12px', color: '#f87171', fontWeight: 700 }}>
-              ₹{blockedSum.toLocaleString('en-IN')}
-            </span>
+
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginTop: '6px' }}>
+              <span style={{ fontSize: '2rem', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em' }}>
+                {blockedList.length}
+              </span>
+              <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>
+                intercepted
+              </span>
+            </div>
+
+            {/* FULLY VISIBLE IN-CARD EXPLANATION */}
+            <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px', lineHeight: 1.35 }}>
+              Stopped by ML risk engine & security rules
+            </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginTop: '6px' }}>
-            <span style={{ fontSize: '2rem', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em' }}>
-              {blockedList.length}
-            </span>
-            <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>
-              intercepted
-            </span>
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px', fontSize: '11px', color: 'var(--text-secondary)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px', paddingTop: '6px', borderTop: '1px solid rgba(255,255,255,0.05)', fontSize: '11px', color: 'var(--text-secondary)' }}>
             <span>Interception rate</span>
             <span style={{ color: '#f87171', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '3px' }}>
               <TrendingUp size={12} /> High protection
             </span>
           </div>
-
-          {/* DOWNWARD POSITIONED TOOLTIP TO NEVER CLIP BEHIND NAVBAR */}
-          {hoveredCard === 'blocked' && (
-            <div style={{
-              position: 'absolute',
-              top: '100%',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              marginTop: '8px',
-              background: '#161d2d',
-              border: '1px solid var(--status-blocked-border)',
-              borderRadius: '6px',
-              padding: '7px 12px',
-              fontSize: '11px',
-              color: '#fca5a5',
-              whiteSpace: 'nowrap',
-              zIndex: 150,
-              boxShadow: 'var(--shadow-lg)'
-            }}>
-              Transactions stopped by ML risk engine & heuristic security rules
-            </div>
-          )}
         </div>
 
         {/* REVIEW (3DS) CARD */}
         <div 
           className="fintech-card fintech-card-interactive card-glow-amber"
           onClick={() => setFilterDecision(filterDecision === 'REVIEW' ? 'ALL' : 'REVIEW')}
-          onMouseEnter={() => setHoveredCard('review')}
-          onMouseLeave={() => setHoveredCard(null)}
           style={{ 
             padding: '1.25rem', 
             borderLeft: '4px solid #f59e0b',
-            position: 'relative',
             background: filterDecision === 'REVIEW' ? 'rgba(245, 158, 11, 0.08)' : 'var(--bg-card)',
-            boxShadow: filterDecision === 'REVIEW' ? 'var(--shadow-glow-amber)' : 'var(--shadow-sm)'
+            boxShadow: filterDecision === 'REVIEW' ? 'var(--shadow-glow-amber)' : 'var(--shadow-sm)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            minHeight: '140px'
           }}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ fontSize: '11px', color: '#fbbf24', fontWeight: 800, letterSpacing: '0.04em' }}>
-                REVIEW (3DS STEP-UP)
-              </span>
-              <span style={{ fontSize: '10px', background: 'rgba(245,158,11,0.15)', color: '#fde68a', padding: '1px 5px', borderRadius: '3px', fontWeight: 700 }}>
-                {reviewPct}%
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontSize: '11px', color: '#fbbf24', fontWeight: 800, letterSpacing: '0.04em' }}>
+                  REVIEW (3DS STEP-UP)
+                </span>
+                <span style={{ fontSize: '10px', background: 'rgba(245,158,11,0.15)', color: '#fde68a', padding: '1px 5px', borderRadius: '3px', fontWeight: 700 }}>
+                  {reviewPct}%
+                </span>
+              </div>
+              <span style={{ fontSize: '12px', color: '#fbbf24', fontWeight: 700 }}>
+                ₹{reviewSum.toLocaleString('en-IN')}
               </span>
             </div>
-            <span style={{ fontSize: '12px', color: '#fbbf24', fontWeight: 700 }}>
-              ₹{reviewSum.toLocaleString('en-IN')}
-            </span>
+
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginTop: '6px' }}>
+              <span style={{ fontSize: '2rem', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em' }}>
+                {reviewList.length}
+              </span>
+              <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>
+                challenges
+              </span>
+            </div>
+
+            {/* FULLY VISIBLE IN-CARD EXPLANATION */}
+            <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px', lineHeight: 1.35 }}>
+              Multi-factor / 3DS challenge review active
+            </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginTop: '6px' }}>
-            <span style={{ fontSize: '2rem', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em' }}>
-              {reviewList.length}
-            </span>
-            <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>
-              challenges
-            </span>
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px', fontSize: '11px', color: 'var(--text-secondary)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px', paddingTop: '6px', borderTop: '1px solid rgba(255,255,255,0.05)', fontSize: '11px', color: 'var(--text-secondary)' }}>
             <span>Friction control</span>
             <span style={{ color: '#fbbf24', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '3px' }}>
               <Activity size={12} /> Step-up OTP active
             </span>
           </div>
-
-          {/* DOWNWARD POSITIONED TOOLTIP TO NEVER CLIP BEHIND NAVBAR */}
-          {hoveredCard === 'review' && (
-            <div style={{
-              position: 'absolute',
-              top: '100%',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              marginTop: '8px',
-              background: '#161d2d',
-              border: '1px solid var(--status-review-border)',
-              borderRadius: '6px',
-              padding: '7px 12px',
-              fontSize: '11px',
-              color: '#fde68a',
-              whiteSpace: 'nowrap',
-              zIndex: 150,
-              boxShadow: 'var(--shadow-lg)'
-            }}>
-              Transactions requiring additional multi-factor / 3DS challenge review
-            </div>
-          )}
         </div>
 
         {/* ALLOWED CARD */}
         <div 
           className="fintech-card fintech-card-interactive card-glow-green"
           onClick={() => setFilterDecision(filterDecision === 'ALLOWED' ? 'ALL' : 'ALLOWED')}
-          onMouseEnter={() => setHoveredCard('allowed')}
-          onMouseLeave={() => setHoveredCard(null)}
           style={{ 
             padding: '1.25rem', 
             borderLeft: '4px solid #10b981',
-            position: 'relative',
             background: filterDecision === 'ALLOWED' ? 'rgba(16, 185, 129, 0.08)' : 'var(--bg-card)',
-            boxShadow: filterDecision === 'ALLOWED' ? 'var(--shadow-glow-green)' : 'var(--shadow-sm)'
+            boxShadow: filterDecision === 'ALLOWED' ? 'var(--shadow-glow-green)' : 'var(--shadow-sm)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            minHeight: '140px'
           }}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ fontSize: '11px', color: '#34d399', fontWeight: 800, letterSpacing: '0.04em' }}>
-                ALLOWED PAYMENTS
-              </span>
-              <span style={{ fontSize: '10px', background: 'rgba(16,185,129,0.15)', color: '#a7f3d0', padding: '1px 5px', borderRadius: '3px', fontWeight: 700 }}>
-                {allowedPct}%
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontSize: '11px', color: '#34d399', fontWeight: 800, letterSpacing: '0.04em' }}>
+                  ALLOWED PAYMENTS
+                </span>
+                <span style={{ fontSize: '10px', background: 'rgba(16,185,129,0.15)', color: '#a7f3d0', padding: '1px 5px', borderRadius: '3px', fontWeight: 700 }}>
+                  {allowedPct}%
+                </span>
+              </div>
+              <span style={{ fontSize: '12px', color: '#34d399', fontWeight: 700 }}>
+                ₹{allowedSum.toLocaleString('en-IN')}
               </span>
             </div>
-            <span style={{ fontSize: '12px', color: '#34d399', fontWeight: 700 }}>
-              ₹{allowedSum.toLocaleString('en-IN')}
-            </span>
+
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginTop: '6px' }}>
+              <span style={{ fontSize: '2rem', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em' }}>
+                {allowedList.length}
+              </span>
+              <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>
+                authentic
+              </span>
+            </div>
+
+            {/* FULLY VISIBLE IN-CARD EXPLANATION */}
+            <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px', lineHeight: 1.35 }}>
+              Authentic checkouts passed all risk checks
+            </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginTop: '6px' }}>
-            <span style={{ fontSize: '2rem', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em' }}>
-              {allowedList.length}
-            </span>
-            <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 600 }}>
-              authentic
-            </span>
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px', fontSize: '11px', color: 'var(--text-secondary)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px', paddingTop: '6px', borderTop: '1px solid rgba(255,255,255,0.05)', fontSize: '11px', color: 'var(--text-secondary)' }}>
             <span>Approval velocity</span>
             <span style={{ color: '#34d399', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '3px' }}>
               <TrendingDown size={12} /> Frictionless checkout
             </span>
           </div>
-
-          {/* DOWNWARD POSITIONED TOOLTIP TO NEVER CLIP BEHIND NAVBAR */}
-          {hoveredCard === 'allowed' && (
-            <div style={{
-              position: 'absolute',
-              top: '100%',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              marginTop: '8px',
-              background: '#161d2d',
-              border: '1px solid var(--status-allowed-border)',
-              borderRadius: '6px',
-              padding: '7px 12px',
-              fontSize: '11px',
-              color: '#a7f3d0',
-              whiteSpace: 'nowrap',
-              zIndex: 150,
-              boxShadow: 'var(--shadow-lg)'
-            }}>
-              Authentic payments that successfully passed all risk checks
-            </div>
-          )}
         </div>
 
       </div>
