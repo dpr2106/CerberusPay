@@ -1,46 +1,88 @@
 ﻿import React, { useState, useEffect } from 'react';
-import { FileText, ShieldCheck, Clock, CheckCircle2, ArrowRight, ArrowUpRight } from 'lucide-react';
+import { FileText, ShieldCheck, Clock, CheckCircle2, AlertCircle, ArrowRight } from 'lucide-react';
 
 export default function ChargebacksView({ onInvestigateDispute }) {
   const [disputes, setDisputes] = useState([]);
   const [selectedDispute, setSelectedDispute] = useState(null);
   const [isCompiling, setIsCompiling] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
 
-  useEffect(() => {
+  const fetchChargebacks = () => {
     fetch('http://localhost:8000/api/chargebacks')
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error(`Backend returned status ${res.status}`);
+        return res.json();
+      })
       .then(data => {
         if (data.disputes && data.disputes.length > 0) {
           setDisputes(data.disputes);
-          setSelectedDispute(data.disputes[0]);
-        }
-      })
-      .catch(() => {});
-  }, []);
-
-  const handleGenerateEvidence = (txId) => {
-    setIsCompiling(true);
-    fetch('http://localhost:8000/api/chargeback/generate-evidence', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ transaction_id: txId, reason: 'REPRESENTMENT_SUBMISSION' })
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.evidence_packet) {
-          setDisputes(prev => prev.map(d => {
-            if (d.transaction_id === txId) {
-              return { ...d, status: 'RESPONDED', evidence: data.evidence_packet };
-            }
-            return d;
-          }));
-          if (selectedDispute?.transaction_id === txId) {
-            setSelectedDispute(prev => ({ ...prev, status: 'RESPONDED', evidence: data.evidence_packet }));
+          if (!selectedDispute) {
+            setSelectedDispute(data.disputes[0]);
+          } else {
+            // keep current selection updated
+            const updatedSelection = data.disputes.find(d => d.id === selectedDispute.id);
+            if (updatedSelection) setSelectedDispute(updatedSelection);
           }
         }
-        setIsCompiling(false);
       })
-      .catch(() => setIsCompiling(false));
+      .catch(err => {
+        console.error('[CerberusPay] Failed to load chargeback disputes:', err);
+        setErrorMessage('Unable to connect to dispute operations service. Ensure FastAPI backend is running on port 8000.');
+      });
+  };
+
+  useEffect(() => {
+    fetchChargebacks();
+  }, []);
+
+  const handleGenerateEvidence = async (txId) => {
+    if (isCompiling) return; // Prevent duplicate clicks
+    setIsCompiling(true);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    try {
+      const res = await fetch('http://localhost:8000/api/chargeback/generate-evidence', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transaction_id: txId, reason: 'REPRESENTMENT_SUBMISSION' })
+      });
+
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.detail || `Server returned ${res.status}`);
+      }
+
+      const data = await res.json();
+      if (data.evidence_packet) {
+        // 1. Update selected dispute in place
+        setSelectedDispute(prev => ({
+          ...prev,
+          status: 'RESPONDED',
+          evidence: data.evidence_packet
+        }));
+
+        // 2. Update disputes array
+        setDisputes(prev => prev.map(d => {
+          if (d.transaction_id === txId) {
+            return { ...d, status: 'RESPONDED', evidence: data.evidence_packet };
+          }
+          return d;
+        }));
+
+        setSuccessMessage('Cryptographic dispute representation packet successfully compiled and stored on backend!');
+        setTimeout(() => setSuccessMessage(null), 4000);
+
+        // 3. Re-fetch from FastAPI backend to guarantee 100% synchronization
+        fetchChargebacks();
+      }
+    } catch (err) {
+      console.error('[CerberusPay] Error generating chargeback evidence:', err);
+      setErrorMessage(`Evidence compilation failed: ${err.message || 'Network error'}`);
+    } finally {
+      setIsCompiling(false);
+    }
   };
 
   const getStatusBadge = (status) => {
@@ -55,6 +97,44 @@ export default function ChargebacksView({ onInvestigateDispute }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
       
+      {/* TOAST SUCCESS */}
+      {successMessage && (
+        <div style={{
+          background: 'rgba(16, 185, 129, 0.15)',
+          border: '1px solid #10b981',
+          color: '#34d399',
+          padding: '10px 16px',
+          borderRadius: '6px',
+          fontSize: '13px',
+          fontWeight: 600,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}>
+          <CheckCircle2 size={16} />
+          <span>{successMessage}</span>
+        </div>
+      )}
+
+      {/* TOAST ERROR */}
+      {errorMessage && (
+        <div style={{
+          background: 'rgba(239, 68, 68, 0.15)',
+          border: '1px solid #ef4444',
+          color: '#f87171',
+          padding: '10px 16px',
+          borderRadius: '6px',
+          fontSize: '13px',
+          fontWeight: 600,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}>
+          <AlertCircle size={16} />
+          <span>{errorMessage}</span>
+        </div>
+      )}
+
       {/* HEADER STATS */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
         <div className="fintech-card" style={{ padding: '1rem' }}>
@@ -84,7 +164,7 @@ export default function ChargebacksView({ onInvestigateDispute }) {
           <div style={{ padding: '0.85rem 1.25rem', borderBottom: '1px solid var(--border-subtle)' }}>
             <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#fff' }}>Dispute Operations Queue</h3>
             <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-              Click any dispute to view representation packet and jump into transaction investigation
+              Select a dispute to inspect evidence packet and open transaction investigation
             </p>
           </div>
 
@@ -127,7 +207,7 @@ export default function ChargebacksView({ onInvestigateDispute }) {
           </table>
         </div>
 
-        {/* EVIDENCE PACKET & INTEGRATED INVESTIGATION (RULE 5) */}
+        {/* EVIDENCE PACKET & INTEGRATED INVESTIGATION */}
         <div className="fintech-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {selectedDispute ? (
             <div>
@@ -192,10 +272,10 @@ export default function ChargebacksView({ onInvestigateDispute }) {
                     onClick={() => handleGenerateEvidence(selectedDispute.transaction_id)}
                     disabled={isCompiling}
                     className="btn-primary-fintech"
-                    style={{ width: '100%', justifyContent: 'center' }}
+                    style={{ width: '100%', justifyContent: 'center', opacity: isCompiling ? 0.7 : 1, cursor: isCompiling ? 'not-allowed' : 'pointer' }}
                   >
                     <FileText size={14} />
-                    {isCompiling ? 'Compiling Evidentiary Packet...' : 'Generate Bank Evidence Packet'}
+                    {isCompiling ? 'Compiling Evidentiary Packet from Backend...' : 'Generate Bank Evidence Packet'}
                   </button>
                 </div>
               )}

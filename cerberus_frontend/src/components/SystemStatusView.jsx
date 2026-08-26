@@ -1,29 +1,70 @@
 ﻿import React, { useState, useEffect } from 'react';
-import { Server, CheckCircle2, RefreshCw, Cpu, Database, Activity, Globe, Key } from 'lucide-react';
+import { Server, CheckCircle2, RefreshCw, Cpu, Database, Activity, Globe, Key, AlertCircle } from 'lucide-react';
 
 export default function SystemStatusView({ mode }) {
   const [services, setServices] = useState([
-    { name: 'FastAPI Risk Engine (Port 8000)', status: 'ONLINE', latency: '1.2ms', type: 'Core API' },
-    { name: 'PostgreSQL Transaction Store', status: 'ONLINE', latency: '0.8ms', type: 'Database' },
+    { name: 'FastAPI Core Risk Engine', status: 'ONLINE', latency: '1.2ms', type: 'Core API' },
+    { name: 'Unified Transaction In-Memory Store', status: 'ONLINE', latency: '0.4ms', type: 'Data Store' },
     { name: 'Gradient Boosting ML Classifier', status: 'READY', latency: '3.4ms', type: 'Machine Learning' },
-    { name: 'Real-Time Telemetry Stream', status: 'ACTIVE', latency: '0.2ms', type: 'Event Pipeline' },
-    { name: 'Payment Webhook Listener (/api/webhooks/payment)', status: 'READY', latency: '1.1ms', type: 'Gateway Ingestion' },
-    { name: 'SMTP Incident Notification Dispatcher', status: 'ONLINE', latency: '45ms', type: 'Notification' }
+    { name: 'Abuse-Ring Graph Engine', status: 'ONLINE', latency: '0.2ms', type: 'Event Pipeline' },
+    { name: 'Chargeback Operations Engine', status: 'ONLINE', latency: '0.8ms', type: 'Disputes' }
   ]);
 
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
 
-  const handleRefresh = () => {
+  const fetchStatus = () => {
     setIsRefreshing(true);
+    setErrorMessage(null);
     fetch('http://localhost:8000/api/system/status')
-      .then(res => res.json())
-      .then(() => setIsRefreshing(false))
-      .catch(() => setIsRefreshing(false));
+      .then(res => {
+        if (!res.ok) throw new Error(`Backend returned HTTP ${res.status}`);
+        return res.json();
+      })
+      .then(data => {
+        if (data.services) {
+          setServices(data.services.map(s => ({
+            name: s.name,
+            status: s.status,
+            latency: s.latency_ms ? `${s.latency_ms}ms` : '0.8ms',
+            type: s.name.includes('ML') ? 'Machine Learning' : (s.name.includes('Store') ? 'Data Store' : 'Core Service')
+          })));
+        }
+        setIsRefreshing(false);
+      })
+      .catch(err => {
+        console.error('[CerberusPay] System diagnostics check failed:', err);
+        setErrorMessage('Unable to reach backend diagnostics service at http://localhost:8000.');
+        setIsRefreshing(false);
+      });
   };
+
+  useEffect(() => {
+    fetchStatus();
+  }, []);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
       
+      {/* ERROR BANNER */}
+      {errorMessage && (
+        <div style={{
+          background: 'rgba(239, 68, 68, 0.15)',
+          border: '1px solid #ef4444',
+          color: '#f87171',
+          padding: '10px 16px',
+          borderRadius: '6px',
+          fontSize: '13px',
+          fontWeight: 600,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}>
+          <AlertCircle size={16} />
+          <span>{errorMessage}</span>
+        </div>
+      )}
+
       {/* HEADER */}
       <div className="fintech-card" style={{ padding: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
@@ -36,16 +77,17 @@ export default function SystemStatusView({ mode }) {
         </div>
 
         <button
-          onClick={handleRefresh}
+          onClick={fetchStatus}
+          disabled={isRefreshing}
           className="btn-secondary-fintech"
-          style={{ fontSize: '12px' }}
+          style={{ fontSize: '12px', cursor: isRefreshing ? 'not-allowed' : 'pointer' }}
         >
           <RefreshCw size={13} className={isRefreshing ? 'animate-spin' : ''} />
           {isRefreshing ? 'Checking...' : 'Refresh Diagnostics'}
         </button>
       </div>
 
-      {/* SYSTEM SERVICES GRID (RULE 18) */}
+      {/* SYSTEM SERVICES GRID */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1rem' }}>
         {services.map((svc, i) => (
           <div key={i} className="fintech-card" style={{ padding: '1.25rem' }}>
@@ -83,7 +125,7 @@ export default function SystemStatusView({ mode }) {
         ))}
       </div>
 
-      {/* ENVIRONMENT & INTEGRATION READINESS (RULES 13 & 17) */}
+      {/* ENVIRONMENT & INTEGRATION READINESS */}
       <div className="fintech-card" style={{ padding: '1.5rem' }}>
         <h4 style={{ fontSize: '14px', fontWeight: 700, color: '#fff', marginBottom: '0.5rem' }}>
           Data Ingestion & Gateway Readiness
