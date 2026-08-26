@@ -1,17 +1,16 @@
 ﻿import React from 'react';
-import { 
-  ShieldCheck, LayoutDashboard, ListFilter, Cpu, 
-  Layers, FileText, BarChart3, Server, ToggleLeft, ToggleRight
-} from 'lucide-react';
+import { ShieldCheck, Activity, Search, Layers, Cpu, FileText, Server } from 'lucide-react';
 
-export default function Navbar({ activeTab, setActiveTab, mode, setMode, isStreamLive, setIsStreamLive }) {
-  const navItems = [
-    { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-    { id: 'transactions', label: 'Transactions', icon: ListFilter },
-    { id: 'intelligence', label: 'Risk Intelligence', icon: Cpu },
-    { id: 'abuse-graph', label: 'Abuse Graph', icon: Layers },
+export default function Navbar({ activeTab, setActiveTab, mode, setMode, isStreamLive, setIsStreamLive, selectedTransaction }) {
+  const primaryTabs = [
+    { id: 'monitor', label: 'Monitor', icon: Activity },
+    { id: 'investigate', label: selectedTransaction ? `Investigate (${selectedTransaction.id})` : 'Investigate', icon: Search },
+    { id: 'networks', label: 'Networks', icon: Layers },
+    { id: 'models', label: 'Models', icon: Cpu },
+  ];
+
+  const secondaryTabs = [
     { id: 'chargebacks', label: 'Chargebacks', icon: FileText },
-    { id: 'models', label: 'Models / Risk Lab', icon: BarChart3 },
     { id: 'system', label: 'System', icon: Server },
   ];
 
@@ -27,7 +26,7 @@ export default function Navbar({ activeTab, setActiveTab, mode, setMode, isStrea
       <div style={{
         maxWidth: '1440px',
         margin: '0 auto',
-        padding: '0.75rem 1.5rem',
+        padding: '0.65rem 1.5rem',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -36,38 +35,34 @@ export default function Navbar({ activeTab, setActiveTab, mode, setMode, isStrea
       }}>
         
         {/* BRAND */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <div style={{
-            width: '32px',
-            height: '32px',
+            width: '28px',
+            height: '28px',
             borderRadius: '6px',
-            background: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
+            background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             color: '#fff'
           }}>
-            <ShieldCheck size={18} />
+            <ShieldCheck size={16} />
           </div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ fontSize: '1rem', fontWeight: 800, letterSpacing: '-0.01em', color: '#fff' }}>
+              <span style={{ fontSize: '0.95rem', fontWeight: 800, letterSpacing: '-0.01em', color: '#fff' }}>
                 CERBERUSPAY
-              </span>
-              <span style={{ fontSize: '10px', color: '#60a5fa', background: 'rgba(59, 130, 246, 0.15)', padding: '1px 6px', borderRadius: '3px', fontWeight: 700 }}>
-                RISK PLATFORM
               </span>
             </div>
             <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-              Payment Risk Intelligence Platform
+              Payment Risk Intelligence
             </div>
           </div>
         </div>
 
-        {/* SYSTEM STATUS & MODE TOGGLE */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+        {/* STATUS & CONTROLS */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           
-          {/* Operational Pill */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
@@ -77,14 +72,13 @@ export default function Navbar({ activeTab, setActiveTab, mode, setMode, isStrea
             color: '#10b981',
             background: 'rgba(16, 185, 129, 0.1)',
             border: '1px solid rgba(16, 185, 129, 0.2)',
-            padding: '3px 8px',
+            padding: '2px 8px',
             borderRadius: '4px'
           }}>
             <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981' }} />
-            SYSTEM OPERATIONAL
+            SYSTEM ONLINE
           </div>
 
-          {/* Mode Pill / Toggle */}
           <div 
             onClick={() => setMode(mode === 'SIMULATION' ? 'SANDBOX' : 'SIMULATION')}
             style={{
@@ -96,16 +90,15 @@ export default function Navbar({ activeTab, setActiveTab, mode, setMode, isStrea
               color: mode === 'SIMULATION' ? '#f59e0b' : '#3b82f6',
               background: mode === 'SIMULATION' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(59, 130, 246, 0.1)',
               border: `1px solid ${mode === 'SIMULATION' ? 'rgba(245, 158, 11, 0.25)' : 'rgba(59, 130, 246, 0.25)'}`,
-              padding: '3px 8px',
+              padding: '2px 8px',
               borderRadius: '4px',
               cursor: 'pointer'
             }}
-            title="Click to toggle between Simulation and Sandbox Mode"
+            title="Click to toggle Simulation / Sandbox"
           >
             <span>● {mode} MODE</span>
           </div>
 
-          {/* Live Ingestion Stream Toggle */}
           <button
             onClick={() => setIsStreamLive(!isStreamLive)}
             style={{
@@ -113,60 +106,94 @@ export default function Navbar({ activeTab, setActiveTab, mode, setMode, isStrea
               border: '1px solid var(--border-subtle)',
               color: isStreamLive ? '#10b981' : 'var(--text-muted)',
               borderRadius: '4px',
-              padding: '3px 8px',
+              padding: '2px 8px',
               fontSize: '11px',
               fontWeight: 600,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px'
+              cursor: 'pointer'
             }}
           >
-            {isStreamLive ? 'Stream: Active' : 'Stream: Paused'}
+            {isStreamLive ? 'Stream: Live' : 'Stream: Paused'}
           </button>
 
         </div>
 
       </div>
 
-      {/* NAVIGATION TABS */}
+      {/* STREAMLINED PRIMARY & SECONDARY NAVIGATION */}
       <div style={{
         maxWidth: '1440px',
         margin: '0 auto',
         padding: '0 1.5rem',
         display: 'flex',
-        gap: '0.25rem',
+        justifyContent: 'space-between',
+        alignItems: 'center',
         borderTop: '1px solid var(--border-subtle)',
         overflowX: 'auto'
       }}>
-        {navItems.map(item => {
-          const Icon = item.icon;
-          const isActive = activeTab === item.id;
-          return (
-            <button
-              key={item.id}
-              onClick={() => setActiveTab(item.id)}
-              style={{
-                background: 'none',
-                border: 'none',
-                borderBottom: isActive ? '2px solid #3b82f6' : '2px solid transparent',
-                color: isActive ? '#fff' : 'var(--text-secondary)',
-                fontWeight: isActive ? 600 : 500,
-                fontSize: '13px',
-                padding: '0.65rem 0.85rem',
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '7px',
-                whiteSpace: 'nowrap',
-                transition: 'color 0.15s ease'
-              }}
-            >
-              <Icon size={15} color={isActive ? '#3b82f6' : 'var(--text-muted)'} />
-              {item.label}
-            </button>
-          );
-        })}
+        
+        {/* PRIMARY TABS */}
+        <div style={{ display: 'flex', gap: '0.25rem' }}>
+          {primaryTabs.map(item => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  borderBottom: isActive ? '2px solid #3b82f6' : '2px solid transparent',
+                  color: isActive ? '#fff' : 'var(--text-secondary)',
+                  fontWeight: isActive ? 600 : 500,
+                  fontSize: '13px',
+                  padding: '0.65rem 0.85rem',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '7px',
+                  whiteSpace: 'nowrap',
+                  transition: 'color 0.15s ease'
+                }}
+              >
+                <Icon size={15} color={isActive ? '#3b82f6' : 'var(--text-muted)'} />
+                {item.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* SECONDARY TABS */}
+        <div style={{ display: 'flex', gap: '0.25rem' }}>
+          {secondaryTabs.map(item => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  borderBottom: isActive ? '2px solid var(--text-muted)' : '2px solid transparent',
+                  color: isActive ? '#fff' : 'var(--text-muted)',
+                  fontWeight: isActive ? 600 : 500,
+                  fontSize: '12px',
+                  padding: '0.65rem 0.65rem',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                <Icon size={13} />
+                {item.label}
+              </button>
+            );
+          })}
+        </div>
+
       </div>
     </header>
   );

@@ -1,16 +1,14 @@
 ﻿import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
-import OverviewView from './components/OverviewView';
-import TransactionsView from './components/TransactionsView';
-import TransactionDrawer from './components/TransactionDrawer';
-import RiskIntelligenceView from './components/RiskIntelligenceView';
-import AbuseGraphView from './components/AbuseGraphView';
+import MonitorView from './components/MonitorView';
+import InvestigationView from './components/InvestigationView';
+import NetworksView from './components/NetworksView';
+import ModelsView from './components/ModelsView';
 import ChargebacksView from './components/ChargebacksView';
-import RiskLabView from './components/RiskLabView';
 import SystemStatusView from './components/SystemStatusView';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('monitor'); // 'monitor' | 'investigate' | 'networks' | 'models' | 'chargebacks' | 'system'
   const [mode, setMode] = useState('SIMULATION'); // 'SIMULATION' or 'SANDBOX'
   const [isStreamLive, setIsStreamLive] = useState(true);
 
@@ -18,12 +16,17 @@ export default function App() {
   const [metrics, setMetrics] = useState(null);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
 
-  // Initial Fetch of Transactions & Metrics
+  // Initial Fetch of Transactions & Metrics from FastAPI
   useEffect(() => {
     fetch('http://localhost:8000/api/risk/transactions?limit=60')
       .then(res => res.json())
       .then(data => {
-        if (data.transactions) setTransactions(data.transactions);
+        if (data.transactions && data.transactions.length > 0) {
+          setTransactions(data.transactions);
+          // Preselect first blocked transaction for instant investigation readiness
+          const firstBlocked = data.transactions.find(t => t.action === 'BLOCK');
+          if (firstBlocked) setSelectedTransaction(firstBlocked);
+        }
       })
       .catch(() => {});
 
@@ -33,7 +36,7 @@ export default function App() {
       .catch(() => {});
   }, []);
 
-  // Background Stream Ingestion (Simulating live payment gateway events)
+  // Background Stream Ingestion
   useEffect(() => {
     if (!isStreamLive) return;
 
@@ -70,10 +73,27 @@ export default function App() {
         }
       })
       .catch(() => {});
-    }, 3200);
+    }, 3500);
 
     return () => clearInterval(interval);
   }, [isStreamLive, mode]);
+
+  const handleSelectTransaction = (tx) => {
+    setSelectedTransaction(tx);
+    setActiveTab('investigate');
+  };
+
+  const handleUpdateAction = (txId, newAction) => {
+    setTransactions(prev => prev.map(t => {
+      if (t.id === txId) {
+        return { ...t, action: newAction };
+      }
+      return t;
+    }));
+    if (selectedTransaction?.id === txId) {
+      setSelectedTransaction(prev => ({ ...prev, action: newAction }));
+    }
+  };
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
@@ -86,46 +106,38 @@ export default function App() {
         setMode={setMode}
         isStreamLive={isStreamLive}
         setIsStreamLive={setIsStreamLive}
+        selectedTransaction={selectedTransaction}
       />
 
-      {/* MAIN BODY VIEW */}
+      {/* MAIN FRAUD OPERATIONS CANVAS */}
       <main style={{ flex: 1, maxWidth: '1440px', width: '100%', margin: '0 auto', padding: '1.5rem' }}>
         
-        {activeTab === 'overview' && (
-          <OverviewView
+        {activeTab === 'monitor' && (
+          <MonitorView
             transactions={transactions}
-            metrics={metrics}
             mode={mode}
-            onSelectTransaction={(tx) => setSelectedTransaction(tx)}
-            onNavigateTab={(tab) => setActiveTab(tab)}
+            onSelectTransaction={handleSelectTransaction}
           />
         )}
 
-        {activeTab === 'transactions' && (
-          <TransactionsView
-            transactions={transactions}
-            onSelectTransaction={(tx) => setSelectedTransaction(tx)}
+        {activeTab === 'investigate' && (
+          <InvestigationView
+            transaction={selectedTransaction}
+            onUpdateAction={handleUpdateAction}
+            onNavigateToNetworks={() => setActiveTab('networks')}
           />
         )}
 
-        {activeTab === 'intelligence' && (
-          <RiskIntelligenceView
-            onEvaluateCustom={(tx) => {
-              setTransactions(prev => [tx, ...prev]);
-            }}
-          />
+        {activeTab === 'networks' && (
+          <NetworksView />
         )}
 
-        {activeTab === 'abuse-graph' && (
-          <AbuseGraphView />
+        {activeTab === 'models' && (
+          <ModelsView metrics={metrics} />
         )}
 
         {activeTab === 'chargebacks' && (
           <ChargebacksView />
-        )}
-
-        {activeTab === 'models' && (
-          <RiskLabView metrics={metrics} />
         )}
 
         {activeTab === 'system' && (
@@ -134,24 +146,16 @@ export default function App() {
 
       </main>
 
-      {/* RIGHT-SIDE TRANSACTION INVESTIGATION DRAWER */}
-      {selectedTransaction && (
-        <TransactionDrawer
-          transaction={selectedTransaction}
-          onClose={() => setSelectedTransaction(null)}
-        />
-      )}
-
       {/* FOOTER */}
       <footer style={{
         borderTop: '1px solid var(--border-subtle)',
-        padding: '1rem 1.5rem',
+        padding: '0.85rem 1.5rem',
         textAlign: 'center',
-        fontSize: '12px',
+        fontSize: '11px',
         color: 'var(--text-muted)',
         background: 'var(--bg-secondary)'
       }}>
-        CERBERUSPAY • Autonomous Payment Risk & Fraud Intelligence Platform • Razorpay AI Buildathon Track 02
+        CERBERUSPAY • Payment Risk Intelligence Platform • Razorpay AI Buildathon Track 02
       </footer>
 
     </div>

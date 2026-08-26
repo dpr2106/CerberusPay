@@ -465,4 +465,17 @@ def system_status():
 
 @app.get("/api/health")
 def health():
-    return {"status": "healthy", "service": "CerberusPay Risk Platform", "timestamp": datetime.now().isoformat()}
+    return {"status": "healthy", "service": "CerberusPay Risk Platform", "timestamp": datetime.now().isoformat()}@app.post("/api/risk/transactions/{transaction_id}/action")
+def update_transaction_action(transaction_id: str, action: str = Query(..., regex="^(ALLOW|BLOCK|CHALLENGE_STEP_UP_OTP)$")):
+    """Analyst Manual Action Override"""
+    for t in TRANSACTIONS:
+        if t["id"] == transaction_id:
+            t["action"] = action
+            t["decision_rationale"] = f"Manual analyst decision override applied: {action}"
+            t["timeline"].append({
+                "time": datetime.now().strftime("%H:%M"),
+                "event": f"Analyst manual decision override -> {action}",
+                "severity": "info" if action == "ALLOW" else "danger"
+            })
+            return {"status": "success", "transaction": t}
+    raise HTTPException(status_code=404, detail="Transaction not found")
