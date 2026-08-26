@@ -1,105 +1,154 @@
-﻿@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+﻿@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 :root {
-  --bg-primary: #07090e;
-  --bg-secondary: #0d111a;
-  --bg-tertiary: #131926;
-  --bg-card: rgba(19, 25, 38, 0.7);
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-active: rgba(239, 68, 68, 0.4);
-  --text-primary: #f8fafc;
+  --bg-primary: #090b10;
+  --bg-secondary: #0f131c;
+  --bg-tertiary: #161b26;
+  --bg-card: #121722;
+  --bg-hover: #1b212f;
+  
+  --border-subtle: #1f2636;
+  --border-muted: #2a3449;
+  
+  --text-primary: #f1f5f9;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
-  --accent-crimson: #ef4444;
-  --accent-amber: #f59e0b;
-  --accent-emerald: #10b981;
-  --accent-cyan: #06b6d4;
-  --accent-violet: #8b5cf6;
+  
+  /* Status Colors */
+  --status-allowed: #10b981;
+  --status-allowed-bg: rgba(16, 185, 129, 0.12);
+  --status-review: #f59e0b;
+  --status-review-bg: rgba(245, 158, 11, 0.12);
+  --status-blocked: #ef4444;
+  --status-blocked-bg: rgba(239, 68, 68, 0.12);
+  
+  /* Brand Accent */
+  --accent: #3b82f6;
+  --accent-muted: rgba(59, 130, 246, 0.15);
 }
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
   overflow-x: hidden;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
-code, pre, .mono {
+.mono {
   font-family: 'JetBrains Mono', monospace;
 }
 
-.glass-panel {
+/* Panels & Cards */
+.fintech-card {
   background: var(--bg-card);
-  backdrop-filter: blur(16px);
   border: 1px solid var(--border-subtle);
-  border-radius: 12px;
+  border-radius: 8px;
 }
 
-.badge-block {
-  background: rgba(239, 68, 68, 0.15);
-  color: #f87171;
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  padding: 3px 8px;
+/* Badges */
+.badge-allowed {
+  background: var(--status-allowed-bg);
+  color: var(--status-allowed);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  padding: 2px 8px;
   border-radius: 4px;
-  font-size: 0.75rem;
+  font-size: 11px;
   font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
-.badge-allow {
-  background: rgba(16, 185, 129, 0.15);
-  color: #34d399;
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  padding: 3px 8px;
+.badge-review {
+  background: var(--status-review-bg);
+  color: var(--status-review);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  padding: 2px 8px;
   border-radius: 4px;
-  font-size: 0.75rem;
+  font-size: 11px;
   font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
-.badge-challenge {
-  background: rgba(245, 158, 11, 0.15);
-  color: #fbbf24;
-  border: 1px solid rgba(245, 158, 11, 0.3);
-  padding: 3px 8px;
+.badge-blocked {
+  background: var(--status-blocked-bg);
+  color: var(--status-blocked);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  padding: 2px 8px;
   border-radius: 4px;
-  font-size: 0.75rem;
+  font-size: 11px;
   font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
-.btn-crimson {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
-  color: #fff;
+.badge-source {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+  border: 1px solid var(--border-subtle);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+/* Buttons */
+.btn-primary-fintech {
+  background: var(--accent);
+  color: #ffffff;
   border: none;
   border-radius: 6px;
-  padding: 8px 16px;
-  font-weight: 700;
-  font-size: 0.85rem;
+  padding: 7px 14px;
+  font-weight: 600;
+  font-size: 13px;
   cursor: pointer;
   display: inline-flex;
-  alignItems: center;
-  gap: 8px;
-  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
-  transition: all 0.2s ease;
+  align-items: center;
+  gap: 6px;
+  transition: opacity 0.15s ease;
 }
 
-.btn-crimson:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
+.btn-primary-fintech:hover {
+  opacity: 0.9;
 }
 
+.btn-secondary-fintech {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.btn-secondary-fintech:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+/* Scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: var(--bg-secondary);
+  background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: var(--border-subtle);
   border-radius: 3px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--border-muted);
 }
