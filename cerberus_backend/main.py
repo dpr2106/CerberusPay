@@ -38,7 +38,7 @@ def get_env_map():
 app = FastAPI(
     title="CERBERUSPAY: Payment Risk Operations Platform",
     description="Internal Enterprise Fraud & Payment Risk Intelligence Platform (Authorized Operators Only)",
-    version="3.0.0"
+    version="3.1.0"
 )
 
 app.add_middleware(
@@ -51,6 +51,12 @@ app.add_middleware(
 
 ENVIRONMENT_MODE = os.getenv("CERBERUS_MODE", "SIMULATION")
 JWT_SECRET = os.getenv("JWT_SECRET", "cerberus_internal_operator_key_99214")
+
+# ==============================================================================
+# CONFIGURATION & THRESHOLD STATE
+# ==============================================================================
+DEFAULT_DECISION_THRESHOLD: float = 0.70
+RISK_DECISION_THRESHOLD: float = 0.70
 
 # Initialize Database Schema & Seed Data
 init_db()
@@ -212,7 +218,7 @@ def dispatch_dual_fraud_alerts(txn_record: Dict[str, Any]) -> Dict[str, Any]:
     if not signals_list:
         signals_list = "• Multi-signal anomalous transaction pattern"
 
-    # EMAIL 1: INTERNAL FRAUD TEAM (Full ML breakdown, scores, factors)
+    # EMAIL 1: INTERNAL FRAUD TEAM
     internal_body = f"""CERBERUSPAY
 AI PAYMENT RISK ALERT (INTERNAL)
 
@@ -224,7 +230,8 @@ Customer User ID:    {txn_record.get('user_id', 'Unknown')}
 Amount:              ₹{txn_record.get('amount', 0.0):,.2f}
 Risk Level:          {txn_record.get('risk_level', 'CRITICAL')}
 Risk Score:          {txn_record.get('risk_score', 0)}/100
-Confidence:          {txn_record.get('confidence', '98.4%')}
+Fraud Probability:   {txn_record.get('fraud_probability', 0.0):.3f}
+Decision Threshold:  {txn_record.get('decision_threshold_applied', RISK_DECISION_THRESHOLD):.2f}
 Decision:            {txn_record.get('action', 'BLOCK')}
 --------------------------------------------------
 
@@ -240,7 +247,7 @@ Internal notification for CerberusPay Fraud Operations.
     internal_subject = f"🚨 CerberusPay AI Fraud Alert — {txn_id}"
     internal_res = send_smtp_email(internal_subject, internal_body)
 
-    # EMAIL 2: REGISTERED CUSTOMER SECURITY NOTICE (Polite, NO internal ML details)
+    # EMAIL 2: REGISTERED CUSTOMER SECURITY NOTICE
     customer_res = None
     target_user_id = txn_record.get("user_id")
     customer = get_customer_by_id(target_user_id)
@@ -329,8 +336,9 @@ def seed_unified_database():
         is_fraud = (i % 4 == 0)
         user = users[i % len(users)]
         amount = random.randint(18000, 42000) if is_fraud else random.randint(450, 4200)
-        risk = random.randint(85, 98) if is_fraud else random.randint(8, 24)
-        act = "BLOCK" if risk >= 70 else ("CHALLENGE_STEP_UP_OTP" if risk >= 30 else "ALLOW")
+        raw_prob = random.uniform(0.85, 0.98) if is_fraud else random.uniform(0.08, 0.24)
+        risk = round(raw_prob * 100)
+        act = "BLOCK" if raw_prob >= RISK_DECISION_THRESHOLD else ("CHALLENGE_STEP_UP_OTP" if raw_prob >= (RISK_DECISION_THRESHOLD * 0.43) else "ALLOW")
         t = datetime.now() - timedelta(minutes=(30 - i) * 4)
         
         geo_dist = random.randint(2400, 8100) if is_fraud else random.randint(2, 35)
@@ -355,9 +363,9 @@ def seed_unified_database():
         breakdown = generate_risk_breakdown(signals, risk)
         
         if is_fraud:
-            rationale = f"Transaction blocked because the payment originated from an unusually distant location ({geo_dist} km jump) with elevated velocity ({vel} tx/hr) over a VPN proxy."
+            rationale = f"Transaction blocked: Model fraud probability ({raw_prob:.1%}) exceeded the active decision threshold ({RISK_DECISION_THRESHOLD:.1%})."
         else:
-            rationale = "No significant risk signals detected. Transaction behavior, geolocation, and device profile are within expected customer baseline."
+            rationale = f"Transaction allowed: Model fraud probability ({raw_prob:.1%}) remained below the active decision threshold ({RISK_DECISION_THRESHOLD:.1%})."
 
         txn_id = f"TXN_{uuid.uuid4().hex[:8].upper()}"
 
@@ -366,8 +374,10 @@ def seed_unified_database():
             "user_id": user,
             "amount": float(amount),
             "category": "electronics" if is_fraud else "ecommerce",
+            "fraud_probability": round(raw_prob, 4),
             "risk_score": risk,
             "risk_level": "CRITICAL" if risk >= 90 else ("HIGH" if risk >= 70 else ("MEDIUM" if risk >= 30 else "LOW")),
+            "decision_threshold_applied": RISK_DECISION_THRESHOLD,
             "action": act,
             "decision_rationale": rationale,
             "confidence": "98.4%" if is_fraud else "99.1%",
@@ -440,6 +450,9 @@ class OperatorLoginPayload(BaseModel):
     email: str = Field(..., description="Authorized Operator / Analyst Email")
     password: str = Field(..., description="Operator Password")
 
+class ThresholdPayload(BaseModel):
+    threshold: float = Field(..., ge=0.0, le=1.0, description="Decision threshold between 0.0 and 1.0")
+
 class TransactionPayload(BaseModel):
     user_id: str
     amount: float
@@ -465,8 +478,42 @@ class TestEmailPayload(BaseModel):
     to_email: Optional[str] = None
 
 # ==============================================================================
-# 4. INTERNAL OPERATOR AUTHENTICATION ENDPOINTS
+# 4. INTERNAL OPERATOR & CONFIGURATION ENDPOINTS
 # ==============================================================================
+
+@app.get("/api/risk/config")
+def get_risk_config():
+    return {
+        "status": "success",
+        "threshold": RISK_DECISION_THRESHOLD,
+        "block_threshold": RISK_DECISION_THRESHOLD,
+        "review_threshold": round(RISK_DECISION_THRESHOLD * 0.43, 2),
+        "default_threshold": DEFAULT_DECISION_THRESHOLD
+    }
+
+@app.patch("/api/risk/config/threshold")
+@app.post("/api/risk/config/threshold")
+def update_risk_threshold(payload: ThresholdPayload):
+    global RISK_DECISION_THRESHOLD
+    if payload.threshold < 0.0 or payload.threshold > 1.0:
+        raise HTTPException(status_code=422, detail="Decision threshold must be a valid float between 0.0 and 1.0")
+
+    old_val = RISK_DECISION_THRESHOLD
+    RISK_DECISION_THRESHOLD = round(float(payload.threshold), 3)
+
+    print(f"\n==================================================", flush=True)
+    print(f"[RISK CONFIG] Decision Threshold Updated: {old_val:.2f} -> {RISK_DECISION_THRESHOLD:.2f}", flush=True)
+    print(f"Block Threshold: {RISK_DECISION_THRESHOLD:.2f} | Review Threshold: {round(RISK_DECISION_THRESHOLD * 0.43, 2):.2f}", flush=True)
+    print(f"Time: {datetime.now().strftime('%H:%M:%S')}", flush=True)
+    print(f"==================================================\n", flush=True)
+
+    return {
+        "status": "success",
+        "message": f"Decision threshold updated from {old_val:.2f} to {RISK_DECISION_THRESHOLD:.2f}",
+        "threshold": RISK_DECISION_THRESHOLD,
+        "block_threshold": RISK_DECISION_THRESHOLD,
+        "review_threshold": round(RISK_DECISION_THRESHOLD * 0.43, 2)
+    }
 
 @app.post("/api/auth/login")
 @app.post("/api/auth/operator/login")
@@ -514,7 +561,6 @@ def get_current_operator_profile(current_analyst: Dict[str, Any] = Depends(get_c
         }
     }
 
-# Explicitly reject any public registration attempts
 @app.post("/api/auth/register")
 def reject_public_register():
     raise HTTPException(
@@ -523,7 +569,7 @@ def reject_public_register():
     )
 
 # ==============================================================================
-# 5. RISK EVALUATION & INGESTION PIPELINE
+# 5. RISK EVALUATION & INGESTION PIPELINE (APPLIES REAL THRESHOLD)
 # ==============================================================================
 
 @app.post("/api/risk/evaluate-transaction")
@@ -548,19 +594,26 @@ def evaluate_transaction(txn: TransactionPayload):
         if txn.velocity_1h > 5:
             risk_score += 35
         risk_score = min(risk_score, 100)
+        raw_proba = risk_score / 100.0
 
-    if risk_score >= 70:
+    # REAL END-TO-END THRESHOLD COMPARISON
+    block_threshold_val = RISK_DECISION_THRESHOLD
+    review_threshold_val = round(block_threshold_val * 0.43, 2)
+
+    if raw_proba >= block_threshold_val:
         action = "BLOCK"
-        risk_level = "CRITICAL" if risk_score >= 90 else "HIGH"
-        rationale = f"Transaction blocked because the payment originated from an unusually distant location ({txn.geo_distance_km} km jump) combined with elevated velocity ({txn.velocity_1h} tx/hr)."
-    elif risk_score >= 30:
+        risk_level = "CRITICAL" if raw_proba >= min(0.90, block_threshold_val) else "HIGH"
+        rationale = f"Transaction blocked: Model fraud probability ({raw_proba:.1%}) met or exceeded the active decision threshold ({block_threshold_val:.1%})."
+    elif raw_proba >= review_threshold_val:
         action = "CHALLENGE_STEP_UP_OTP"
         risk_level = "MEDIUM"
-        rationale = f"Transaction flagged for 3D-Secure verification due to moderate velocity ({txn.velocity_1h} tx/hr) from a newly observed checkout profile."
+        rationale = f"Transaction flagged for 3D-Secure verification: Model fraud probability ({raw_proba:.1%}) exceeded review threshold ({review_threshold_val:.1%})."
     else:
         action = "ALLOW"
         risk_level = "LOW"
-        rationale = "No significant risk signals detected. Transaction behavior, geolocation, and device profile are within expected customer baseline."
+        rationale = f"Transaction allowed: Model fraud probability ({raw_proba:.1%}) remained below the active decision threshold ({block_threshold_val:.1%})."
+
+    print(f"[EVALUATION] Txn: {txn.user_id} | Amount: INR {txn.amount:,.0f} | Fraud Prob: {raw_proba:.3f} | Threshold: {block_threshold_val:.2f} -> Decision: {action}", flush=True)
 
     now = datetime.now()
     signals = {
@@ -570,9 +623,9 @@ def evaluate_transaction(txn: TransactionPayload):
         "device_trust": txn.device_trust_score,
         "card_fails_24h": txn.card_fails_24h,
         "user_account_age_days": txn.user_account_age_days,
-        "device_id": "DEV_FINGERPRINT_A9" if risk_score >= 70 else "DEV_TRUSTED_01",
+        "device_id": "DEV_FINGERPRINT_A9" if raw_proba >= block_threshold_val else "DEV_TRUSTED_01",
         "ip_address": "185.220.101.4 (Proxy)" if txn.is_proxy_vpn else "103.21.144.12",
-        "card_mask": "CARD_4111_9210" if risk_score >= 70 else "CARD_5241_3309"
+        "card_mask": "CARD_4111_9210" if raw_proba >= block_threshold_val else "CARD_5241_3309"
     }
 
     breakdown = generate_risk_breakdown(signals, risk_score)
@@ -582,11 +635,13 @@ def evaluate_transaction(txn: TransactionPayload):
         "user_id": txn.user_id,
         "amount": txn.amount,
         "category": txn.category,
+        "fraud_probability": round(raw_proba, 4),
         "risk_score": risk_score,
         "risk_level": risk_level,
+        "decision_threshold_applied": block_threshold_val,
         "action": action,
         "decision_rationale": rationale,
-        "confidence": "98.4%" if risk_score >= 70 else "99.1%",
+        "confidence": "98.4%" if raw_proba >= block_threshold_val else "99.1%",
         "source": txn.source or "PAYMENT_GATEWAY",
         "timestamp": now.isoformat(),
         "signals": signals,
@@ -594,9 +649,9 @@ def evaluate_transaction(txn: TransactionPayload):
         "email_alert": {"attempted": False, "sent": False},
         "timeline": [
             {"time": now.strftime("%H:%M:%S"), "event": f"Payment submitted for customer {txn.user_id}", "severity": "info"},
-            {"time": now.strftime("%H:%M:%S"), "event": "Transaction behavioral signals evaluated by GradientBoosting model", "severity": "info"},
-            {"time": now.strftime("%H:%M:%S"), "event": f"Geolocation offset: {txn.geo_distance_km} km", "severity": "danger" if risk_score >= 70 else "info"},
-            {"time": now.strftime("%H:%M:%S"), "event": f"AI Risk score: {risk_score}/100 -> Decision: {action}", "severity": "danger" if action == "BLOCK" else "success"}
+            {"time": now.strftime("%H:%M:%S"), "event": f"GradientBoosting model computed fraud probability: {raw_proba:.3f}", "severity": "info"},
+            {"time": now.strftime("%H:%M:%S"), "event": f"Applied active decision threshold: {block_threshold_val:.2f}", "severity": "info"},
+            {"time": now.strftime("%H:%M:%S"), "event": f"Final Decision: {action} ({risk_level})", "severity": "danger" if action == "BLOCK" else "success"}
         ]
     }
 
@@ -777,12 +832,13 @@ def system_status():
     return {
         "status": "success",
         "environment": ENVIRONMENT_MODE,
+        "current_decision_threshold": RISK_DECISION_THRESHOLD,
         "fraud_alert_threshold": int(env_config.get("FRAUD_ALERT_THRESHOLD") or os.getenv("FRAUD_ALERT_THRESHOLD", "80")),
         "smtp_configured": smtp_configured,
         "services": [
             {"name": "FastAPI Core Engine", "status": "ONLINE", "latency_ms": 1.2},
+            {"name": "ML Risk Engine (GradientBoosting)", "status": "READY", "threshold": RISK_DECISION_THRESHOLD},
             {"name": "Internal Operator Security Gate", "status": "ONLINE (RESTRICTED)"},
-            {"name": "ML Gradient Boosting Scorer", "status": "READY", "version": "v1.0.0-prod"},
             {"name": "Customer Repository & Dual Alert Engine", "status": "ONLINE", "active_records": len(TRANSACTIONS)},
             {"name": "SMTP Alert Dispatcher", "status": "ONLINE" if smtp_configured else "READY (STANDBY)", "latency_ms": 0.5},
             {"name": "Abuse-Ring Graph Engine", "status": "ONLINE", "correlated_entities": 14},
@@ -792,4 +848,9 @@ def system_status():
 
 @app.get("/api/health")
 def health():
-    return {"status": "healthy", "service": "CerberusPay Fraud Operations Platform", "timestamp": datetime.now().isoformat()}
+    return {
+        "status": "healthy",
+        "service": "CerberusPay Fraud Operations Platform",
+        "decision_threshold": RISK_DECISION_THRESHOLD,
+        "timestamp": datetime.now().isoformat()
+    }
