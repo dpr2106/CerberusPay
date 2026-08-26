@@ -120,47 +120,25 @@ export default function AuthGate({ onAuthSuccess }) {
       flexDirection: 'column',
       justifyContent: 'center',
       alignItems: 'center',
-      background: 'radial-gradient(ellipse 90% 60% at 50% 15%, rgba(234, 179, 8, 0.14) 0%, rgba(120, 53, 15, 0.08) 40%, #06070a 85%)',
+      backgroundColor: '#07090C',
       padding: '2rem 1.5rem',
-      color: 'var(--text-primary)',
-      position: 'relative',
-      overflow: 'hidden'
+      color: '#F8FAFC'
     }}>
-      
-      {/* BACKGROUND AMBIENT GOLD MESH GLOW */}
-      <div style={{
-        position: 'absolute',
-        top: '12%',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        width: '500px',
-        height: '350px',
-        background: 'radial-gradient(circle, rgba(234, 179, 8, 0.14) 0%, rgba(202, 138, 4, 0.06) 50%, transparent 80%)',
-        filter: 'blur(50px)',
-        pointerEvents: 'none'
-      }} />
 
-      {/* BRANDING & LOGO HEADER */}
-      <div style={{ textAlign: 'center', marginBottom: '1.75rem', position: 'relative', zIndex: 2 }}>
+      {/* CLEAN LOGO & PROJECT HEADER */}
+      <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
         <div style={{
-          position: 'relative',
-          width: '78px',
-          height: '78px',
-          borderRadius: '20px',
+          width: '54px',
+          height: '54px',
+          borderRadius: '10px',
           overflow: 'hidden',
-          background: 'linear-gradient(135deg, #eab308 0%, #78350f 100%)',
+          background: '#0D1117',
+          border: '1px solid #252D38',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          margin: '0 auto 1.25rem',
-          boxShadow: '0 0 35px rgba(234, 179, 8, 0.55), 0 0 15px rgba(250, 204, 21, 0.3)',
-          border: '2px solid rgba(250, 204, 21, 0.7)',
-          cursor: 'pointer',
-          transition: 'transform 0.2s ease'
-        }}
-        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-        >
+          margin: '0 auto 1rem'
+        }}>
           <img 
             src="/cerberuspay_logo.png" 
             alt="CerberusPay Logo" 
@@ -173,90 +151,83 @@ export default function AuthGate({ onAuthSuccess }) {
         </div>
 
         <h1 style={{ 
-          fontSize: '2.15rem', 
+          fontSize: '1.85rem', 
           fontWeight: 900, 
-          color: '#ffffff', 
-          letterSpacing: '-0.03em', 
-          margin: 0,
-          textShadow: '0 0 20px rgba(255,255,255,0.2)'
+          color: '#F8FAFC', 
+          letterSpacing: '-0.02em', 
+          margin: 0
         }}>
-          CERBERUS<span style={{ color: '#facc15', textShadow: '0 0 25px rgba(250, 204, 21, 0.8)' }}>PAY</span>
+          CERBERUS<span style={{ color: '#F97316' }}>PAY</span>
         </h1>
       </div>
 
-      {/* GLASSMORPHIC AUTHENTICATION CARD */}
+      {/* CLEAN, CRISP AUTHENTICATION CARD */}
       <div 
-        className="fintech-card" 
         style={{ 
-          maxWidth: '420px', 
+          maxWidth: '400px', 
           width: '100%', 
-          padding: '2.25rem', 
-          background: 'rgba(14, 17, 24, 0.88)',
-          backdropFilter: 'blur(24px)',
-          border: '1px solid rgba(234, 179, 8, 0.3)',
-          borderRadius: '16px',
-          boxShadow: '0 25px 60px -10px rgba(0, 0, 0, 0.9), 0 0 35px -5px rgba(234, 179, 8, 0.18)',
-          position: 'relative',
-          zIndex: 2
+          padding: '2rem', 
+          backgroundColor: '#11161E',
+          border: '1px solid #252D38',
+          borderRadius: '10px',
+          boxShadow: '0 12px 36px rgba(0, 0, 0, 0.6)'
         }}
       >
         
         {/* NOTIFICATIONS */}
         {errorMsg && (
           <div style={{ 
-            background: 'rgba(239, 68, 68, 0.15)', 
-            border: '1px solid #ef4444', 
-            color: '#f87171', 
-            padding: '10px 14px', 
-            borderRadius: '8px', 
-            fontSize: '12.5px', 
+            background: 'rgba(239, 68, 68, 0.12)', 
+            border: '1px solid rgba(239, 68, 68, 0.35)', 
+            color: '#F87171', 
+            padding: '9px 12px', 
+            borderRadius: '6px', 
+            fontSize: '12px', 
             display: 'flex', 
             alignItems: 'center', 
             gap: '8px', 
-            marginBottom: '1.25rem',
-            boxShadow: '0 0 15px rgba(239, 68, 68, 0.2)'
+            marginBottom: '1.25rem'
           }}>
-            <AlertCircle size={16} />
+            <AlertCircle size={15} style={{ flexShrink: 0 }} />
             <span>{errorMsg}</span>
           </div>
         )}
 
         {infoMsg && (
           <div style={{ 
-            background: 'rgba(234, 179, 8, 0.15)', 
-            border: '1px solid #ca8a04', 
-            color: '#fef08a', 
-            padding: '10px 14px', 
-            borderRadius: '8px', 
-            fontSize: '12.5px', 
+            background: 'rgba(249, 115, 22, 0.12)', 
+            border: '1px solid rgba(249, 115, 22, 0.35)', 
+            color: '#FB923C', 
+            padding: '9px 12px', 
+            borderRadius: '6px', 
+            fontSize: '12px', 
             display: 'flex', 
             alignItems: 'center', 
             gap: '8px', 
-            marginBottom: '1.25rem',
-            boxShadow: '0 0 15px rgba(234, 179, 8, 0.2)'
+            marginBottom: '1.25rem'
           }}>
-            <CheckCircle2 size={16} />
+            <CheckCircle2 size={15} style={{ flexShrink: 0 }} />
             <span>{infoMsg}</span>
           </div>
         )}
 
         {/* STEP 1: OPERATOR CREDENTIALS */}
         {step === 'CREDENTIALS' && (
-          <form onSubmit={handleRequestOtp} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <form onSubmit={handleRequestOtp} style={{ display: 'flex', flexDirection: 'column', gap: '1.15rem' }}>
             <div>
               <label style={{ 
                 display: 'block', 
                 fontSize: '11px', 
-                fontWeight: 800, 
-                color: '#94a3b8', 
+                fontWeight: 700, 
+                color: '#94A3B8', 
                 marginBottom: '6px', 
                 textTransform: 'uppercase', 
-                letterSpacing: '0.05em' 
+                letterSpacing: '0.04em' 
               }}>
                 Operator Email
               </label>
               <div style={{ position: 'relative' }}>
-                <Mail size={15} style={{ position: 'absolute', left: '12px', top: '12px', color: '#64748b' }} />
+                <Mail size={14} style={{ position: 'absolute', left: '11px', top: '12px', color: '#64748B' }} />
                 <input
                   type="email"
                   required
@@ -265,23 +236,17 @@ export default function AuthGate({ onAuthSuccess }) {
                   onChange={(e) => setEmail(e.target.value)}
                   style={{
                     width: '100%',
-                    padding: '10px 12px 10px 36px',
-                    background: 'rgba(7, 9, 13, 0.85)',
-                    border: '1px solid rgba(234, 179, 8, 0.3)',
-                    borderRadius: '8px',
-                    color: '#fff',
+                    padding: '9px 12px 9px 34px',
+                    background: '#0A0D12',
+                    border: '1px solid #252D38',
+                    borderRadius: '6px',
+                    color: '#F8FAFC',
                     fontSize: '13px',
                     outline: 'none',
-                    transition: 'all 0.18s ease'
+                    transition: 'border-color 0.15s ease'
                   }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#facc15';
-                    e.target.style.boxShadow = '0 0 15px rgba(234, 179, 8, 0.35)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = 'rgba(234, 179, 8, 0.3)';
-                    e.target.style.boxShadow = 'none';
-                  }}
+                  onFocus={(e) => e.target.style.borderColor = '#F97316'}
+                  onBlur={(e) => e.target.style.borderColor = '#252D38'}
                 />
               </div>
             </div>
@@ -290,16 +255,16 @@ export default function AuthGate({ onAuthSuccess }) {
               <label style={{ 
                 display: 'block', 
                 fontSize: '11px', 
-                fontWeight: 800, 
-                color: '#94a3b8', 
+                fontWeight: 700, 
+                color: '#94A3B8', 
                 marginBottom: '6px', 
                 textTransform: 'uppercase', 
-                letterSpacing: '0.05em' 
+                letterSpacing: '0.04em' 
               }}>
                 Operator Password
               </label>
               <div style={{ position: 'relative' }}>
-                <Lock size={15} style={{ position: 'absolute', left: '12px', top: '12px', color: '#64748b' }} />
+                <Lock size={14} style={{ position: 'absolute', left: '11px', top: '12px', color: '#64748B' }} />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
@@ -308,23 +273,17 @@ export default function AuthGate({ onAuthSuccess }) {
                   onChange={(e) => setPassword(e.target.value)}
                   style={{
                     width: '100%',
-                    padding: '10px 38px 10px 36px',
-                    background: 'rgba(7, 9, 13, 0.85)',
-                    border: '1px solid rgba(234, 179, 8, 0.3)',
-                    borderRadius: '8px',
-                    color: '#fff',
+                    padding: '9px 36px 9px 34px',
+                    background: '#0A0D12',
+                    border: '1px solid #252D38',
+                    borderRadius: '6px',
+                    color: '#F8FAFC',
                     fontSize: '13px',
                     outline: 'none',
-                    transition: 'all 0.18s ease'
+                    transition: 'border-color 0.15s ease'
                   }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#facc15';
-                    e.target.style.boxShadow = '0 0 15px rgba(234, 179, 8, 0.35)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = 'rgba(234, 179, 8, 0.3)';
-                    e.target.style.boxShadow = 'none';
-                  }}
+                  onFocus={(e) => e.target.style.borderColor = '#F97316'}
+                  onBlur={(e) => e.target.style.borderColor = '#252D38'}
                 />
                 <button
                   type="button"
@@ -336,85 +295,73 @@ export default function AuthGate({ onAuthSuccess }) {
                     transform: 'translateY(-50%)',
                     background: 'none',
                     border: 'none',
-                    color: showPassword ? '#facc15' : '#64748b',
+                    color: showPassword ? '#F97316' : '#64748B',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    padding: '4px',
-                    transition: 'color 0.15s ease'
+                    padding: '3px'
                   }}
                   title={showPassword ? 'Hide password' : 'Show password'}
                 >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                 </button>
               </div>
             </div>
 
-            {/* GOLD SUBMIT BUTTON */}
+            {/* CLEAN PRIMARY BUTTON */}
             <button
               type="submit"
               disabled={isLoading}
               style={{
                 width: '100%',
                 justifyContent: 'center',
-                marginTop: '0.5rem',
-                padding: '11px 18px',
-                background: 'linear-gradient(135deg, #eab308 0%, #ca8a04 100%)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                borderRadius: '9px',
-                color: '#080a0f',
-                fontWeight: 900,
-                fontSize: '13.5px',
+                marginTop: '0.35rem',
+                padding: '10px 16px',
+                background: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                borderRadius: '6px',
+                color: '#FFFFFF',
+                fontWeight: 700,
+                fontSize: '13px',
                 cursor: isLoading ? 'not-allowed' : 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '8px',
-                boxShadow: '0 4px 20px rgba(234, 179, 8, 0.45), 0 0 15px rgba(250, 204, 21, 0.3)',
-                transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                gap: '7px',
+                transition: 'opacity 0.15s ease',
                 opacity: isLoading ? 0.7 : 1
-              }}
-              onMouseEnter={(e) => {
-                if (!isLoading) {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 6px 28px rgba(234, 179, 8, 0.65)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 4px 20px rgba(234, 179, 8, 0.45)';
               }}
             >
               {isLoading ? 'Sending Security OTP...' : 'Send Verification OTP'}
-              <ArrowRight size={15} />
+              <ArrowRight size={14} />
             </button>
           </form>
         )}
 
         {/* STEP 2: 2FA EMAIL OTP VERIFICATION */}
         {step === 'OTP' && (
-          <form onSubmit={handleVerifyOtp} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <form onSubmit={handleVerifyOtp} style={{ display: 'flex', flexDirection: 'column', gap: '1.15rem' }}>
             <div style={{ textAlign: 'center' }}>
               <div style={{
-                width: '44px',
-                height: '44px',
-                borderRadius: '12px',
-                background: 'linear-gradient(135deg, rgba(234, 179, 8, 0.2) 0%, rgba(202, 138, 4, 0.3) 100%)',
-                border: '1px solid rgba(250, 204, 21, 0.5)',
+                width: '40px',
+                height: '40px',
+                borderRadius: '8px',
+                background: 'rgba(249, 115, 22, 0.12)',
+                border: '1px solid rgba(249, 115, 22, 0.35)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                margin: '0 auto 0.75rem',
-                color: '#facc15'
+                margin: '0 auto 0.65rem',
+                color: '#FB923C'
               }}>
-                <KeyRound size={22} />
+                <KeyRound size={20} />
               </div>
-              <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#fff', margin: 0 }}>
+              <h3 style={{ fontSize: '14.5px', fontWeight: 700, color: '#F8FAFC', margin: 0 }}>
                 Enter 6-Digit Security Code
               </h3>
               <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px', lineHeight: 1.4 }}>
                 A verification code was dispatched to:
               </p>
-              <div className="mono" style={{ color: '#facc15', fontWeight: 700, fontSize: '12.5px', marginTop: '2px' }}>
+              <div className="mono" style={{ color: '#FB923C', fontWeight: 700, fontSize: '12px', marginTop: '2px' }}>
                 {maskEmail(email)}
               </div>
             </div>
@@ -432,43 +379,36 @@ export default function AuthGate({ onAuthSuccess }) {
                 className="mono"
                 style={{
                   width: '100%',
-                  padding: '12px 14px',
-                  background: 'rgba(7, 9, 13, 0.9)',
-                  border: '1.5px solid rgba(234, 179, 8, 0.45)',
-                  borderRadius: '9px',
-                  color: '#facc15',
-                  fontSize: '22px',
-                  fontWeight: 900,
+                  padding: '10px 12px',
+                  background: '#0A0D12',
+                  border: '1.5px solid #252D38',
+                  borderRadius: '6px',
+                  color: '#F8FAFC',
+                  fontSize: '20px',
+                  fontWeight: 800,
                   textAlign: 'center',
-                  letterSpacing: '10px',
+                  letterSpacing: '8px',
                   outline: 'none',
-                  boxShadow: '0 0 20px rgba(234, 179, 8, 0.2)',
-                  transition: 'all 0.18s ease'
+                  transition: 'border-color 0.15s ease'
                 }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = '#facc15';
-                  e.target.style.boxShadow = '0 0 25px rgba(234, 179, 8, 0.4)';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = 'rgba(234, 179, 8, 0.45)';
-                  e.target.style.boxShadow = '0 0 20px rgba(234, 179, 8, 0.2)';
-                }}
+                onFocus={(e) => e.target.style.borderColor = '#F97316'}
+                onBlur={(e) => e.target.style.borderColor = '#252D38'}
               />
             </div>
 
             {/* SPAM FOLDER REMINDER NOTICE */}
             <div style={{
-              background: 'rgba(234, 179, 8, 0.1)',
-              border: '1px solid rgba(234, 179, 8, 0.3)',
-              borderRadius: '7px',
-              padding: '8px 12px',
+              background: 'rgba(249, 115, 22, 0.08)',
+              border: '1px solid rgba(249, 115, 22, 0.25)',
+              borderRadius: '6px',
+              padding: '7px 11px',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
+              gap: '7px',
               fontSize: '11px',
-              color: '#fde68a'
+              color: '#FED7AA'
             }}>
-              <AlertTriangle size={14} color="#f59e0b" style={{ flexShrink: 0 }} />
+              <AlertTriangle size={13} color="#F97316" style={{ flexShrink: 0 }} />
               <span>Please check your <strong>Inbox</strong> or <strong>Spam folder</strong> for the OTP email.</span>
             </div>
 
@@ -479,28 +419,26 @@ export default function AuthGate({ onAuthSuccess }) {
               style={{
                 width: '100%',
                 justifyContent: 'center',
-                padding: '11px 18px',
-                background: 'linear-gradient(135deg, #eab308 0%, #ca8a04 100%)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                borderRadius: '9px',
-                color: '#080a0f',
-                fontWeight: 900,
-                fontSize: '13.5px',
+                padding: '10px 16px',
+                background: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                borderRadius: '6px',
+                color: '#FFFFFF',
+                fontWeight: 700,
+                fontSize: '13px',
                 cursor: (isLoading || otp.length !== 6) ? 'not-allowed' : 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '8px',
-                boxShadow: '0 4px 20px rgba(234, 179, 8, 0.45)',
-                transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                gap: '7px',
                 opacity: (isLoading || otp.length !== 6) ? 0.6 : 1
               }}
             >
               {isLoading ? 'Verifying Code...' : 'Verify Code & Unlock Console'}
-              <ShieldCheck size={16} />
+              <ShieldCheck size={15} />
             </button>
 
             {/* RESEND & BACK BUTTONS */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11.5px', marginTop: '4px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11.5px', marginTop: '3px' }}>
               <button
                 type="button"
                 onClick={() => {
@@ -520,7 +458,7 @@ export default function AuthGate({ onAuthSuccess }) {
                   fontWeight: 600
                 }}
               >
-                <ArrowLeft size={13} />
+                <ArrowLeft size={12} />
                 <span>Change Credentials</span>
               </button>
 
@@ -531,7 +469,7 @@ export default function AuthGate({ onAuthSuccess }) {
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: '#facc15',
+                  color: '#F97316',
                   cursor: resending ? 'not-allowed' : 'pointer',
                   display: 'flex',
                   alignItems: 'center',
@@ -540,7 +478,7 @@ export default function AuthGate({ onAuthSuccess }) {
                   opacity: resending ? 0.6 : 1
                 }}
               >
-                <RefreshCw size={12} className={resending ? 'animate-spin' : ''} />
+                <RefreshCw size={11} className={resending ? 'animate-spin' : ''} />
                 <span>{resending ? 'Resending...' : 'Resend Code'}</span>
               </button>
             </div>
@@ -550,7 +488,7 @@ export default function AuthGate({ onAuthSuccess }) {
       </div>
 
       {/* FOOTER */}
-      <div style={{ marginTop: '1.75rem', fontSize: '11.5px', color: 'var(--text-muted)', textAlign: 'center', zIndex: 2 }}>
+      <div style={{ marginTop: '1.5rem', fontSize: '11px', color: 'var(--text-muted)', textAlign: 'center' }}>
         CERBERUSPAY • Internal Risk Intelligence Engine • Zero-Trust Operations Platform
       </div>
 
