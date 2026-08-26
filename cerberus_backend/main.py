@@ -725,16 +725,8 @@ def evaluate_transaction(txn: TransactionPayload):
         ]
     }
 
-    # DUAL SMTP ALERT: Dispatch if risk_score >= threshold
-    if risk_score >= fraud_threshold:
-        alert_status = dispatch_dual_fraud_alerts(txn_record)
-        txn_record["email_alert"] = alert_status
-        if alert_status.get("sent"):
-            txn_record["timeline"].append({
-                "time": now.strftime("%H:%M:%S"),
-                "event": "Automated Dual SMTP fraud alerts dispatched (Security Team + Registered Customer)",
-                "severity": "danger"
-            })
+    # DUAL SMTP ALERT: Automated background stream email spam disabled (Only manual or 2FA OTP emails sent)
+    txn_record["email_alert"] = {"attempted": False, "sent": False, "reason": "Stream email alerts silenced"}
 
     TRANSACTIONS.insert(0, txn_record)
     return {"status": "success", "evaluation": txn_record}
