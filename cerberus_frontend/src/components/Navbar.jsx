@@ -33,44 +33,44 @@ export default function Navbar({
   return (
     <header style={{
       borderBottom: '1px solid var(--border-subtle)',
-      background: 'rgba(8, 10, 14, 0.96)',
+      background: 'rgba(7, 9, 12, 0.95)',
       backdropFilter: 'blur(16px)',
       position: 'sticky',
       top: 0,
       zIndex: 100,
-      boxShadow: '0 4px 24px -2px rgba(0, 0, 0, 0.8)'
+      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.75)'
     }}>
       
-      {/* TOP BAR: GOLD LOGO & INTERACTIVE STATUS PILLS */}
+      {/* TOP BAR: BRAND LOGO & COMPACT STATUS CONTROLS */}
       <div style={{
         maxWidth: '1440px',
         margin: '0 auto',
-        padding: '0.65rem 1.5rem',
+        padding: '0.6rem 1.5rem',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
         flexWrap: 'wrap',
-        gap: '1rem'
+        gap: '0.85rem'
       }}>
         
-        {/* GOLD CERBERUSPAY LOGO & BRAND */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+        {/* CERBERUSPAY ORANGE BRAND */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <div style={{
             position: 'relative',
-            width: '38px',
-            height: '38px',
-            borderRadius: '10px',
+            width: '36px',
+            height: '36px',
+            borderRadius: '8px',
             overflow: 'hidden',
-            background: 'linear-gradient(135deg, #eab308 0%, #78350f 100%)',
+            background: '#0D1117',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 0 18px rgba(234, 179, 8, 0.55)',
-            border: '1.5px solid rgba(250, 204, 21, 0.65)',
+            boxShadow: '0 0 16px rgba(249, 115, 22, 0.4)',
+            border: '1.5px solid rgba(249, 115, 22, 0.55)',
             cursor: 'pointer',
-            transition: 'transform 0.2s ease'
+            transition: 'transform 0.18s ease'
           }}
-          onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.06)'}
+          onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
           onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
           >
             <img 
@@ -93,23 +93,22 @@ export default function Navbar({
                 fontSize: '1.05rem', 
                 fontWeight: 900, 
                 letterSpacing: '-0.02em', 
-                color: '#ffffff',
-                textShadow: '0 0 12px rgba(255,255,255,0.2)'
+                color: '#F8FAFC',
+                textShadow: '0 0 12px rgba(255,255,255,0.15)'
               }}>
                 CERBERUS<span style={{ 
-                  color: '#facc15', 
-                  textShadow: '0 0 14px rgba(250, 204, 21, 0.7)' 
+                  color: '#F97316', 
+                  textShadow: '0 0 14px rgba(249, 115, 22, 0.6)' 
                 }}>PAY</span>
               </span>
               <span style={{ 
                 fontSize: '10px', 
-                background: 'linear-gradient(135deg, rgba(234,179,8,0.25) 0%, rgba(202,138,4,0.25) 100%)', 
-                color: '#fef08a', 
+                background: 'rgba(249, 115, 22, 0.15)', 
+                color: '#FB923C', 
                 padding: '2px 6px', 
                 borderRadius: '4px', 
                 fontWeight: 800,
-                border: '1px solid rgba(250,204,21,0.4)',
-                boxShadow: '0 0 10px rgba(234,179,8,0.25)'
+                border: '1px solid rgba(249, 115, 22, 0.35)'
               }}>
                 SOC v3.1
               </span>
@@ -120,10 +119,10 @@ export default function Navbar({
           </div>
         </div>
 
-        {/* STATUS PILLS */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
+        {/* STATUS CONTROLS (COMPACT PROFESSIONAL SOC TOOLBAR) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', flexWrap: 'wrap' }}>
           
-          {/* 1. EMERALD SYSTEM ONLINE PILL */}
+          {/* 1. EMERALD SYSTEM ONLINE (GREEN FOR HEALTHY) */}
           <div 
             onMouseEnter={() => setHoveredPill('system')}
             onMouseLeave={() => setHoveredPill(null)}
@@ -131,17 +130,16 @@ export default function Navbar({
               position: 'relative',
               display: 'flex',
               alignItems: 'center',
-              gap: '7px',
+              gap: '6px',
               fontSize: '11px',
-              fontWeight: 800,
-              color: '#34d399',
-              background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.16) 0%, rgba(5, 150, 105, 0.25) 100%)',
-              border: '1px solid rgba(52, 211, 153, 0.45)',
-              padding: '5px 11px',
-              borderRadius: '7px',
-              boxShadow: '0 0 14px rgba(16, 185, 129, 0.25)',
+              fontWeight: 700,
+              color: '#34D399',
+              background: 'rgba(16, 185, 129, 0.12)',
+              border: '1px solid rgba(16, 185, 129, 0.35)',
+              padding: '4px 10px',
+              borderRadius: '6px',
               cursor: 'default',
-              transition: 'all 0.2s ease'
+              transition: 'all 0.18s ease'
             }}
           >
             <div className="beacon-pulse-green" />
@@ -151,23 +149,23 @@ export default function Navbar({
                 position: 'absolute',
                 top: '100%',
                 right: 0,
-                marginTop: '8px',
-                background: '#0d1522',
-                border: '1px solid rgba(52, 211, 153, 0.4)',
-                borderRadius: '7px',
-                padding: '7px 12px',
+                marginTop: '6px',
+                background: '#0D1117',
+                border: '1px solid #252D38',
+                borderRadius: '6px',
+                padding: '6px 10px',
                 fontSize: '11px',
-                color: '#a7f3d0',
+                color: '#A7F3D0',
                 whiteSpace: 'nowrap',
                 zIndex: 200,
-                boxShadow: '0 10px 25px rgba(0,0,0,0.6)'
+                boxShadow: '0 8px 24px rgba(0,0,0,0.7)'
               }}>
                 ● ML Risk Engine & SQLite Operational • 99.99% Uptime
               </div>
             )}
           </div>
 
-          {/* 2. GOLDEN SUNFIRE SIMULATION MODE PILL */}
+          {/* 2. AMBER/ORANGE SIMULATION MODE TOGGLE */}
           <div 
             onMouseEnter={() => setHoveredPill('mode')}
             onMouseLeave={() => setHoveredPill(null)}
@@ -176,94 +174,88 @@ export default function Navbar({
               position: 'relative',
               display: 'flex',
               alignItems: 'center',
-              gap: '6px',
+              gap: '5px',
               fontSize: '11px',
-              fontWeight: 800,
-              color: mode === 'SIMULATION' ? '#fbbf24' : '#eab308',
-              background: mode === 'SIMULATION' 
-                ? 'linear-gradient(135deg, rgba(234, 179, 8, 0.18) 0%, rgba(202, 138, 4, 0.28) 100%)'
-                : 'linear-gradient(135deg, rgba(250, 204, 21, 0.18) 0%, rgba(234, 179, 8, 0.28) 100%)',
-              border: `1px solid ${mode === 'SIMULATION' ? 'rgba(250, 204, 21, 0.55)' : 'rgba(234, 179, 8, 0.55)'}`,
-              padding: '5px 11px',
-              borderRadius: '7px',
-              boxShadow: '0 0 14px rgba(234, 179, 8, 0.3)',
+              fontWeight: 700,
+              color: mode === 'SIMULATION' ? '#FBBF24' : '#FB923C',
+              background: mode === 'SIMULATION' ? 'rgba(245, 158, 11, 0.12)' : 'rgba(249, 115, 22, 0.12)',
+              border: `1px solid ${mode === 'SIMULATION' ? 'rgba(245, 158, 11, 0.4)' : 'rgba(249, 115, 22, 0.4)'}`,
+              padding: '4px 10px',
+              borderRadius: '6px',
               cursor: 'pointer',
-              transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-              transform: hoveredPill === 'mode' ? 'translateY(-1.5px)' : 'translateY(0)'
+              transition: 'all 0.18s ease',
+              transform: hoveredPill === 'mode' ? 'translateY(-1px)' : 'translateY(0)'
             }}
           >
-            <Zap size={13} color={mode === 'SIMULATION' ? '#fbbf24' : '#facc15'} />
+            <Zap size={12} color={mode === 'SIMULATION' ? '#FBBF24' : '#F97316'} />
             <span>{mode} MODE</span>
             {hoveredPill === 'mode' && (
               <div style={{
                 position: 'absolute',
                 top: '100%',
                 right: 0,
-                marginTop: '8px',
-                background: '#0d1522',
-                border: '1px solid rgba(251, 191, 36, 0.4)',
-                borderRadius: '7px',
-                padding: '7px 12px',
+                marginTop: '6px',
+                background: '#0D1117',
+                border: '1px solid #252D38',
+                borderRadius: '6px',
+                padding: '6px 10px',
                 fontSize: '11px',
-                color: '#fde68a',
+                color: '#FDE68A',
                 whiteSpace: 'nowrap',
                 zIndex: 200,
-                boxShadow: '0 10px 25px rgba(0,0,0,0.6)'
+                boxShadow: '0 8px 24px rgba(0,0,0,0.7)'
               }}>
                 ⚡ Click to toggle between Simulation & Sandbox traffic
               </div>
             )}
           </div>
 
-          {/* 3. GOLDEN RADAR STREAM PILL */}
+          {/* 3. STREAM LIVE TOGGLE (BRAND ORANGE) */}
           <button
             onMouseEnter={() => setHoveredPill('stream')}
             onMouseLeave={() => setHoveredPill(null)}
             onClick={() => setIsStreamLive(!isStreamLive)}
             style={{
               position: 'relative',
-              background: isStreamLive 
-                ? 'linear-gradient(135deg, rgba(234, 179, 8, 0.18) 0%, rgba(202, 138, 4, 0.28) 100%)' 
-                : 'linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.08) 100%)',
-              border: `1px solid ${isStreamLive ? 'rgba(250, 204, 21, 0.55)' : 'var(--border-subtle)'}`,
-              color: isStreamLive ? '#facc15' : 'var(--text-muted)',
-              borderRadius: '7px',
-              padding: '5px 11px',
+              background: isStreamLive ? 'rgba(249, 115, 22, 0.14)' : 'rgba(255, 255, 255, 0.04)',
+              border: `1px solid ${isStreamLive ? 'rgba(249, 115, 22, 0.45)' : 'var(--border-subtle)'}`,
+              color: isStreamLive ? '#FB923C' : 'var(--text-muted)',
+              borderRadius: '6px',
+              padding: '4px 10px',
               fontSize: '11px',
-              fontWeight: 800,
+              fontWeight: 700,
               cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '6px',
-              boxShadow: isStreamLive ? '0 0 14px rgba(234, 179, 8, 0.3)' : 'none',
-              transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-              transform: hoveredPill === 'stream' ? 'translateY(-1.5px)' : 'translateY(0)'
+              gap: '5px',
+              transition: 'all 0.18s ease',
+              transform: hoveredPill === 'stream' ? 'translateY(-1px)' : 'translateY(0)'
             }}
           >
-            <Radio size={13} className={isStreamLive ? 'animate-pulse' : ''} />
+            <Radio size={12} className={isStreamLive ? 'animate-pulse' : ''} />
             <span>{isStreamLive ? 'Stream: Live' : 'Stream: Paused'}</span>
             {hoveredPill === 'stream' && (
               <div style={{
                 position: 'absolute',
                 top: '100%',
                 right: 0,
-                marginTop: '8px',
-                background: '#0d1522',
-                border: '1px solid rgba(250, 204, 21, 0.4)',
-                borderRadius: '7px',
-                padding: '7px 12px',
+                marginTop: '6px',
+                background: '#0D1117',
+                border: '1px solid #252D38',
+                borderRadius: '6px',
+                padding: '6px 10px',
                 fontSize: '11px',
-                color: '#fef08a',
+                color: '#FED7AA',
                 whiteSpace: 'nowrap',
                 zIndex: 200,
-                boxShadow: '0 10px 25px rgba(0,0,0,0.6)'
+                boxShadow: '0 8px 24px rgba(0,0,0,0.7)'
               }}>
                 {isStreamLive ? 'Ingesting live payment events • Click to pause' : 'Stream paused • Click to resume'}
               </div>
             )}
           </button>
 
-          {/* 4. CHIEF RISK OFFICER OPERATOR PROFILE BADGE */}
+          {/* 4. CHIEF RISK OFFICER BADGE */}
           <div 
             onMouseEnter={() => setHoveredPill('operator')}
             onMouseLeave={() => setHoveredPill(null)}
@@ -271,36 +263,35 @@ export default function Navbar({
               position: 'relative',
               display: 'flex',
               alignItems: 'center',
-              gap: '7px',
-              background: 'linear-gradient(135deg, rgba(234, 179, 8, 0.15) 0%, rgba(120, 53, 15, 0.25) 100%)',
-              border: '1px solid rgba(250, 204, 21, 0.45)',
-              padding: '4px 10px',
-              borderRadius: '7px',
+              gap: '6px',
+              background: '#0D1117',
+              border: '1px solid #252D38',
+              padding: '3px 9px',
+              borderRadius: '6px',
               fontSize: '11px',
-              color: '#fef08a',
-              boxShadow: '0 0 14px rgba(234, 179, 8, 0.25)',
-              transition: 'all 0.2s ease'
+              color: '#F8FAFC',
+              transition: 'all 0.18s ease'
             }}
           >
             <div style={{
-              width: '18px',
-              height: '18px',
+              width: '16px',
+              height: '16px',
               borderRadius: '50%',
-              background: 'linear-gradient(135deg, #facc15 0%, #ca8a04 100%)',
+              background: 'linear-gradient(135deg, #F97316 0%, #C2410C 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#000',
+              color: '#FFF',
               fontWeight: 900,
-              fontSize: '10px'
+              fontSize: '9.5px'
             }}>
               C
             </div>
-            <span style={{ fontWeight: 800, color: '#fff' }}>Chief Risk Officer</span>
+            <span style={{ fontWeight: 700, color: '#F8FAFC' }}>Chief Risk Officer</span>
             <span className="mono" style={{ 
               fontSize: '10px', 
-              background: 'rgba(255,255,255,0.1)', 
-              color: '#fef08a', 
+              background: 'rgba(255,255,255,0.06)', 
+              color: 'var(--text-secondary)', 
               padding: '1px 5px', 
               borderRadius: '3px',
               fontWeight: 700 
@@ -313,23 +304,23 @@ export default function Navbar({
                 position: 'absolute',
                 top: '100%',
                 right: 0,
-                marginTop: '8px',
-                background: '#0d1522',
-                border: '1px solid rgba(250, 204, 21, 0.4)',
-                borderRadius: '7px',
-                padding: '7px 12px',
+                marginTop: '6px',
+                background: '#0D1117',
+                border: '1px solid #252D38',
+                borderRadius: '6px',
+                padding: '6px 10px',
                 fontSize: '11px',
-                color: '#fef08a',
+                color: '#CBD5E1',
                 whiteSpace: 'nowrap',
                 zIndex: 200,
-                boxShadow: '0 10px 25px rgba(0,0,0,0.6)'
+                boxShadow: '0 8px 24px rgba(0,0,0,0.7)'
               }}>
                 Role: <strong>Lead Fraud Operations Analyst</strong>
               </div>
             )}
           </div>
 
-          {/* 5. CRIMSON SIGN OUT BUTTON */}
+          {/* 5. DESTRUCTIVE / RED SIGN OUT BUTTON */}
           <button
             onClick={onLogout}
             title="Lock Session & Sign Out"
@@ -338,21 +329,20 @@ export default function Navbar({
             style={{ 
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '6px',
-              padding: '5px 12px', 
+              gap: '5px',
+              padding: '4px 10px', 
               fontSize: '11px', 
-              fontWeight: 800,
-              color: '#fca5a5', 
-              border: '1px solid rgba(248, 113, 113, 0.5)',
-              background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.18) 0%, rgba(185, 28, 28, 0.28) 100%)',
-              borderRadius: '7px',
+              fontWeight: 700,
+              color: '#F87171', 
+              border: '1px solid rgba(239, 68, 68, 0.4)',
+              background: 'rgba(239, 68, 68, 0.1)',
+              borderRadius: '6px',
               cursor: 'pointer',
-              boxShadow: '0 0 12px rgba(239, 68, 68, 0.3)',
-              transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-              transform: hoveredPill === 'signout' ? 'translateY(-1.5px)' : 'translateY(0)'
+              transition: 'all 0.18s ease',
+              transform: hoveredPill === 'signout' ? 'translateY(-1px)' : 'translateY(0)'
             }}
           >
-            <Lock size={12} />
+            <Lock size={11} />
             <span>Sign Out</span>
           </button>
 
@@ -373,7 +363,7 @@ export default function Navbar({
       }}>
         
         {/* PRIMARY TABS */}
-        <div style={{ display: 'flex', gap: '0.35rem' }}>
+        <div style={{ display: 'flex', gap: '0.25rem' }}>
           {primaryTabs.map(item => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -384,27 +374,27 @@ export default function Navbar({
                 style={{
                   background: 'none',
                   border: 'none',
-                  borderBottom: isActive ? '2px solid #facc15' : '2px solid transparent',
-                  color: isActive ? '#fff' : 'var(--text-secondary)',
-                  fontWeight: isActive ? 800 : 500,
+                  borderBottom: isActive ? '2px solid #F97316' : '2px solid transparent',
+                  color: isActive ? '#F8FAFC' : 'var(--text-secondary)',
+                  fontWeight: isActive ? 700 : 500,
                   fontSize: '13px',
-                  padding: '0.65rem 0.95rem',
+                  padding: '0.65rem 0.9rem',
                   cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '7px',
+                  gap: '6px',
                   whiteSpace: 'nowrap',
-                  transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
+                  transition: 'all 0.15s ease',
                   position: 'relative'
                 }}
               >
                 <Icon 
-                  size={15} 
-                  color={isActive ? '#facc15' : 'var(--text-muted)'} 
+                  size={14} 
+                  color={isActive ? '#F97316' : 'var(--text-muted)'} 
                   style={{ 
-                    transition: 'transform 0.2s ease', 
-                    transform: isActive ? 'scale(1.1)' : 'scale(1)',
-                    filter: isActive ? 'drop-shadow(0 0 6px rgba(250,204,21,0.8))' : 'none'
+                    transition: 'transform 0.18s ease', 
+                    transform: isActive ? 'scale(1.08)' : 'scale(1)',
+                    filter: isActive ? 'drop-shadow(0 0 5px rgba(249,115,22,0.6))' : 'none'
                   }}
                 />
                 <span>{item.label}</span>
@@ -415,8 +405,8 @@ export default function Navbar({
                     left: '10%',
                     right: '10%',
                     height: '2px',
-                    background: 'linear-gradient(90deg, #facc15 0%, #eab308 100%)',
-                    boxShadow: '0 0 10px #facc15'
+                    background: 'linear-gradient(90deg, #F97316 0%, #FB923C 100%)',
+                    boxShadow: '0 0 8px #F97316'
                   }} />
                 )}
               </button>
@@ -425,7 +415,7 @@ export default function Navbar({
         </div>
 
         {/* SECONDARY TABS */}
-        <div style={{ display: 'flex', gap: '0.35rem' }}>
+        <div style={{ display: 'flex', gap: '0.25rem' }}>
           {secondaryTabs.map(item => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -436,8 +426,8 @@ export default function Navbar({
                 style={{
                   background: 'none',
                   border: 'none',
-                  borderBottom: isActive ? '2px solid var(--text-muted)' : '2px solid transparent',
-                  color: isActive ? '#fff' : 'var(--text-muted)',
+                  borderBottom: isActive ? '2px solid #F97316' : '2px solid transparent',
+                  color: isActive ? '#F8FAFC' : 'var(--text-muted)',
                   fontWeight: isActive ? 700 : 500,
                   fontSize: '12px',
                   padding: '0.65rem 0.75rem',
@@ -449,7 +439,7 @@ export default function Navbar({
                   transition: 'color 0.15s ease'
                 }}
               >
-                <Icon size={14} color={isActive ? '#facc15' : 'var(--text-muted)'} />
+                <Icon size={13} color={isActive ? '#F97316' : 'var(--text-muted)'} />
                 <span>{item.label}</span>
               </button>
             );

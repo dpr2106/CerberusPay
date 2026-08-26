@@ -36,13 +36,11 @@ export default function ChargebacksView({
         const loadedDisputes = data.disputes || [];
         setDisputes(loadedDisputes);
 
-        // Auto-select dispute based on targetTransactionId if provided
         if (targetTransactionId) {
           const matched = loadedDisputes.find(d => d.transaction_id === targetTransactionId || d.id === targetTransactionId);
           if (matched) {
             setSelectedDisputeId(matched.id);
           } else {
-            // Target transaction has no chargeback filing
             setSelectedDisputeId(null);
           }
         } else if (!selectedDisputeId && loadedDisputes.length > 0) {
@@ -56,12 +54,10 @@ export default function ChargebacksView({
       });
   };
 
-  // On mount or when targetTransactionId changes, fetch and synchronize
   useEffect(() => {
     fetchChargebacks();
   }, [targetTransactionId]);
 
-  // When targetTransactionId changes dynamically while disputes are already loaded
   useEffect(() => {
     if (disputes.length > 0) {
       if (targetTransactionId) {
@@ -96,7 +92,6 @@ export default function ChargebacksView({
       const packet = data.evidence_packet;
 
       if (packet) {
-        // Synchronously update the disputes array (which automatically synchronizes selectedDispute via useMemo)
         setDisputes(prevDisputes => prevDisputes.map(d => {
           if (d.transaction_id === txId || d.id === caseId) {
             return {
@@ -119,6 +114,7 @@ export default function ChargebacksView({
     }
   };
 
+  // Semantic Status Colors (Red for Open, Amber for Review, Green for Responded)
   const getStatusBadge = (status) => {
     switch (status) {
       case 'OPEN': return <span className="badge-blocked">OPEN DISPUTE</span>;
@@ -135,8 +131,8 @@ export default function ChargebacksView({
       {successMessage && (
         <div style={{
           background: 'rgba(16, 185, 129, 0.15)',
-          border: '1px solid #10b981',
-          color: '#34d399',
+          border: '1px solid #10B981',
+          color: '#34D399',
           padding: '10px 16px',
           borderRadius: '6px',
           fontSize: '13px',
@@ -154,8 +150,8 @@ export default function ChargebacksView({
       {errorMessage && (
         <div style={{
           background: 'rgba(239, 68, 68, 0.15)',
-          border: '1px solid #ef4444',
-          color: '#f87171',
+          border: '1px solid #EF4444',
+          color: '#F87171',
           padding: '10px 16px',
           borderRadius: '6px',
           fontSize: '13px',
@@ -169,11 +165,11 @@ export default function ChargebacksView({
         </div>
       )}
 
-      {/* TRANSACTION FILTER BANNER (If navigated from a specific transaction) */}
+      {/* TRANSACTION FILTER BANNER */}
       {targetTransactionId && (
         <div style={{
-          background: 'rgba(59, 130, 246, 0.12)',
-          border: '1px solid rgba(59, 130, 246, 0.3)',
+          background: 'rgba(249, 115, 22, 0.12)',
+          border: '1px solid rgba(249, 115, 22, 0.35)',
           borderRadius: '6px',
           padding: '8px 14px',
           display: 'flex',
@@ -181,9 +177,9 @@ export default function ChargebacksView({
           alignItems: 'center',
           fontSize: '12px'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#93c5fd' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#FB923C' }}>
             <FileText size={15} />
-            <span>Filtering disputes associated with Transaction: <strong className="mono" style={{ color: '#fff' }}>{targetTransactionId}</strong></span>
+            <span>Filtering disputes associated with Transaction: <strong className="mono" style={{ color: '#F8FAFC' }}>{targetTransactionId}</strong></span>
           </div>
           {onClearTransactionFilter && (
             <button
@@ -200,35 +196,35 @@ export default function ChargebacksView({
 
       {/* HEADER STATS */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-        <div className="fintech-card" style={{ padding: '1rem' }}>
+        <div className="fintech-card" style={{ padding: '1.1rem' }}>
           <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 700 }}>ACTIVE CHARGEBACK CASES</div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#fff', marginTop: '2px' }}>
+          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#F8FAFC', marginTop: '2px' }}>
             {disputes.length} Disputes
           </div>
         </div>
-        <div className="fintech-card" style={{ padding: '1rem' }}>
+        <div className="fintech-card" style={{ padding: '1.1rem' }}>
           <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 700 }}>TOTAL DISPUTED VALUE</div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#f87171', marginTop: '2px' }}>
+          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#F87171', marginTop: '2px' }}>
             ₹{disputes.reduce((acc, d) => acc + (d.amount || 0), 0).toLocaleString('en-IN')}
           </div>
         </div>
-        <div className="fintech-card" style={{ padding: '1rem' }}>
+        <div className="fintech-card" style={{ padding: '1.1rem' }}>
           <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 700 }}>ESTIMATED WIN PROBABILITY</div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#10b981', marginTop: '2px' }}>
+          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#10B981', marginTop: '2px' }}>
             94.6% Average
           </div>
         </div>
       </div>
 
       {/* TWO-COLUMN SYNCHRONIZED LAYOUT */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1.5fr', gap: '1.5rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1.6fr', gap: '1.5rem' }}>
         
         {/* LEFT COLUMN: DISPUTES QUEUE */}
         <div className="fintech-card" style={{ padding: '0', overflow: 'hidden' }}>
-          <div style={{ padding: '0.85rem 1.25rem', borderBottom: '1px solid var(--border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ padding: '0.85rem 1.25rem', borderBottom: '1px solid var(--border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-secondary)' }}>
             <div>
-              <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#fff' }}>Dispute Operations Queue</h3>
-              <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+              <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#F8FAFC' }}>Dispute Operations Queue</h3>
+              <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '1px' }}>
                 Select a dispute to inspect evidence packet and open transaction investigation
               </p>
             </div>
@@ -257,16 +253,22 @@ export default function ChargebacksView({
                       style={{
                         borderBottom: '1px solid var(--border-subtle)',
                         cursor: 'pointer',
-                        background: isSelected ? 'rgba(59, 130, 246, 0.15)' : 'transparent',
-                        borderLeft: isSelected ? '3px solid #3b82f6' : '3px solid transparent',
+                        background: isSelected ? 'rgba(249, 115, 22, 0.12)' : 'transparent',
+                        borderLeft: isSelected ? '3px solid #F97316' : '3px solid transparent',
                         transition: 'background 0.15s ease'
+                      }}
+                      onMouseOver={(e) => {
+                        if (!isSelected) e.currentTarget.style.background = 'var(--bg-hover)';
+                      }}
+                      onMouseOut={(e) => {
+                        if (!isSelected) e.currentTarget.style.background = 'transparent';
                       }}
                     >
                       <td style={{ padding: '11px 14px' }}>
-                        <span className="mono" style={{ fontWeight: 700, color: '#fff' }}>{d.id}</span>
-                        <div className="mono" style={{ fontSize: '11px', color: '#60a5fa' }}>{d.transaction_id}</div>
+                        <span className="mono" style={{ fontWeight: 700, color: '#F8FAFC' }}>{d.id}</span>
+                        <div className="mono" style={{ fontSize: '11px', color: '#FB923C' }}>{d.transaction_id}</div>
                       </td>
-                      <td style={{ padding: '11px 14px', fontWeight: 700, color: '#fff' }}>
+                      <td style={{ padding: '11px 14px', fontWeight: 700, color: '#F8FAFC' }}>
                         ₹{d.amount?.toLocaleString('en-IN')}
                       </td>
                       <td style={{ padding: '11px 14px', fontSize: '12px', color: 'var(--text-secondary)' }}>
@@ -287,14 +289,14 @@ export default function ChargebacksView({
           )}
         </div>
 
-        {/* RIGHT COLUMN: CHARGEBACK DOSSIER (SYNCHRONIZED SINGLE SOURCE OF TRUTH) */}
+        {/* RIGHT COLUMN: CHARGEBACK DOSSIER */}
         <div className="fintech-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {selectedDispute ? (
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
                 <div>
                   <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 700 }}>CHARGEBACK DOSSIER</div>
-                  <span className="mono" style={{ fontSize: '16px', fontWeight: 800, color: '#fff' }}>
+                  <span className="mono" style={{ fontSize: '16px', fontWeight: 800, color: '#F8FAFC' }}>
                     {selectedDispute.id}
                   </span>
                 </div>
@@ -305,19 +307,19 @@ export default function ChargebacksView({
               <div style={{ background: 'var(--bg-secondary)', padding: '0.85rem', borderRadius: '6px', marginBottom: '1rem', fontSize: '12px', border: '1px solid var(--border-subtle)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
                   <span style={{ color: 'var(--text-muted)' }}>Target Transaction:</span>
-                  <strong className="mono" style={{ color: '#fff' }}>{selectedDispute.transaction_id}</strong>
+                  <strong className="mono" style={{ color: '#F8FAFC' }}>{selectedDispute.transaction_id}</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
                   <span style={{ color: 'var(--text-muted)' }}>Disputed Amount:</span>
-                  <strong style={{ color: '#f87171' }}>₹{selectedDispute.amount?.toLocaleString('en-IN')}</strong>
+                  <strong style={{ color: '#F87171' }}>₹{selectedDispute.amount?.toLocaleString('en-IN')}</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
                   <span style={{ color: 'var(--text-muted)' }}>Customer Account:</span>
-                  <span style={{ color: '#cbd5e1' }}>{selectedDispute.customer}</span>
+                  <span style={{ color: '#CBD5E1' }}>{selectedDispute.customer}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
                   <span style={{ color: 'var(--text-muted)' }}>Dispute Reason:</span>
-                  <span style={{ color: '#f59e0b', fontWeight: 600 }}>{selectedDispute.reason_code} • {selectedDispute.reason?.replace(/_/g, ' ')}</span>
+                  <span style={{ color: '#F59E0B', fontWeight: 600 }}>{selectedDispute.reason_code} • {selectedDispute.reason?.replace(/_/g, ' ')}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: 'var(--text-muted)' }}>Created Timestamp:</span>
@@ -337,18 +339,18 @@ export default function ChargebacksView({
 
               {/* EVIDENCE PACKET STATUS */}
               {selectedDispute.evidence ? (
-                <div style={{ border: '1px solid rgba(16,185,129,0.3)', background: 'rgba(16,185,129,0.05)', padding: '1rem', borderRadius: '6px' }}>
+                <div style={{ border: '1px solid rgba(16,185,129,0.3)', background: 'rgba(16,185,129,0.06)', padding: '1rem', borderRadius: '6px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                    <span style={{ fontSize: '11px', color: '#10b981', fontWeight: 700 }}>STRUCTURED EVIDENCE PACKET COMPILED</span>
+                    <span style={{ fontSize: '11px', color: '#10B981', fontWeight: 700 }}>STRUCTURED EVIDENCE PACKET COMPILED</span>
                     <span className="mono" style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{selectedDispute.evidence.evidence_id}</span>
                   </div>
-                  <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#fff', marginBottom: '4px' }}>
+                  <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#F8FAFC', marginBottom: '4px' }}>
                     {selectedDispute.evidence.verdict}
                   </h4>
                   <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
                     {selectedDispute.evidence.packet_summary}
                   </p>
-                  <div style={{ marginTop: '8px', fontSize: '12px', color: '#10b981', fontWeight: 600 }}>
+                  <div style={{ marginTop: '8px', fontSize: '12px', color: '#10B981', fontWeight: 600 }}>
                     Estimated Win Probability: {selectedDispute.evidence.win_probability || '94.6%'}
                   </div>
                 </div>
@@ -370,10 +372,9 @@ export default function ChargebacksView({
               )}
             </div>
           ) : targetTransactionId ? (
-            /* DEDICATED NO-CHARGEBACK STATE FOR TARGET TRANSACTION */
             <div style={{ textAlign: 'center', padding: '3.5rem 1.5rem', color: 'var(--text-muted)' }}>
-              <AlertTriangle size={36} color="#f59e0b" style={{ margin: '0 auto 1rem', opacity: 0.8 }} />
-              <h4 style={{ fontSize: '14px', fontWeight: 700, color: '#fff', marginBottom: '6px' }}>
+              <AlertTriangle size={36} color="#F59E0B" style={{ margin: '0 auto 1rem', opacity: 0.8 }} />
+              <h4 style={{ fontSize: '14px', fontWeight: 700, color: '#F8FAFC', marginBottom: '6px' }}>
                 No Chargeback Case for {targetTransactionId}
               </h4>
               <p style={{ fontSize: '12px', color: 'var(--text-secondary)', maxWidth: '320px', margin: '0 auto 1.25rem', lineHeight: 1.4 }}>
@@ -390,7 +391,6 @@ export default function ChargebacksView({
               )}
             </div>
           ) : (
-            /* DEFAULT EMPTY SELECTION */
             <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '3.5rem 1.5rem', fontSize: '13px' }}>
               <FileText size={36} style={{ margin: '0 auto 1rem', opacity: 0.3 }} />
               Select a dispute from the operations queue to inspect its chargeback dossier.
