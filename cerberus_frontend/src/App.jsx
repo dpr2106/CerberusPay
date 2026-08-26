@@ -29,12 +29,12 @@ export default function App() {
           setFocusedNetworkTxn(firstBlocked);
         }
       })
-      .catch(() => {});
+      .catch((err) => console.error('[CerberusPay] Failed to fetch transactions:', err));
 
     fetch('http://localhost:8000/api/risk/metrics')
       .then(res => res.json())
       .then(data => setMetrics(data))
-      .catch(() => {});
+      .catch((err) => console.error('[CerberusPay] Failed to fetch metrics:', err));
   }, []);
 
   // Background Stream Ingestion
@@ -73,7 +73,7 @@ export default function App() {
           setTransactions(prev => [data.evaluation, ...prev.slice(0, 59)]);
         }
       })
-      .catch(() => {});
+      .catch((err) => console.error('[CerberusPay Stream Error]:', err));
     }, 3800);
 
     return () => clearInterval(interval);
@@ -86,16 +86,41 @@ export default function App() {
     setActiveTab('investigate');
   };
 
-  // Update action across unified store
-  const handleUpdateAction = (txId, newAction) => {
-    setTransactions(prev => prev.map(t => {
-      if (t.id === txId) {
-        return { ...t, action: newAction };
+  // Real FastAPI Action Update Function (Requirement 4)
+  const handleUpdateAction = async (txId, newAction) => {
+    try {
+      const response = await fetch(`http://localhost:8000/api/risk/transactions/${txId}/action`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          action: newAction
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || `Server returned ${response.status}`);
       }
-      return t;
-    }));
-    if (selectedTransaction?.id === txId) {
-      setSelectedTransaction(prev => ({ ...prev, action: newAction }));
+
+      const result = await response.json();
+      const updatedTxn = result.transaction;
+
+      // Update both transactions list and selectedTransaction with verified backend response
+      setTransactions(prev => prev.map(t => (t.id === txId ? updatedTxn : t)));
+      
+      if (selectedTransaction?.id === txId) {
+        setSelectedTransaction(updatedTxn);
+      }
+      if (focusedNetworkTxn?.id === txId) {
+        setFocusedNetworkTxn(updatedTxn);
+      }
+
+      return updatedTxn;
+    } catch (error) {
+      console.error(`[CerberusPay Action Error] Failed to update ${txId} to ${newAction}:`, error);
+      throw error;
     }
   };
 

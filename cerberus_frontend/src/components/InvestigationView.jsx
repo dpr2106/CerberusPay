@@ -9,6 +9,7 @@ export default function InvestigationView({ transaction, onUpdateAction, onNavig
   const [relatedData, setRelatedData] = useState(null);
   const [acting, setActing] = useState(false);
   const [actionSuccess, setActionSuccess] = useState(null);
+  const [actionError, setActionError] = useState(null);
 
   useEffect(() => {
     if (!transaction) return;
@@ -47,7 +48,7 @@ export default function InvestigationView({ transaction, onUpdateAction, onNavig
 
   const score = transaction.risk_score || 0;
   const isBlocked = transaction.action === 'BLOCK';
-  const isReview = transaction.action === 'CHALLENGE_STEP_UP_OTP';
+  const isReview = transaction.action === 'CHALLENGE_STEP_UP_OTP' || transaction.action === 'REVIEW_3DS';
   const isAllowed = transaction.action === 'ALLOW';
 
   const getRiskMeta = (s) => {
@@ -59,27 +60,31 @@ export default function InvestigationView({ transaction, onUpdateAction, onNavig
 
   const riskMeta = getRiskMeta(score);
 
+  // Real Asynchronous API Action Handler (Requirement 5)
   const handleAction = async (newAction) => {
     setActing(true);
+    setActionSuccess(null);
+    setActionError(null);
+
     try {
-      await fetch(`http://localhost:8000/api/risk/transactions/${transaction.id}/action?action=${newAction}`, {
-        method: 'POST'
-      });
-      if (onUpdateAction) onUpdateAction(transaction.id, newAction);
-      setActionSuccess(`Transaction status updated to: ${newAction}`);
-      setTimeout(() => setActionSuccess(null), 3000);
-    } catch {
-      if (onUpdateAction) onUpdateAction(transaction.id, newAction);
-      setActionSuccess(`Local status updated to: ${newAction}`);
-      setTimeout(() => setActionSuccess(null), 3000);
+      if (onUpdateAction) {
+        await onUpdateAction(transaction.id, newAction);
+      }
+      setActionSuccess(`Transaction decision successfully updated to: ${newAction}`);
+      setTimeout(() => setActionSuccess(null), 3500);
+    } catch (err) {
+      console.error('[Action Error]:', err);
+      setActionError(`Failed to update backend: ${err.message || 'Network error'}`);
+      setTimeout(() => setActionError(null), 4000);
+    } finally {
+      setActing(false);
     }
-    setActing(false);
   };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', maxWidth: '1000px', margin: '0 auto' }}>
       
-      {/* TOAST NOTIFICATION */}
+      {/* TOAST NOTIFICATION SUCCESS */}
       {actionSuccess && (
         <div style={{
           background: 'rgba(16, 185, 129, 0.15)',
@@ -95,6 +100,25 @@ export default function InvestigationView({ transaction, onUpdateAction, onNavig
         }}>
           <CheckCircle2 size={16} />
           <span>{actionSuccess}</span>
+        </div>
+      )}
+
+      {/* TOAST NOTIFICATION ERROR */}
+      {actionError && (
+        <div style={{
+          background: 'rgba(239, 68, 68, 0.15)',
+          border: '1px solid #ef4444',
+          color: '#f87171',
+          padding: '10px 16px',
+          borderRadius: '6px',
+          fontSize: '13px',
+          fontWeight: 600,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}>
+          <XCircle size={16} />
+          <span>{actionError}</span>
         </div>
       )}
 
@@ -149,7 +173,7 @@ export default function InvestigationView({ transaction, onUpdateAction, onNavig
       {/* 2. SECTION A: WHY? 3-5 STRONGEST RISK SIGNALS (RULE 2A) */}
       <div className="fintech-card" style={{ padding: '1.5rem' }}>
         <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#fff', marginBottom: '0.35rem' }}>
-          A. Why did CerberusPay {transaction.action === 'BLOCK' ? 'block' : (transaction.action === 'CHALLENGE_STEP_UP_OTP' ? 'challenge' : 'allow')} this transaction?
+          A. Why did CerberusPay {transaction.action === 'BLOCK' ? 'block' : (isReview ? 'challenge' : 'allow')} this transaction?
         </h3>
         
         <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '1.25rem' }}>
@@ -314,7 +338,7 @@ export default function InvestigationView({ transaction, onUpdateAction, onNavig
         </div>
       </div>
 
-      {/* 5. SECTION D: WHAT CAN THE ANALYST DO? (RULE 2D) */}
+      {/* 5. SECTION D: WHAT CAN THE ANALYST DO? (RULE 2D & REQUIREMENT 5) */}
       <div className="fintech-card" style={{ padding: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>
@@ -332,15 +356,15 @@ export default function InvestigationView({ transaction, onUpdateAction, onNavig
             className="btn-secondary-fintech"
             style={{ color: '#f87171', borderColor: 'rgba(239,68,68,0.3)', opacity: isBlocked ? 0.6 : 1 }}
           >
-            <XCircle size={14} /> Block Payment
+            <XCircle size={14} /> {acting ? 'Updating...' : 'Block Payment'}
           </button>
           <button
-            onClick={() => handleAction('CHALLENGE_STEP_UP_OTP')}
+            onClick={() => handleAction('REVIEW_3DS')}
             disabled={acting || isReview}
             className="btn-secondary-fintech"
             style={{ color: '#fbbf24', borderColor: 'rgba(245,158,11,0.3)', opacity: isReview ? 0.6 : 1 }}
           >
-            <Lock size={14} /> Require 3DS Review
+            <Lock size={14} /> {acting ? 'Updating...' : 'Require 3DS Review'}
           </button>
           <button
             onClick={() => handleAction('ALLOW')}
@@ -348,7 +372,7 @@ export default function InvestigationView({ transaction, onUpdateAction, onNavig
             className="btn-primary-fintech"
             style={{ background: '#10b981', opacity: isAllowed ? 0.6 : 1 }}
           >
-            <CheckCircle2 size={14} /> Allow Payment
+            <CheckCircle2 size={14} /> {acting ? 'Updating...' : 'Allow Payment'}
           </button>
         </div>
       </div>

@@ -1,6 +1,6 @@
-﻿from fastapi import FastAPI, HTTPException, BackgroundTasks, Query, Request
+﻿from fastapi import FastAPI, HTTPException, BackgroundTasks, Query, Request, Body
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 from datetime import datetime, timedelta
 import pickle
@@ -34,9 +34,9 @@ try:
         RISK_MODEL = pickle.load(f)
     with open(METRICS_PATH, "r") as f:
         EVAL_METRICS = json.load(f)
-    print("[CERBERUS] Loaded Trained ML Risk Model & Metrics successfully.")
+    print("[CERBERUS] Loaded Trained ML Risk Model & Metrics successfully.", flush=True)
 except Exception as e:
-    print(f"[CERBERUS WARNING] Model load fallback: {e}")
+    print(f"[CERBERUS WARNING] Model load fallback: {e}", flush=True)
     RISK_MODEL = None
     EVAL_METRICS = {
         "precision": 0.962,
@@ -110,7 +110,7 @@ def seed_unified_database():
     cards = ["CARD_4111_9210", "CARD_5241_3309", "CARD_4532_8819", "CARD_6011_0042"]
 
     for i in range(30):
-        is_fraud = (i % 4 == 0) # predictable distribution
+        is_fraud = (i % 4 == 0)
         user = users[i % len(users)]
         amount = random.randint(18000, 42000) if is_fraud else random.randint(450, 4200)
         risk = random.randint(85, 98) if is_fraud else random.randint(8, 24)
@@ -167,7 +167,7 @@ def seed_unified_database():
             ]
         })
 
-    # Seed 3 Chargebacks tied to actual seeded transactions!
+    # Seed 3 Chargebacks tied to real seeded transactions
     fraud_txns = [t for t in TRANSACTIONS if t["action"] == "BLOCK"]
     clean_txns = [t for t in TRANSACTIONS if t["action"] == "ALLOW"]
 
@@ -229,6 +229,9 @@ class TransactionPayload(BaseModel):
     is_new_shipping_address: int
     hour_of_day: Optional[int] = None
     source: Optional[str] = "SIMULATION"
+
+class ActionPayload(BaseModel):
+    action: str = Field(..., description="Action to set: ALLOW, BLOCK, REVIEW_3DS or CHALLENGE_STEP_UP_OTP")
 
 class ChargebackPayload(BaseModel):
     transaction_id: str
@@ -307,19 +310,50 @@ def evaluate_transaction(txn: TransactionPayload):
     TRANSACTIONS.insert(0, txn_record)
     return {"status": "success", "evaluation": txn_record}
 
+def _apply_action_update(transaction_id: str, action: str) -> Dict[str, Any]:
+    norm_action = action.upper().strip()
+    if norm_action == "REVIEW_3DS":
+        norm_action = "CHALLENGE_STEP_UP_OTP"
+    
+    if norm_action not in ["ALLOW", "BLOCK", "CHALLENGE_STEP_UP_OTP"]:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Invalid action '{action}'. Must be one of: ALLOW, BLOCK, REVIEW_3DS, CHALLENGE_STEP_UP_OTP"
+        )
+    
+    target = next((t for t in TRANSACTIONS if t["id"] == transaction_id), None)
+    if not target:
+        raise HTTPException(status_code=404, detail=f"Transaction '{transaction_id}' not found in unified store")
+
+    target["action"] = norm_action
+    target["decision_rationale"] = f"Analyst manual decision override applied: {norm_action}"
+    target["timeline"].append({
+        "time": datetime.now().strftime("%H:%M:%S"),
+        "event": f"Analyst manual decision override -> {norm_action}",
+        "severity": "info" if norm_action == "ALLOW" else "danger"
+    })
+
+    # Visibly print log in terminal as requested!
+    print(f"\n[ACTION UPDATE] {transaction_id} -> {norm_action}", flush=True)
+
+    return {"status": "success", "transaction": target}
+
+@app.patch("/api/risk/transactions/{transaction_id}/action")
+def patch_transaction_action(transaction_id: str, payload: ActionPayload):
+    """PATCH endpoint for analyst manual decision override with JSON body"""
+    return _apply_action_update(transaction_id, payload.action)
+
 @app.post("/api/risk/transactions/{transaction_id}/action")
-def update_transaction_action(transaction_id: str, action: str = Query(..., regex="^(ALLOW|BLOCK|CHALLENGE_STEP_UP_OTP)$")):
-    for t in TRANSACTIONS:
-        if t["id"] == transaction_id:
-            t["action"] = action
-            t["decision_rationale"] = f"Analyst manual decision override applied: {action}"
-            t["timeline"].append({
-                "time": datetime.now().strftime("%H:%M:%S"),
-                "event": f"Analyst manual decision override -> {action}",
-                "severity": "info" if action == "ALLOW" else "danger"
-            })
-            return {"status": "success", "transaction": t}
-    raise HTTPException(status_code=404, detail="Transaction not found")
+def post_transaction_action(
+    transaction_id: str,
+    payload: Optional[ActionPayload] = None,
+    action: Optional[str] = Query(None)
+):
+    """POST endpoint for compatibility with body or query parameter"""
+    act = payload.action if payload else action
+    if not act:
+        raise HTTPException(status_code=422, detail="Missing 'action' in body or query param")
+    return _apply_action_update(transaction_id, act)
 
 @app.get("/api/risk/transactions")
 def get_transactions(limit: int = 60):
@@ -382,7 +416,6 @@ def get_chargebacks():
 @app.post("/api/chargeback/generate-evidence")
 def generate_chargeback_evidence(payload: ChargebackPayload):
     target = next((t for t in TRANSACTIONS if t["id"] == payload.transaction_id), None)
-    now = datetime.now().isoformat()
     
     if target:
         evidence_doc = {
