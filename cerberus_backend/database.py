@@ -44,13 +44,13 @@ def init_db():
     """)
 
     # Seed Default Internal Lead Analyst if not exists
-    cursor.execute("SELECT id FROM operators WHERE email = 'security.operator@cerberuspay.internal'")
+    cursor.execute("SELECT id FROM operators WHERE email = 'prashanthraodugyala34@gmail.com'")
     if not cursor.fetchone():
         analyst_pass_hash = hash_password("operator123")
         cursor.execute("""
         INSERT INTO operators (operator_id, name, email, password_hash, role, created_at)
         VALUES (?, ?, ?, ?, ?, ?)
-        """, ('OPR_LEAD_ANALYST', 'Chief Risk Officer', 'security.operator@cerberuspay.internal', analyst_pass_hash, 'lead_analyst', datetime.now().isoformat()))
+        """, ('OPR_PRASHANTH_01', 'Prashanth Rao Dugyala', 'prashanthraodugyala34@gmail.com', analyst_pass_hash, 'lead_analyst', datetime.now().isoformat()))
 
     # Seed Standard Customer Records (Used for live transaction evaluations & customer alerts)
     seed_customers = [

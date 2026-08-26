@@ -119,6 +119,7 @@ def get_current_analyst(authorization: Optional[str] = Header(None)) -> Dict[str
 # ==============================================================================
 
 SENT_ALERT_TXN_IDS = set()
+OTP_STORE: Dict[str, Dict[str, Any]] = {}
 
 MODEL_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "cerberus_ml")
 MODEL_PATH = os.path.join(MODEL_DIR, "cerberus_risk_model.pkl")
@@ -450,6 +451,10 @@ class OperatorLoginPayload(BaseModel):
     email: str = Field(..., description="Authorized Operator / Analyst Email")
     password: str = Field(..., description="Operator Password")
 
+class VerifyOtpPayload(BaseModel):
+    email: str
+    otp: str
+
 class ThresholdPayload(BaseModel):
     threshold: float = Field(..., ge=0.0, le=1.0, description="Decision threshold between 0.0 and 1.0")
 
@@ -518,12 +523,74 @@ def update_risk_threshold(payload: ThresholdPayload):
 @app.post("/api/auth/login")
 @app.post("/api/auth/operator/login")
 def operator_login(payload: OperatorLoginPayload):
+    import random
     email_clean = payload.email.strip().lower()
     operator = get_operator_by_email(email_clean)
 
     if not operator or not verify_password(payload.password, operator["password_hash"]):
         raise HTTPException(status_code=401, detail="Invalid operator credentials. Access restricted to authorized personnel only.")
 
+    # Generate 6-digit numeric security OTP
+    otp_code = str(random.randint(100000, 999999))
+    OTP_STORE[email_clean] = {
+        "otp": otp_code,
+        "expires_at": time.time() + 600,
+        "operator": operator
+    }
+
+    # Dispatch Verification OTP via SMTP
+    subject = f"🔐 CerberusPay Security Verification Code: {otp_code}"
+    body = f"""CERBERUSPAY ZERO-TRUST SECURITY GATEWAY
+Two-Factor Operator Authentication
+
+Hello {operator['name']},
+
+Your one-time security login verification code is:
+
+==============================
+       [   {otp_code}   ]
+==============================
+
+This verification code is valid for 10 minutes.
+Enter this code in your CerberusPay console to authenticate your operator session.
+
+If you did not initiate this login request, please secure your credentials immediately.
+
+Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+Gateway:   Internal Fraud Operations Platform
+"""
+    email_res = send_smtp_email(subject, body, to_email=email_clean)
+
+    print(f"\n==================================================", flush=True)
+    print(f"[ANALYST 2FA OTP] Dispatched OTP ({otp_code}) to {email_clean}", flush=True)
+    print(f"Email Dispatch Sent: {email_res.get('sent', False)} | Time: {datetime.now().strftime('%H:%M:%S')}", flush=True)
+    print(f"==================================================\n", flush=True)
+
+    return {
+        "status": "otp_sent",
+        "requires_otp": True,
+        "email": email_clean,
+        "operator_id": operator["operator_id"],
+        "message": f"Security verification code dispatched to {email_clean}. Please check your inbox or spam folder."
+    }
+
+@app.post("/api/auth/verify-otp")
+def verify_operator_otp(payload: VerifyOtpPayload):
+    email_clean = payload.email.strip().lower()
+    otp_clean = payload.otp.strip()
+
+    record = OTP_STORE.get(email_clean)
+    if not record:
+        raise HTTPException(status_code=400, detail="No active verification session found. Please request a new code.")
+
+    if record.get("expires_at", 0) < time.time():
+        del OTP_STORE[email_clean]
+        raise HTTPException(status_code=400, detail="Verification code has expired (10 min limit). Please request a new code.")
+
+    if record.get("otp") != otp_clean:
+        raise HTTPException(status_code=401, detail="Invalid verification code. Please check your email and try again.")
+
+    operator = record["operator"]
     access_token = create_access_token({
         "operator_id": operator["operator_id"],
         "email": operator["email"],
@@ -531,8 +598,11 @@ def operator_login(payload: OperatorLoginPayload):
         "role": operator["role"]
     })
 
+    # Clean up OTP record on successful verification
+    del OTP_STORE[email_clean]
+
     print(f"\n==================================================", flush=True)
-    print(f"[ANALYST AUTH] Operator Logged In: {operator['operator_id']} ({email_clean})", flush=True)
+    print(f"[ANALYST AUTH SUCCESS] Operator Logged In via 2FA OTP: {operator['operator_id']} ({email_clean})", flush=True)
     print(f"Name: {operator['name']} | Role: {operator['role']} | Time: {datetime.now().strftime('%H:%M:%S')}", flush=True)
     print(f"==================================================\n", flush=True)
 
