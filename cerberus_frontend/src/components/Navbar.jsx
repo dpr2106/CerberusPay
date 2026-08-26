@@ -82,7 +82,6 @@ export default function Navbar({
                 objectFit: 'cover'
               }}
               onError={(e) => {
-                // Fallback to high-tech SVG icon if image fails
                 e.target.style.display = 'none';
               }}
             />
@@ -265,72 +264,70 @@ export default function Navbar({
           </button>
 
           {/* 4. PURPLE / INDIGO OPERATOR PROFILE BADGE */}
-          {currentOperator && (
-            <div 
-              onMouseEnter={() => setHoveredPill('operator')}
-              onMouseLeave={() => setHoveredPill(null)}
-              style={{
-                position: 'relative',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '7px',
-                background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.18) 0%, rgba(99, 102, 241, 0.28) 100%)',
-                border: '1px solid rgba(167, 139, 250, 0.45)',
-                padding: '4px 10px',
-                borderRadius: '7px',
-                fontSize: '11px',
-                color: '#c4b5fd',
-                boxShadow: '0 0 14px rgba(139, 92, 246, 0.25)',
-                transition: 'all 0.2s ease'
-              }}
-            >
-              <div style={{
-                width: '18px',
-                height: '18px',
-                borderRadius: '50%',
-                background: 'linear-gradient(135deg, #a855f7 0%, #6366f1 100%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#fff',
-                fontWeight: 900,
-                fontSize: '10px'
-              }}>
-                {currentOperator.name ? currentOperator.name[0] : 'O'}
-              </div>
-              <span style={{ fontWeight: 800, color: '#fff' }}>{currentOperator.name}</span>
-              <span className="mono" style={{ 
-                fontSize: '10px', 
-                background: 'rgba(255,255,255,0.1)', 
-                color: '#ddd6fe', 
-                padding: '1px 5px', 
-                borderRadius: '3px',
-                fontWeight: 700 
-              }}>
-                {currentOperator.operator_id}
-              </span>
-
-              {hoveredPill === 'operator' && (
-                <div style={{
-                  position: 'absolute',
-                  top: '100%',
-                  right: 0,
-                  marginTop: '8px',
-                  background: '#0d1522',
-                  border: '1px solid rgba(167, 139, 250, 0.4)',
-                  borderRadius: '7px',
-                  padding: '7px 12px',
-                  fontSize: '11px',
-                  color: '#e9d5ff',
-                  whiteSpace: 'nowrap',
-                  zIndex: 200,
-                  boxShadow: '0 10px 25px rgba(0,0,0,0.6)'
-                }}>
-                  Role: <strong>{currentOperator.role || 'Lead Fraud Operations Analyst'}</strong>
-                </div>
-              )}
+          <div 
+            onMouseEnter={() => setHoveredPill('operator')}
+            onMouseLeave={() => setHoveredPill(null)}
+            style={{
+              position: 'relative',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '7px',
+              background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.18) 0%, rgba(99, 102, 241, 0.28) 100%)',
+              border: '1px solid rgba(167, 139, 250, 0.45)',
+              padding: '4px 10px',
+              borderRadius: '7px',
+              fontSize: '11px',
+              color: '#c4b5fd',
+              boxShadow: '0 0 14px rgba(139, 92, 246, 0.25)',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            <div style={{
+              width: '18px',
+              height: '18px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #a855f7 0%, #6366f1 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#fff',
+              fontWeight: 900,
+              fontSize: '10px'
+            }}>
+              C
             </div>
-          )}
+            <span style={{ fontWeight: 800, color: '#fff' }}>Chief Risk Officer</span>
+            <span className="mono" style={{ 
+              fontSize: '10px', 
+              background: 'rgba(255,255,255,0.1)', 
+              color: '#ddd6fe', 
+              padding: '1px 5px', 
+              borderRadius: '3px',
+              fontWeight: 700 
+            }}>
+              OPR_LEAD_ANALYST
+            </span>
+
+            {hoveredPill === 'operator' && (
+              <div style={{
+                position: 'absolute',
+                top: '100%',
+                right: 0,
+                marginTop: '8px',
+                background: '#0d1522',
+                border: '1px solid rgba(167, 139, 250, 0.4)',
+                borderRadius: '7px',
+                padding: '7px 12px',
+                fontSize: '11px',
+                color: '#e9d5ff',
+                whiteSpace: 'nowrap',
+                zIndex: 200,
+                boxShadow: '0 10px 25px rgba(0,0,0,0.6)'
+              }}>
+                Role: <strong>Lead Fraud Operations Analyst</strong>
+              </div>
+            )}
+          </div>
 
           {/* 5. CRIMSON NEON SIGN OUT BUTTON */}
           <button

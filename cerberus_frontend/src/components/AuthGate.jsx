@@ -15,6 +15,14 @@ export default function AuthGate({ onAuthSuccess }) {
   const [isLoading, setIsLoading] = useState(false);
   const [resending, setResending] = useState(false);
 
+  // Mask email for UI privacy (e.g. p***4@gmail.com)
+  const maskEmail = (val) => {
+    if (!val || !val.includes('@')) return 'registered operator email';
+    const [user, domain] = val.split('@');
+    if (user.length <= 2) return `${user[0]}*@${domain}`;
+    return `${user[0]}${'*'.repeat(Math.min(user.length - 2, 4))}${user[user.length - 1]}@${domain}`;
+  };
+
   // Step 1: Send Credentials & Request OTP
   const handleRequestOtp = async (e) => {
     if (e) e.preventDefault();
@@ -36,7 +44,7 @@ export default function AuthGate({ onAuthSuccess }) {
 
       if (data.requires_otp || data.status === 'otp_sent') {
         setStep('OTP');
-        setInfoMsg(`Security verification code sent to ${data.email || email}. Check your inbox or spam folder.`);
+        setInfoMsg(`Security verification code dispatched. Please check your inbox or spam folder.`);
       } else if (data.access_token) {
         onAuthSuccess(data.operator, data.access_token);
       }
@@ -96,7 +104,7 @@ export default function AuthGate({ onAuthSuccess }) {
         throw new Error(data.detail || 'Unable to resend OTP.');
       }
 
-      setInfoMsg(`Fresh verification code dispatched to ${email}. Check your inbox and spam folder.`);
+      setInfoMsg(`Fresh verification code dispatched to ${maskEmail(email)}. Check your inbox and spam folder.`);
       setTimeout(() => setInfoMsg(null), 5000);
     } catch (err) {
       setErrorMsg(`Resend failed: ${err.message}`);
@@ -252,7 +260,7 @@ export default function AuthGate({ onAuthSuccess }) {
                 <input
                   type="email"
                   required
-                  placeholder="prashanthraodugyala34@gmail.com"
+                  placeholder="operator@cerberuspay.internal"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   style={{
@@ -407,7 +415,7 @@ export default function AuthGate({ onAuthSuccess }) {
                 A verification code was dispatched to:
               </p>
               <div className="mono" style={{ color: '#38bdf8', fontWeight: 700, fontSize: '12.5px', marginTop: '2px' }}>
-                {email}
+                {maskEmail(email)}
               </div>
             </div>
 
