@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, Activity, Search, Layers, Cpu, FileText, Server, User, LogOut } from 'lucide-react';
+import { ShieldCheck, Activity, Search, Layers, Cpu, FileText, Server, User, LogOut, Lock } from 'lucide-react';
 
 export default function Navbar({ 
   activeTab, 
@@ -9,10 +9,12 @@ export default function Navbar({
   isStreamLive, 
   setIsStreamLive, 
   selectedTransaction,
-  customerUser,
+  currentUser,
   onLogout
 }) {
-  const primaryTabs = [
+  const isCustomerRole = currentUser?.role === 'customer';
+
+  const analystTabs = [
     { id: 'monitor', label: 'Monitor', icon: Activity },
     { id: 'investigate', label: selectedTransaction ? `Investigate (${selectedTransaction.id})` : 'Investigate', icon: Search },
     { id: 'networks', label: 'Networks', icon: Layers },
@@ -22,7 +24,7 @@ export default function Navbar({
   const secondaryTabs = [
     { id: 'chargebacks', label: 'Chargebacks', icon: FileText },
     { id: 'system', label: 'System', icon: Server },
-    { id: 'customer', label: customerUser ? `Account (${customerUser.name.split(' ')[0]})` : 'Customer Portal', icon: User },
+    { id: 'customer', label: 'Customer Portal', icon: User },
   ];
 
   return (
@@ -126,21 +128,34 @@ export default function Navbar({
             {isStreamLive ? 'Stream: Live' : 'Stream: Paused'}
           </button>
 
-          {/* CUSTOMER PROFILE PILL */}
-          {customerUser && (
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              background: 'rgba(59, 130, 246, 0.15)',
-              border: '1px solid rgba(59, 130, 246, 0.3)',
-              padding: '2px 8px',
-              borderRadius: '4px',
-              fontSize: '11px',
-              color: '#60a5fa'
-            }}>
-              <User size={12} />
-              <span className="mono" style={{ fontWeight: 700 }}>{customerUser.user_id}</span>
+          {/* AUTHENTICATED USER BADGE & LOGOUT */}
+          {currentUser && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                background: currentUser.role === 'customer' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(16, 185, 129, 0.15)',
+                border: `1px solid ${currentUser.role === 'customer' ? 'rgba(59, 130, 246, 0.3)' : 'rgba(16, 185, 129, 0.3)'}`,
+                padding: '2px 8px',
+                borderRadius: '4px',
+                fontSize: '11px',
+                color: currentUser.role === 'customer' ? '#60a5fa' : '#34d399'
+              }}>
+                <User size={12} />
+                <span style={{ fontWeight: 600 }}>{currentUser.name}</span>
+                <span className="mono" style={{ opacity: 0.75 }}>({currentUser.user_id})</span>
+              </div>
+
+              <button
+                onClick={onLogout}
+                title="Lock Session & Sign Out"
+                className="btn-secondary-fintech"
+                style={{ padding: '3px 8px', fontSize: '11px', color: '#f87171', borderColor: 'rgba(239,68,68,0.3)' }}
+              >
+                <Lock size={11} />
+                <span>Lock / Sign Out</span>
+              </button>
             </div>
           )}
 
@@ -148,7 +163,7 @@ export default function Navbar({
 
       </div>
 
-      {/* STREAMLINED PRIMARY & SECONDARY NAVIGATION */}
+      {/* STREAMLINED NAVIGATION */}
       <div style={{
         maxWidth: '1440px',
         margin: '0 auto',
@@ -160,9 +175,9 @@ export default function Navbar({
         overflowX: 'auto'
       }}>
         
-        {/* PRIMARY TABS */}
+        {/* PRIMARY TABS (FOR ANALYST / OPERATORS) */}
         <div style={{ display: 'flex', gap: '0.25rem' }}>
-          {primaryTabs.map(item => {
+          {analystTabs.map(item => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
             return (

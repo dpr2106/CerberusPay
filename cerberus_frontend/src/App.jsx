@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
+import AuthGate from './components/AuthGate';
 import MonitorView from './components/MonitorView';
 import InvestigationView from './components/InvestigationView';
 import NetworksView from './components/NetworksView';
@@ -9,6 +10,20 @@ import SystemStatusView from './components/SystemStatusView';
 import CustomerPortal from './components/CustomerPortal';
 
 export default function App() {
+  // Authentication Gate State
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem('cerberus_auth_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const [authToken, setAuthToken] = useState(() => {
+    return localStorage.getItem('cerberus_auth_token') || null;
+  });
+
   const [activeTab, setActiveTab] = useState('monitor');
   const [mode, setMode] = useState('SIMULATION');
   const [isStreamLive, setIsStreamLive] = useState(true);
@@ -18,57 +33,27 @@ export default function App() {
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [focusedNetworkTxn, setFocusedNetworkTxn] = useState(null);
 
-  // Customer Authentication State
-  const [customerUser, setCustomerUser] = useState(() => {
-    try {
-      const saved = localStorage.getItem('cerberus_customer_user');
-      return saved ? JSON.parse(saved) : null;
-    } catch {
-      return null;
+  // Authentication Handlers
+  const handleAuthSuccess = (userObj, tokenStr, roleType) => {
+    const fullUser = { ...userObj, role: roleType || userObj.role || 'analyst' };
+    setCurrentUser(fullUser);
+    setAuthToken(tokenStr);
+    localStorage.setItem('cerberus_auth_user', JSON.stringify(fullUser));
+    localStorage.setItem('cerberus_auth_token', tokenStr);
+
+    if (fullUser.role === 'customer') {
+      setActiveTab('customer');
+    } else {
+      setActiveTab('monitor');
     }
-  });
-
-  const [customerToken, setCustomerToken] = useState(() => {
-    return localStorage.getItem('cerberus_customer_token') || null;
-  });
-
-  // Verify stored token on mount
-  useEffect(() => {
-    if (customerToken) {
-      fetch('http://127.0.0.1:8000/api/auth/me', {
-        headers: { Authorization: `Bearer ${customerToken}` }
-      })
-        .then(res => {
-          if (!res.ok) throw new Error('Token expired');
-          return res.json();
-        })
-        .then(data => {
-          if (data.user) {
-            setCustomerUser(data.user);
-            localStorage.setItem('cerberus_customer_user', JSON.stringify(data.user));
-          }
-        })
-        .catch(() => {
-          setCustomerUser(null);
-          setCustomerToken(null);
-          localStorage.removeItem('cerberus_customer_user');
-          localStorage.removeItem('cerberus_customer_token');
-        });
-    }
-  }, [customerToken]);
-
-  const handleLoginSuccess = (userObj, tokenStr) => {
-    setCustomerUser(userObj);
-    setCustomerToken(tokenStr);
-    localStorage.setItem('cerberus_customer_user', JSON.stringify(userObj));
-    localStorage.setItem('cerberus_customer_token', tokenStr);
   };
 
   const handleLogout = () => {
-    setCustomerUser(null);
-    setCustomerToken(null);
-    localStorage.removeItem('cerberus_customer_user');
-    localStorage.removeItem('cerberus_customer_token');
+    setCurrentUser(null);
+    setAuthToken(null);
+    localStorage.removeItem('cerberus_auth_user');
+    localStorage.removeItem('cerberus_auth_token');
+    setActiveTab('monitor');
   };
 
   // Initial Fetch of Shared Unified Transactions & Metrics from FastAPI
@@ -193,6 +178,12 @@ export default function App() {
     setActiveTab('investigate');
   };
 
+  // 1. MANDATORY AUTHENTICATION GATE: NO ACCESS UNTIL LOGGED IN
+  if (!currentUser) {
+    return <AuthGate onAuthSuccess={handleAuthSuccess} />;
+  }
+
+  // 2. AUTHENTICATED PLATFORM CONSOLE
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
       
@@ -205,7 +196,7 @@ export default function App() {
         isStreamLive={isStreamLive}
         setIsStreamLive={setIsStreamLive}
         selectedTransaction={selectedTransaction}
-        customerUser={customerUser}
+        currentUser={currentUser}
         onLogout={handleLogout}
       />
 
@@ -251,9 +242,9 @@ export default function App() {
 
         {activeTab === 'customer' && (
           <CustomerPortal
-            user={customerUser}
-            token={customerToken}
-            onLoginSuccess={handleLoginSuccess}
+            user={currentUser}
+            token={authToken}
+            onLoginSuccess={handleAuthSuccess}
             onLogout={handleLogout}
           />
         )}
@@ -269,7 +260,7 @@ export default function App() {
         color: 'var(--text-muted)',
         background: 'var(--bg-secondary)'
       }}>
-        CERBERUSPAY • Unified Payment Risk Intelligence Platform • Razorpay AI Buildathon Track 02
+        CERBERUSPAY • Unified Payment Risk Intelligence Platform • Enterprise Authentication Gate Active
       </footer>
 
     </div>
