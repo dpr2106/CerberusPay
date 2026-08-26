@@ -32,15 +32,16 @@ export default function Navbar({
 
   return (
     <header style={{
-      borderBottom: '1px solid #26344A',
-      background: '#0B1220',
+      borderBottom: '1px solid var(--border-subtle)',
+      background: 'rgba(10, 14, 23, 0.95)',
+      backdropFilter: 'blur(16px)',
       position: 'sticky',
       top: 0,
       zIndex: 100,
-      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
+      boxShadow: '0 4px 24px -2px rgba(0, 0, 0, 0.6)'
     }}>
       
-      {/* TOP HEADER ROW */}
+      {/* TOP BAR: CUSTOM LOGO & COLORFUL INTERACTIVE STATUS PILLS */}
       <div style={{
         maxWidth: '1440px',
         margin: '0 auto',
@@ -49,23 +50,29 @@ export default function Navbar({
         justifyContent: 'space-between',
         alignItems: 'center',
         flexWrap: 'wrap',
-        gap: '0.75rem'
+        gap: '1rem'
       }}>
         
-        {/* ENTERPRISE BRAND MARK */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        {/* CUSTOM GENERATED CERBERUSPAY LOGO & BRAND */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
           <div style={{
-            width: '34px',
-            height: '34px',
-            borderRadius: '6px',
+            position: 'relative',
+            width: '38px',
+            height: '38px',
+            borderRadius: '10px',
             overflow: 'hidden',
-            background: '#111A2B',
-            border: '1px solid #26344A',
+            background: 'linear-gradient(135deg, #0284c7 0%, #1e1b4b 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            flexShrink: 0
-          }}>
+            boxShadow: '0 0 18px rgba(14, 165, 233, 0.65)',
+            border: '1.5px solid rgba(56, 189, 248, 0.6)',
+            cursor: 'pointer',
+            transition: 'transform 0.2s ease'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.06)'}
+          onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+          >
             <img 
               src="/cerberuspay_logo.png" 
               alt="CerberusPay Logo" 
@@ -81,146 +88,271 @@ export default function Navbar({
           </div>
 
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <span style={{ 
-                fontSize: '1rem', 
-                fontWeight: 800, 
-                letterSpacing: '-0.01em', 
-                color: '#F8FAFC'
+                fontSize: '1.05rem', 
+                fontWeight: 900, 
+                letterSpacing: '-0.02em', 
+                color: '#ffffff',
+                textShadow: '0 0 12px rgba(255,255,255,0.2)'
               }}>
-                CERBERUS<span style={{ color: '#FF7A18' }}>PAY</span>
+                CERBERUS<span style={{ 
+                  color: '#38bdf8', 
+                  textShadow: '0 0 14px rgba(56, 189, 248, 0.7)' 
+                }}>PAY</span>
               </span>
               <span style={{ 
                 fontSize: '10px', 
-                background: '#162033', 
-                color: '#94A3B8', 
-                padding: '1px 5px', 
-                borderRadius: '3px', 
-                fontWeight: 600,
-                border: '1px solid #26344A'
+                background: 'linear-gradient(135deg, rgba(14,165,233,0.25) 0%, rgba(99,102,241,0.25) 100%)', 
+                color: '#7dd3fc', 
+                padding: '2px 6px', 
+                borderRadius: '4px', 
+                fontWeight: 800,
+                border: '1px solid rgba(56,189,248,0.4)',
+                boxShadow: '0 0 10px rgba(14,165,233,0.25)'
               }}>
-                v3.1 SOC
+                SOC v3.1
               </span>
             </div>
-            <div style={{ fontSize: '11px', color: '#94A3B8' }}>
+            <div style={{ fontSize: '11px', color: 'var(--text-muted)', letterSpacing: '0.03em' }}>
               Payment Risk & Fraud Defense Console
             </div>
           </div>
         </div>
 
-        {/* COMPACT ENTERPRISE CONTROLS */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+        {/* ULTRA-COLORFUL & INTERACTIVE STATUS PILLS */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
           
-          {/* SYSTEM ONLINE */}
+          {/* 1. EMERALD SYSTEM ONLINE PILL */}
           <div 
+            onMouseEnter={() => setHoveredPill('system')}
+            onMouseLeave={() => setHoveredPill(null)}
             style={{
+              position: 'relative',
               display: 'flex',
               alignItems: 'center',
-              gap: '6px',
+              gap: '7px',
               fontSize: '11px',
-              fontWeight: 600,
-              color: '#19C37D',
-              background: '#111A2B',
-              border: '1px solid #26344A',
-              padding: '4px 9px',
-              borderRadius: '5px'
+              fontWeight: 800,
+              color: '#34d399',
+              background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.16) 0%, rgba(5, 150, 105, 0.25) 100%)',
+              border: '1px solid rgba(52, 211, 153, 0.45)',
+              padding: '5px 11px',
+              borderRadius: '7px',
+              boxShadow: '0 0 14px rgba(16, 185, 129, 0.25)',
+              cursor: 'default',
+              transition: 'all 0.2s ease'
             }}
           >
             <div className="beacon-pulse-green" />
             <span>SYSTEM ONLINE</span>
+            {hoveredPill === 'system' && (
+              <div style={{
+                position: 'absolute',
+                top: '100%',
+                right: 0,
+                marginTop: '8px',
+                background: '#0d1522',
+                border: '1px solid rgba(52, 211, 153, 0.4)',
+                borderRadius: '7px',
+                padding: '7px 12px',
+                fontSize: '11px',
+                color: '#a7f3d0',
+                whiteSpace: 'nowrap',
+                zIndex: 200,
+                boxShadow: '0 10px 25px rgba(0,0,0,0.6)'
+              }}>
+                ● ML Risk Engine & SQLite Operational • 99.99% Uptime
+              </div>
+            )}
           </div>
 
-          {/* SIMULATION / SANDBOX MODE */}
-          <button
+          {/* 2. GOLDEN SUNFIRE SIMULATION MODE PILL */}
+          <div 
+            onMouseEnter={() => setHoveredPill('mode')}
+            onMouseLeave={() => setHoveredPill(null)}
             onClick={() => setMode(mode === 'SIMULATION' ? 'SANDBOX' : 'SIMULATION')}
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '5px',
-              fontSize: '11px',
-              fontWeight: 600,
-              color: mode === 'SIMULATION' ? '#F59E0B' : '#94A3B8',
-              background: '#111A2B',
-              border: '1px solid #26344A',
-              padding: '4px 9px',
-              borderRadius: '5px',
-              cursor: 'pointer',
-              transition: 'background 0.15s ease'
-            }}
-            title="Toggle between Simulation and Sandbox mode"
-          >
-            <Zap size={12} color={mode === 'SIMULATION' ? '#F59E0B' : '#64748B'} />
-            <span>{mode} MODE</span>
-          </button>
-
-          {/* LIVE STREAM TOGGLE */}
-          <button
-            onClick={() => setIsStreamLive(!isStreamLive)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '5px',
-              fontSize: '11px',
-              fontWeight: 600,
-              color: isStreamLive ? '#F8FAFC' : '#64748B',
-              background: isStreamLive ? '#162033' : '#111A2B',
-              border: '1px solid #26344A',
-              padding: '4px 9px',
-              borderRadius: '5px',
-              cursor: 'pointer',
-              transition: 'background 0.15s ease'
-            }}
-          >
-            <Radio size={12} color={isStreamLive ? '#19C37D' : '#64748B'} />
-            <span>{isStreamLive ? 'Stream: Live' : 'Stream: Paused'}</span>
-          </button>
-
-          {/* OPERATOR ROLE BADGE */}
-          <div 
-            style={{
+              position: 'relative',
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
-              background: '#111A2B',
-              border: '1px solid #26344A',
-              padding: '3px 8px',
-              borderRadius: '5px',
               fontSize: '11px',
-              color: '#F8FAFC'
+              fontWeight: 800,
+              color: mode === 'SIMULATION' ? '#fbbf24' : '#60a5fa',
+              background: mode === 'SIMULATION' 
+                ? 'linear-gradient(135deg, rgba(245, 158, 11, 0.18) 0%, rgba(217, 119, 6, 0.28) 100%)'
+                : 'linear-gradient(135deg, rgba(59, 130, 246, 0.18) 0%, rgba(37, 99, 235, 0.28) 100%)',
+              border: `1px solid ${mode === 'SIMULATION' ? 'rgba(251, 191, 36, 0.55)' : 'rgba(96, 165, 250, 0.55)'}`,
+              padding: '5px 11px',
+              borderRadius: '7px',
+              boxShadow: mode === 'SIMULATION' ? '0 0 14px rgba(245, 158, 11, 0.3)' : '0 0 14px rgba(59, 130, 246, 0.3)',
+              cursor: 'pointer',
+              transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+              transform: hoveredPill === 'mode' ? 'translateY(-1.5px)' : 'translateY(0)'
             }}
           >
-            <span style={{ fontWeight: 600 }}>Chief Risk Officer</span>
-            <span className="mono" style={{ 
-              fontSize: '10px', 
-              background: '#162033', 
-              color: '#94A3B8', 
-              padding: '1px 4px', 
-              borderRadius: '3px'
-            }}>
-              OPR_LEAD
-            </span>
+            <Zap size={13} color={mode === 'SIMULATION' ? '#fbbf24' : '#60a5fa'} />
+            <span>{mode} MODE</span>
+            {hoveredPill === 'mode' && (
+              <div style={{
+                position: 'absolute',
+                top: '100%',
+                right: 0,
+                marginTop: '8px',
+                background: '#0d1522',
+                border: '1px solid rgba(251, 191, 36, 0.4)',
+                borderRadius: '7px',
+                padding: '7px 12px',
+                fontSize: '11px',
+                color: '#fde68a',
+                whiteSpace: 'nowrap',
+                zIndex: 200,
+                boxShadow: '0 10px 25px rgba(0,0,0,0.6)'
+              }}>
+                ⚡ Click to toggle between Simulation & Sandbox traffic
+              </div>
+            )}
           </div>
 
-          {/* SIGN OUT BUTTON */}
+          {/* 3. ELECTRIC CYAN RADAR STREAM PILL */}
+          <button
+            onMouseEnter={() => setHoveredPill('stream')}
+            onMouseLeave={() => setHoveredPill(null)}
+            onClick={() => setIsStreamLive(!isStreamLive)}
+            style={{
+              position: 'relative',
+              background: isStreamLive 
+                ? 'linear-gradient(135deg, rgba(6, 182, 212, 0.18) 0%, rgba(59, 130, 246, 0.28) 100%)' 
+                : 'linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.08) 100%)',
+              border: `1px solid ${isStreamLive ? 'rgba(56, 189, 248, 0.55)' : 'var(--border-subtle)'}`,
+              color: isStreamLive ? '#38bdf8' : 'var(--text-muted)',
+              borderRadius: '7px',
+              padding: '5px 11px',
+              fontSize: '11px',
+              fontWeight: 800,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              boxShadow: isStreamLive ? '0 0 14px rgba(6, 182, 212, 0.3)' : 'none',
+              transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+              transform: hoveredPill === 'stream' ? 'translateY(-1.5px)' : 'translateY(0)'
+            }}
+          >
+            <Radio size={13} className={isStreamLive ? 'animate-pulse' : ''} />
+            <span>{isStreamLive ? 'Stream: Live' : 'Stream: Paused'}</span>
+            {hoveredPill === 'stream' && (
+              <div style={{
+                position: 'absolute',
+                top: '100%',
+                right: 0,
+                marginTop: '8px',
+                background: '#0d1522',
+                border: '1px solid rgba(56, 189, 248, 0.4)',
+                borderRadius: '7px',
+                padding: '7px 12px',
+                fontSize: '11px',
+                color: '#bae6fd',
+                whiteSpace: 'nowrap',
+                zIndex: 200,
+                boxShadow: '0 10px 25px rgba(0,0,0,0.6)'
+              }}>
+                {isStreamLive ? 'Ingesting live payment events • Click to pause' : 'Stream paused • Click to resume'}
+              </div>
+            )}
+          </button>
+
+          {/* 4. PURPLE / INDIGO OPERATOR PROFILE BADGE */}
+          <div 
+            onMouseEnter={() => setHoveredPill('operator')}
+            onMouseLeave={() => setHoveredPill(null)}
+            style={{
+              position: 'relative',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '7px',
+              background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.18) 0%, rgba(99, 102, 241, 0.28) 100%)',
+              border: '1px solid rgba(167, 139, 250, 0.45)',
+              padding: '4px 10px',
+              borderRadius: '7px',
+              fontSize: '11px',
+              color: '#c4b5fd',
+              boxShadow: '0 0 14px rgba(139, 92, 246, 0.25)',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            <div style={{
+              width: '18px',
+              height: '18px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #a855f7 0%, #6366f1 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#fff',
+              fontWeight: 900,
+              fontSize: '10px'
+            }}>
+              C
+            </div>
+            <span style={{ fontWeight: 800, color: '#fff' }}>Chief Risk Officer</span>
+            <span className="mono" style={{ 
+              fontSize: '10px', 
+              background: 'rgba(255,255,255,0.1)', 
+              color: '#ddd6fe', 
+              padding: '1px 5px', 
+              borderRadius: '3px',
+              fontWeight: 700 
+            }}>
+              OPR_LEAD_ANALYST
+            </span>
+
+            {hoveredPill === 'operator' && (
+              <div style={{
+                position: 'absolute',
+                top: '100%',
+                right: 0,
+                marginTop: '8px',
+                background: '#0d1522',
+                border: '1px solid rgba(167, 139, 250, 0.4)',
+                borderRadius: '7px',
+                padding: '7px 12px',
+                fontSize: '11px',
+                color: '#e9d5ff',
+                whiteSpace: 'nowrap',
+                zIndex: 200,
+                boxShadow: '0 10px 25px rgba(0,0,0,0.6)'
+              }}>
+                Role: <strong>Lead Fraud Operations Analyst</strong>
+              </div>
+            )}
+          </div>
+
+          {/* 5. CRIMSON NEON SIGN OUT BUTTON */}
           <button
             onClick={onLogout}
             title="Lock Session & Sign Out"
+            onMouseEnter={() => setHoveredPill('signout')}
+            onMouseLeave={() => setHoveredPill(null)}
             style={{ 
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '5px',
-              padding: '4px 9px', 
+              gap: '6px',
+              padding: '5px 12px', 
               fontSize: '11px', 
-              fontWeight: 600,
-              color: '#FF4D5A', 
-              border: '1px solid rgba(255, 77, 90, 0.35)',
-              background: '#111A2B',
-              borderRadius: '5px',
+              fontWeight: 800,
+              color: '#fca5a5', 
+              border: '1px solid rgba(248, 113, 113, 0.5)',
+              background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.18) 0%, rgba(185, 28, 28, 0.28) 100%)',
+              borderRadius: '7px',
               cursor: 'pointer',
-              transition: 'background 0.15s ease'
+              boxShadow: '0 0 12px rgba(239, 68, 68, 0.3)',
+              transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+              transform: hoveredPill === 'signout' ? 'translateY(-1.5px)' : 'translateY(0)'
             }}
           >
-            <Lock size={11} />
+            <Lock size={12} />
             <span>Sign Out</span>
           </button>
 
@@ -236,12 +368,12 @@ export default function Navbar({
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        borderTop: '1px solid #26344A',
+        borderTop: '1px solid var(--border-subtle)',
         overflowX: 'auto'
       }}>
         
         {/* PRIMARY TABS */}
-        <div style={{ display: 'flex', gap: '0.25rem' }}>
+        <div style={{ display: 'flex', gap: '0.35rem' }}>
           {primaryTabs.map(item => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -252,31 +384,48 @@ export default function Navbar({
                 style={{
                   background: 'none',
                   border: 'none',
-                  borderBottom: isActive ? '2px solid #FF7A18' : '2px solid transparent',
-                  color: isActive ? '#F8FAFC' : '#94A3B8',
-                  fontWeight: isActive ? 600 : 500,
+                  borderBottom: isActive ? '2px solid #38bdf8' : '2px solid transparent',
+                  color: isActive ? '#fff' : 'var(--text-secondary)',
+                  fontWeight: isActive ? 800 : 500,
                   fontSize: '13px',
-                  padding: '0.65rem 0.85rem',
+                  padding: '0.65rem 0.95rem',
                   cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '6px',
+                  gap: '7px',
                   whiteSpace: 'nowrap',
-                  transition: 'color 0.15s ease'
+                  transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
+                  position: 'relative'
                 }}
               >
                 <Icon 
-                  size={14} 
-                  color={isActive ? '#FF7A18' : '#64748B'} 
+                  size={15} 
+                  color={isActive ? '#38bdf8' : 'var(--text-muted)'} 
+                  style={{ 
+                    transition: 'transform 0.2s ease', 
+                    transform: isActive ? 'scale(1.1)' : 'scale(1)',
+                    filter: isActive ? 'drop-shadow(0 0 6px rgba(56,189,248,0.7))' : 'none'
+                  }}
                 />
                 <span>{item.label}</span>
+                {isActive && (
+                  <div style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: '10%',
+                    right: '10%',
+                    height: '2px',
+                    background: 'linear-gradient(90deg, #38bdf8 0%, #818cf8 100%)',
+                    boxShadow: '0 0 10px #38bdf8'
+                  }} />
+                )}
               </button>
             );
           })}
         </div>
 
         {/* SECONDARY TABS */}
-        <div style={{ display: 'flex', gap: '0.25rem' }}>
+        <div style={{ display: 'flex', gap: '0.35rem' }}>
           {secondaryTabs.map(item => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -287,9 +436,9 @@ export default function Navbar({
                 style={{
                   background: 'none',
                   border: 'none',
-                  borderBottom: isActive ? '2px solid #FF7A18' : '2px solid transparent',
-                  color: isActive ? '#F8FAFC' : '#64748B',
-                  fontWeight: isActive ? 600 : 500,
+                  borderBottom: isActive ? '2px solid var(--text-muted)' : '2px solid transparent',
+                  color: isActive ? '#fff' : 'var(--text-muted)',
+                  fontWeight: isActive ? 700 : 500,
                   fontSize: '12px',
                   padding: '0.65rem 0.75rem',
                   cursor: 'pointer',
@@ -300,7 +449,7 @@ export default function Navbar({
                   transition: 'color 0.15s ease'
                 }}
               >
-                <Icon size={13} color={isActive ? '#FF7A18' : '#64748B'} />
+                <Icon size={14} color={isActive ? '#cbd5e1' : 'var(--text-muted)'} />
                 <span>{item.label}</span>
               </button>
             );
