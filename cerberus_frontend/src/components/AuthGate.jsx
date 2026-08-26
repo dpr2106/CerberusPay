@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
 import { 
-  ShieldCheck, Lock, Mail, ArrowRight, AlertCircle, 
-  KeyRound, Sparkles, Check, Copy, UserCheck, Zap, ShieldAlert
+  Lock, Mail, ArrowRight, AlertCircle, ShieldAlert
 } from 'lucide-react';
 
 export default function AuthGate({ onAuthSuccess }) {
-  const [email, setEmail] = useState('security.operator@cerberuspay.internal');
-  const [password, setPassword] = useState('operator123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [copiedKey, setCopiedKey] = useState(null);
 
   const handleLogin = async (e) => {
     if (e) e.preventDefault();
@@ -34,19 +32,6 @@ export default function AuthGate({ onAuthSuccess }) {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const autofillCredentials = () => {
-    setEmail('security.operator@cerberuspay.internal');
-    setPassword('operator123');
-    setCopiedKey('filled');
-    setTimeout(() => setCopiedKey(null), 2500);
-  };
-
-  const copyText = (text, type) => {
-    navigator.clipboard.writeText(text);
-    setCopiedKey(type);
-    setTimeout(() => setCopiedKey(null), 2000);
   };
 
   return (
@@ -151,7 +136,7 @@ export default function AuthGate({ onAuthSuccess }) {
       <div 
         className="fintech-card" 
         style={{ 
-          maxWidth: '440px', 
+          maxWidth: '420px', 
           width: '100%', 
           padding: '2.25rem', 
           background: 'rgba(13, 18, 30, 0.82)',
@@ -184,73 +169,6 @@ export default function AuthGate({ onAuthSuccess }) {
           </div>
         )}
 
-        {/* COLORFUL ONE-CLICK CREDENTIALS CALLOUT BOX */}
-        <div style={{
-          background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.12) 0%, rgba(99, 102, 241, 0.18) 100%)',
-          border: '1px solid rgba(56, 189, 248, 0.35)',
-          borderRadius: '10px',
-          padding: '12px 14px',
-          marginBottom: '1.5rem',
-          boxShadow: '0 0 15px rgba(14, 165, 233, 0.12)'
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-            <span style={{ 
-              fontSize: '11px', 
-              fontWeight: 800, 
-              color: '#38bdf8', 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '5px', 
-              letterSpacing: '0.04em' 
-            }}>
-              <KeyRound size={13} /> OPERATOR CREDENTIALS
-            </span>
-            
-            <button
-              type="button"
-              onClick={autofillCredentials}
-              style={{
-                background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.3) 0%, rgba(59, 130, 246, 0.4) 100%)',
-                border: '1px solid rgba(56, 189, 248, 0.5)',
-                color: '#fff',
-                fontSize: '11px',
-                fontWeight: 700,
-                padding: '3px 8px',
-                borderRadius: '5px',
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '4px',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              {copiedKey === 'filled' ? <Check size={12} color="#34d399" /> : <Sparkles size={12} color="#38bdf8" />}
-              <span>{copiedKey === 'filled' ? 'Autofilled!' : 'Quick Autofill'}</span>
-            </button>
-          </div>
-
-          <div style={{ fontSize: '11.5px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span>Email:</span>
-              <span className="mono" style={{ color: '#e0f2fe', fontWeight: 700 }}>
-                security.operator@cerberuspay.internal
-              </span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2px' }}>
-              <span>Password:</span>
-              <span className="mono" style={{ color: '#fde68a', fontWeight: 700 }}>
-                operator123
-              </span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2px' }}>
-              <span>Role:</span>
-              <span style={{ color: '#c4b5fd', fontWeight: 600 }}>
-                Lead Fraud Operations Analyst
-              </span>
-            </div>
-          </div>
-        </div>
-
         {/* INTERNAL ANALYST LOGIN FORM */}
         <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           <div>
@@ -270,7 +188,7 @@ export default function AuthGate({ onAuthSuccess }) {
               <input
                 type="email"
                 required
-                placeholder="security.operator@cerberuspay.internal"
+                placeholder="operator@cerberuspay.internal"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 style={{
