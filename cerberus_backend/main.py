@@ -479,3 +479,54 @@ def update_transaction_action(transaction_id: str, action: str = Query(..., rege
             })
             return {"status": "success", "transaction": t}
     raise HTTPException(status_code=404, detail="Transaction not found")
+
+@app.get("/api/risk/transactions/{transaction_id}/related")
+def get_related_transactions(transaction_id: str):
+    target = next((t for t in TRANSACTIONS if t["id"] == transaction_id), None)
+    if not target:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    
+    user_id = target["user_id"]
+    user_history = [t for t in TRANSACTIONS if t["user_id"] == user_id and t["id"] != transaction_id][:5]
+    
+    if len(user_history) == 0:
+        base_t = datetime.fromisoformat(target["timestamp"])
+        user_history = [
+            {
+                "id": f"TXN_{uuid.uuid4().hex[:8].upper()}",
+                "user_id": user_id,
+                "amount": 1850.0,
+                "risk_score": 12,
+                "risk_level": "LOW",
+                "action": "ALLOW",
+                "timestamp": (base_t - timedelta(days=2, hours=4)).isoformat()
+            },
+            {
+                "id": f"TXN_{uuid.uuid4().hex[:8].upper()}",
+                "user_id": user_id,
+                "amount": 3400.0,
+                "risk_score": 18,
+                "risk_level": "LOW",
+                "action": "ALLOW",
+                "timestamp": (base_t - timedelta(days=6, hours=1)).isoformat()
+            }
+        ]
+
+    is_threat = target["risk_score"] >= 70
+    network_connection = {
+        "is_syndicate_linked": is_threat,
+        "ring_id": "RING_DELTA_042" if is_threat else None,
+        "ring_name": "Card Testing Burst Syndicate" if is_threat else "Isolated Profile",
+        "linked_accounts_count": 14 if is_threat else 1,
+        "shared_device_id": "DEV_FINGERPRINT_A9" if is_threat else "DEV_TRUSTED_01",
+        "shared_ip": "185.220.101.4 (Proxy)" if is_threat else "103.21.144.12",
+        "syndicate_volume": 420000.0 if is_threat else target["amount"]
+    }
+
+    return {
+        "status": "success",
+        "target_id": transaction_id,
+        "user_id": user_id,
+        "user_history": user_history,
+        "network_connection": network_connection
+    }
