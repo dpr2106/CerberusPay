@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { 
-  Lock, Mail, ArrowRight, AlertCircle, ShieldAlert
+  Lock, Mail, ArrowRight, AlertCircle, Eye, EyeOff
 } from 'lucide-react';
 
 export default function AuthGate({ onAuthSuccess }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -61,14 +62,14 @@ export default function AuthGate({ onAuthSuccess }) {
         pointerEvents: 'none'
       }} />
 
-      {/* BRANDING & LOGO HEADER */}
+      {/* BRANDING & LOGO HEADER - CLEAN PROJECT NAME ONLY */}
       <div style={{ textAlign: 'center', marginBottom: '1.75rem', position: 'relative', zIndex: 2 }}>
         
         {/* CUSTOM GENERATED GLOWING CERBERUS LOGO */}
         <div style={{
           position: 'relative',
-          width: '74px',
-          height: '74px',
+          width: '76px',
+          height: '76px',
           borderRadius: '20px',
           overflow: 'hidden',
           background: 'linear-gradient(135deg, #0284c7 0%, #1e1b4b 100%)',
@@ -77,8 +78,13 @@ export default function AuthGate({ onAuthSuccess }) {
           justifyContent: 'center',
           margin: '0 auto 1.25rem',
           boxShadow: '0 0 35px rgba(14, 165, 233, 0.65), 0 0 15px rgba(99, 102, 241, 0.4)',
-          border: '2px solid rgba(56, 189, 248, 0.7)'
-        }}>
+          border: '2px solid rgba(56, 189, 248, 0.7)',
+          cursor: 'pointer',
+          transition: 'transform 0.2s ease'
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+        >
           <img 
             src="/cerberuspay_logo.png" 
             alt="CerberusPay Logo" 
@@ -91,7 +97,7 @@ export default function AuthGate({ onAuthSuccess }) {
         </div>
 
         <h1 style={{ 
-          fontSize: '2rem', 
+          fontSize: '2.15rem', 
           fontWeight: 900, 
           color: '#ffffff', 
           letterSpacing: '-0.03em', 
@@ -100,36 +106,6 @@ export default function AuthGate({ onAuthSuccess }) {
         }}>
           CERBERUS<span style={{ color: '#38bdf8', textShadow: '0 0 25px rgba(56, 189, 248, 0.8)' }}>PAY</span>
         </h1>
-
-        <p style={{ 
-          fontSize: '13.5px', 
-          color: '#94a3b8', 
-          marginTop: '6px', 
-          fontWeight: 600, 
-          letterSpacing: '0.02em' 
-        }}>
-          Payment Risk Intelligence & Fraud Operations Platform
-        </p>
-
-        <div style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '6px',
-          marginTop: '10px',
-          background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.25) 100%)',
-          border: '1px solid rgba(248, 113, 113, 0.4)',
-          color: '#fca5a5',
-          padding: '4px 12px',
-          borderRadius: '20px',
-          fontSize: '11px',
-          fontWeight: 800,
-          letterSpacing: '0.06em',
-          textTransform: 'uppercase',
-          boxShadow: '0 0 12px rgba(239, 68, 68, 0.2)'
-        }}>
-          <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#ef4444' }} />
-          <span>RESTRICTED ZERO-TRUST ACCESS • OPERATORS ONLY</span>
-        </div>
       </div>
 
       {/* VIBRANT GLASSMORPHIC LOGIN CARD */}
@@ -229,14 +205,14 @@ export default function AuthGate({ onAuthSuccess }) {
             <div style={{ position: 'relative' }}>
               <Lock size={15} style={{ position: 'absolute', left: '12px', top: '12px', color: '#64748b' }} />
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 required
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 style={{
                   width: '100%',
-                  padding: '10px 12px 10px 36px',
+                  padding: '10px 38px 10px 36px',
                   background: 'rgba(8, 11, 17, 0.8)',
                   border: '1px solid rgba(56, 189, 248, 0.3)',
                   borderRadius: '8px',
@@ -254,6 +230,27 @@ export default function AuthGate({ onAuthSuccess }) {
                   e.target.style.boxShadow = 'none';
                 }}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute',
+                  right: '10px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  color: showPassword ? '#38bdf8' : '#64748b',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '4px',
+                  transition: 'color 0.15s ease'
+                }}
+                title={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
             </div>
           </div>
 
