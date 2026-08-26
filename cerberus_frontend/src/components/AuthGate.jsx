@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Lock, Mail, User, ArrowRight, CheckCircle2, AlertCircle, KeyRound, RefreshCw } from 'lucide-react';
+import { ShieldCheck, Lock, Mail, User, ArrowRight, CheckCircle2, AlertCircle, KeyRound, RefreshCw, AlertTriangle } from 'lucide-react';
 
 export default function AuthGate({ onAuthSuccess }) {
   const [mode, setMode] = useState('login'); // 'login' | 'register' | 'verify_otp'
@@ -31,7 +31,7 @@ export default function AuthGate({ onAuthSuccess }) {
         throw new Error(data.detail || 'Registration failed');
       }
 
-      setSuccessMsg(`A 6-digit verification code was sent to ${email}. Please check your inbox!`);
+      setSuccessMsg(`A 6-digit verification code was sent to ${email}. Check your Inbox or Spam folder!`);
       setMode('verify_otp');
     } catch (err) {
       setErrorMsg(err.message || 'Registration failed. Ensure backend is running.');
@@ -82,7 +82,7 @@ export default function AuthGate({ onAuthSuccess }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || 'Failed to resend code');
 
-      setSuccessMsg(`A fresh verification code was dispatched to ${email}!`);
+      setSuccessMsg(`A fresh verification code was dispatched to ${email}! (Check Spam if not in Inbox)`);
     } catch (err) {
       setErrorMsg(err.message || 'Unable to resend code');
     } finally {
@@ -424,6 +424,23 @@ export default function AuthGate({ onAuthSuccess }) {
                   color: '#fff'
                 }}
               />
+            </div>
+
+            {/* SPAM / JUNK FOLDER WARNING BANNER */}
+            <div style={{
+              background: 'rgba(245, 158, 11, 0.1)',
+              border: '1px solid rgba(245, 158, 11, 0.25)',
+              borderRadius: '6px',
+              padding: '8px 12px',
+              fontSize: '11px',
+              color: '#fbbf24',
+              lineHeight: 1.4,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}>
+              <AlertTriangle size={15} style={{ flexShrink: 0 }} />
+              <span><strong>Notice:</strong> If the email doesn't appear in your Primary Inbox, please check your <strong>Spam / Junk</strong> folder.</span>
             </div>
 
             <button
