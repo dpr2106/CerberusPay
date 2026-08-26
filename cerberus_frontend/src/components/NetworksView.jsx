@@ -99,24 +99,25 @@ export default function NetworksView({ focusedTransaction, onBackToInvestigation
         </div>
       </div>
 
-      {/* GRAPH CANVAS & CLUSTER INSPECTOR */}
+      {/* TOPOLOGY GRAPH & METADATA DOSSIER */}
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem' }}>
         
-        {/* GRAPH CANVAS */}
-        <div className="fintech-card" style={{ padding: '1.5rem', position: 'relative' }}>
+        {/* INTERACTIVE NETWORK GRAPH */}
+        <div className="fintech-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <div>
-              <h3 style={{ fontSize: '14.5px', fontWeight: 800, color: '#fff' }}>
-                Syndicate & Entity Topology Graph
-              </h3>
-              <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                Visualizing multi-account device collisions, proxy clusters, and card-testing rings
+              <h3 style={{ fontSize: '14.5px', fontWeight: 800, color: '#fff' }}>Syndicate Graph Topology</h3>
+              <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '2px' }}>
+                Select any node to trace correlated fraud clusters and shared hardware fingerprints
               </p>
             </div>
+            <span className="badge-blocked" style={{ fontSize: '11px' }}>
+              <ShieldAlert size={12} /> RING_DELTA_042 (Active)
+            </span>
           </div>
 
           <div style={{ 
-            background: '#070a0f', 
+            background: 'var(--bg-secondary)', 
             border: '1px solid var(--border-subtle)', 
             borderRadius: '8px', 
             padding: '1rem', 
@@ -146,7 +147,7 @@ export default function NetworksView({ focusedTransaction, onBackToInvestigation
                 );
               })}
 
-              {/* NODES */}
+              {/* CLEAN SVG NODES WITH ACCURATE CO-ORDINATES */}
               {nodes.map((node) => {
                 const isSelected = selectedNode?.id === node.id;
                 const isHovered = hoveredNode?.id === node.id;
@@ -159,14 +160,14 @@ export default function NetworksView({ focusedTransaction, onBackToInvestigation
                     onClick={() => setSelectedNode(node)}
                     onMouseEnter={() => setHoveredNode(node)}
                     onMouseLeave={() => setHoveredNode(null)}
-                    style={{ cursor: 'pointer', transition: 'transform 0.15s ease' }}
+                    style={{ cursor: 'pointer' }}
                   >
                     {/* Pulsing ring on active node */}
                     {node.active && (
                       <circle
                         r="20"
                         fill="none"
-                        stroke="rgba(59, 130, 246, 0.3)"
+                        stroke="rgba(59, 130, 246, 0.35)"
                         strokeWidth="1.5"
                         className="animate-pulse"
                       />
@@ -178,7 +179,7 @@ export default function NetworksView({ focusedTransaction, onBackToInvestigation
                       stroke={color}
                       strokeWidth={isSelected ? 3 : (node.active ? 2.5 : 1.8)}
                       style={{
-                        filter: isSelected || isHovered ? `drop-shadow(0 0 8px ${color})` : 'none',
+                        filter: isSelected || isHovered ? `drop-shadow(0 0 10px ${color})` : 'none',
                         transition: 'all 0.15s ease'
                       }}
                     />
@@ -212,89 +213,100 @@ export default function NetworksView({ focusedTransaction, onBackToInvestigation
 
             {/* HOVER TOOLTIP ON NODE */}
             {hoveredNode && (
-              <div style={{
-                position: 'absolute',
-                top: Math.max(hoveredNode.y - 45, 10),
-                left: Math.min(hoveredNode.x + 25, 340),
-                background: 'rgba(18, 23, 34, 0.95)',
-                border: `1px solid ${getNodeColor(hoveredNode.risk)}`,
-                borderRadius: '6px',
-                padding: '6px 10px',
-                fontSize: '11px',
-                color: '#fff',
-                zIndex: 100,
-                boxShadow: 'var(--shadow-lg)',
-                pointerEvents: 'none'
-              }}>
-                <div className="mono" style={{ fontWeight: 800 }}>{hoveredNode.label}</div>
-                <div style={{ color: 'var(--text-muted)', fontSize: '10px' }}>{hoveredNode.desc}</div>
+              <div 
+                style={{
+                  position: 'absolute',
+                  top: Math.max(hoveredNode.y - 45, 10),
+                  left: Math.min(hoveredNode.x + 25, 340),
+                  background: 'rgba(18, 23, 34, 0.95)',
+                  border: `1px solid ${getNodeColor(hoveredNode.risk)}`,
+                  borderRadius: '6px',
+                  padding: '6px 10px',
+                  fontSize: '11px',
+                  color: '#fff',
+                  boxShadow: '0 8px 20px rgba(0,0,0,0.6)',
+                  pointerEvents: 'none',
+                  zIndex: 20
+                }}
+              >
+                <div style={{ fontWeight: 700, color: getNodeColor(hoveredNode.risk) }}>
+                  [{hoveredNode.type}] {hoveredNode.label}
+                </div>
+                <div style={{ fontSize: '10.5px', color: 'var(--text-muted)' }}>
+                  {hoveredNode.desc}
+                </div>
               </div>
             )}
           </div>
-
-          <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '0.75rem', textAlign: 'center' }}>
-            Hover or click any node to inspect multi-entity correlations and shared hardware artifacts.
-          </div>
         </div>
 
-        {/* NODE & SYNDICATE DETAIL PANEL */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          
-          {/* Syndicate Card */}
-          <div className="fintech-card" style={{ padding: '1.25rem', borderLeft: '4px solid #ef4444', boxShadow: 'var(--shadow-glow-red)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-              <span className="badge-blocked">SYNDICATE CLUSTER</span>
-              <span className="mono" style={{ fontSize: '11px', color: 'var(--text-muted)' }}>RING_DELTA_042</span>
+        {/* NODE INSPECTION DOSSIER */}
+        <div className="fintech-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <h3 style={{ fontSize: '14.5px', fontWeight: 800, color: '#fff', marginBottom: '0.25rem' }}>
+            Entity Cluster Intelligence
+          </h3>
+
+          {selectedNode ? (
+            <div 
+              key={selectedNode.id}
+              style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
+            >
+              <div style={{ 
+                background: 'var(--bg-secondary)', 
+                border: `1px solid ${getNodeColor(selectedNode.risk)}`, 
+                borderRadius: '8px', 
+                padding: '1rem' 
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                  <span className="badge-source">{selectedNode.type} ENTITY</span>
+                  <span style={{ fontSize: '11px', fontWeight: 700, color: getNodeColor(selectedNode.risk) }}>
+                    RISK: {selectedNode.risk}
+                  </span>
+                </div>
+                <div className="mono" style={{ fontSize: '14px', fontWeight: 800, color: '#fff' }}>
+                  {selectedNode.label}
+                </div>
+                <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                  {selectedNode.desc}
+                </div>
+              </div>
+
+              {/* Cluster Statistics */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', fontSize: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '6px' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Connected Accounts:</span>
+                  <strong style={{ color: '#fff' }}>4 Associated Users</strong>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '6px' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Syndicate Radius:</span>
+                  <strong style={{ color: '#f87171' }}>3-Hop Correlation</strong>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '6px' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Total Value at Risk:</span>
+                  <strong style={{ color: '#f87171' }}>₹5,72,835</strong>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '6px' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Detection Pattern:</span>
+                  <strong style={{ color: '#fbbf24' }}>Card Testing Burst</strong>
+                </div>
+              </div>
+
+              <div style={{ 
+                background: 'rgba(239, 68, 68, 0.08)', 
+                border: '1px solid var(--status-blocked-border)', 
+                borderRadius: '8px', 
+                padding: '0.85rem', 
+                fontSize: '11.5px', 
+                color: '#fca5a5' 
+              }}>
+                <strong>Graph Finding:</strong> Device <span className="mono">{activeDeviceId}</span> is reused across multiple synthetic identities originating from proxy IP subnets within 30-minute intervals.
+              </div>
             </div>
-
-            <h4 style={{ fontSize: '14.5px', fontWeight: 800, color: '#fff', marginBottom: '0.35rem' }}>
-              Card Testing Burst Syndicate
-            </h4>
-
-            <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '0.85rem' }}>
-              Correlated multi-account ring sharing hardware fingerprint <strong className="mono" style={{ color: '#fff' }}>{activeDeviceId}</strong> and datacenter egress proxy <strong className="mono" style={{ color: '#fff' }}>{activeIp}</strong>.
-            </p>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', fontSize: '12px', background: 'var(--bg-secondary)', padding: '0.85rem', borderRadius: '7px', border: '1px solid var(--border-subtle)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Correlated Accounts:</span>
-                <strong style={{ color: '#fff' }}>14 Synthetic Users</strong>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Shared Fingerprint:</span>
-                <span className="mono" style={{ color: '#60a5fa' }}>{activeDeviceId}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Total Exposure:</span>
-                <strong style={{ color: '#f87171' }}>₹4,20,000</strong>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Clustering Confidence:</span>
-                <strong style={{ color: '#10b981' }}>98.4%</strong>
-              </div>
-            </div>
-          </div>
-
-          {/* Selected Node Details */}
-          {selectedNode && (
-            <div className="fintech-card" style={{ padding: '1.25rem', borderLeft: `4px solid ${selectedNode.active ? '#3b82f6' : getNodeColor(selectedNode.risk)}` }}>
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', marginBottom: '4px', letterSpacing: '0.04em' }}>
-                SELECTED ENTITY DETAILS
-              </div>
-              <div className="mono" style={{ fontSize: '14.5px', fontWeight: 800, color: '#fff' }}>
-                {selectedNode.label}
-              </div>
-              <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                Entity Type: <strong style={{ color: '#fff' }}>{selectedNode.type}</strong> • Role: <strong style={{ color: 'var(--text-muted)' }}>{selectedNode.desc}</strong>
-              </div>
-              <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                Topology Risk: <strong style={{ color: selectedNode.active ? '#60a5fa' : getNodeColor(selectedNode.risk) }}>
-                  {selectedNode.active ? 'ACTIVE INVESTIGATION TARGET' : `${selectedNode.risk} RISK COLLISION`}
-                </strong>
-              </div>
+          ) : (
+            <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem 1rem' }}>
+              Click any node in the topology graph to inspect its syndicate metadata.
             </div>
           )}
-
         </div>
 
       </div>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, ArrowUpRight, ShieldAlert, ShieldCheck, AlertTriangle, 
   X, TrendingUp, TrendingDown, ArrowRight, Activity, Clock, User, Shield
@@ -66,17 +67,20 @@ export default function MonitorView({ transactions, mode, onSelectTransaction })
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
       
-      {/* 1. PREMIUM SUMMARY CARDS (CLEAN, FULLY VISIBLE & NO CLIPPING) */}
+      {/* 1. PHYSICS SPRING-ENABLED SUMMARY CARDS */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
         
         {/* BLOCKED CARD */}
-        <div 
+        <motion.div 
           className="fintech-card fintech-card-interactive card-glow-red"
           onClick={() => setFilterDecision(filterDecision === 'BLOCKED' ? 'ALL' : 'BLOCKED')}
+          whileHover={{ y: -4, scale: 1.01 }}
+          whileTap={{ scale: 0.98 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 25 }}
           style={{ 
             padding: '1.25rem', 
             borderLeft: '4px solid #ef4444',
-            background: filterDecision === 'BLOCKED' ? 'rgba(239, 68, 68, 0.08)' : 'var(--bg-card)',
+            background: filterDecision === 'BLOCKED' ? 'rgba(239, 68, 68, 0.12)' : 'var(--bg-card)',
             boxShadow: filterDecision === 'BLOCKED' ? 'var(--shadow-glow-red)' : 'var(--shadow-sm)',
             display: 'flex',
             flexDirection: 'column',
@@ -108,7 +112,6 @@ export default function MonitorView({ transactions, mode, onSelectTransaction })
               </span>
             </div>
 
-            {/* FULLY VISIBLE IN-CARD EXPLANATION */}
             <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px', lineHeight: 1.35 }}>
               Stopped by ML risk engine & security rules
             </div>
@@ -120,16 +123,19 @@ export default function MonitorView({ transactions, mode, onSelectTransaction })
               <TrendingUp size={12} /> High protection
             </span>
           </div>
-        </div>
+        </motion.div>
 
         {/* REVIEW (3DS) CARD */}
-        <div 
+        <motion.div 
           className="fintech-card fintech-card-interactive card-glow-amber"
           onClick={() => setFilterDecision(filterDecision === 'REVIEW' ? 'ALL' : 'REVIEW')}
+          whileHover={{ y: -4, scale: 1.01 }}
+          whileTap={{ scale: 0.98 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 25 }}
           style={{ 
             padding: '1.25rem', 
             borderLeft: '4px solid #f59e0b',
-            background: filterDecision === 'REVIEW' ? 'rgba(245, 158, 11, 0.08)' : 'var(--bg-card)',
+            background: filterDecision === 'REVIEW' ? 'rgba(245, 158, 11, 0.12)' : 'var(--bg-card)',
             boxShadow: filterDecision === 'REVIEW' ? 'var(--shadow-glow-amber)' : 'var(--shadow-sm)',
             display: 'flex',
             flexDirection: 'column',
@@ -161,7 +167,6 @@ export default function MonitorView({ transactions, mode, onSelectTransaction })
               </span>
             </div>
 
-            {/* FULLY VISIBLE IN-CARD EXPLANATION */}
             <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px', lineHeight: 1.35 }}>
               Multi-factor / 3DS challenge review active
             </div>
@@ -173,16 +178,19 @@ export default function MonitorView({ transactions, mode, onSelectTransaction })
               <Activity size={12} /> Step-up OTP active
             </span>
           </div>
-        </div>
+        </motion.div>
 
         {/* ALLOWED CARD */}
-        <div 
+        <motion.div 
           className="fintech-card fintech-card-interactive card-glow-green"
           onClick={() => setFilterDecision(filterDecision === 'ALLOWED' ? 'ALL' : 'ALLOWED')}
+          whileHover={{ y: -4, scale: 1.01 }}
+          whileTap={{ scale: 0.98 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 25 }}
           style={{ 
             padding: '1.25rem', 
             borderLeft: '4px solid #10b981',
-            background: filterDecision === 'ALLOWED' ? 'rgba(16, 185, 129, 0.08)' : 'var(--bg-card)',
+            background: filterDecision === 'ALLOWED' ? 'rgba(16, 185, 129, 0.12)' : 'var(--bg-card)',
             boxShadow: filterDecision === 'ALLOWED' ? 'var(--shadow-glow-green)' : 'var(--shadow-sm)',
             display: 'flex',
             flexDirection: 'column',
@@ -214,7 +222,6 @@ export default function MonitorView({ transactions, mode, onSelectTransaction })
               </span>
             </div>
 
-            {/* FULLY VISIBLE IN-CARD EXPLANATION */}
             <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px', lineHeight: 1.35 }}>
               Authentic checkouts passed all risk checks
             </div>
@@ -226,11 +233,11 @@ export default function MonitorView({ transactions, mode, onSelectTransaction })
               <TrendingDown size={12} /> Frictionless checkout
             </span>
           </div>
-        </div>
+        </motion.div>
 
       </div>
 
-      {/* 2. LIVE PAYMENT ACTIVITY TABLE (SECTION 2) */}
+      {/* 2. LIVE PAYMENT ACTIVITY TABLE WITH PHYSICAL SPRING INGESTION */}
       <div className="fintech-card" style={{ padding: '0', overflow: 'hidden' }}>
         
         {/* HEADER & SEARCH BAR */}
@@ -257,7 +264,7 @@ export default function MonitorView({ transactions, mode, onSelectTransaction })
           {/* SEARCH & FILTERS */}
           <div style={{ display: 'flex', gap: '0.65rem', alignItems: 'center', flexWrap: 'wrap' }}>
             
-            {/* FOCUS-GLOW SEARCH INPUT */}
+            {/* SEARCH INPUT */}
             <div style={{ position: 'relative', width: '240px' }}>
               <Search 
                 size={14} 
@@ -312,19 +319,21 @@ export default function MonitorView({ transactions, mode, onSelectTransaction })
 
             {/* FILTER CLEAR BUTTON */}
             {filterDecision !== 'ALL' && (
-              <button 
+              <motion.button 
                 onClick={() => setFilterDecision('ALL')}
                 className="btn-secondary-fintech"
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
                 style={{ padding: '5px 10px', fontSize: '11px', gap: '4px' }}
               >
                 <X size={12} />
                 <span>Filter: {filterDecision}</span>
-              </button>
+              </motion.button>
             )}
           </div>
         </div>
 
-        {/* SOC ACTIVITY TABLE WITH LEFT-STATUS BAR & ROW HOVER */}
+        {/* SOC ACTIVITY TABLE WITH SPRING INSERTION ROWS */}
         <div className="custom-scrollbar" style={{ overflowX: 'auto', maxHeight: '640px' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
             <thead>
@@ -399,20 +408,25 @@ export default function MonitorView({ transactions, mode, onSelectTransaction })
 
       {/* FLOATING HOVER DETAILS POPOVER */}
       {hoveredTx && (
-        <div style={{
-          position: 'fixed',
-          top: Math.max(popoverPos.y - 120, 20),
-          left: Math.min(popoverPos.x + 20, window.innerWidth - 360),
-          width: '320px',
-          background: 'rgba(18, 23, 34, 0.95)',
-          backdropFilter: 'blur(12px)',
-          border: `1px solid ${hoveredTx.action === 'BLOCK' ? 'rgba(239, 68, 68, 0.4)' : 'rgba(59, 130, 246, 0.4)'}`,
-          borderRadius: '8px',
-          padding: '10px 14px',
-          zIndex: 1000,
-          boxShadow: '0 10px 30px -5px rgba(0,0,0,0.7)',
-          pointerEvents: 'none'
-        }}>
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+          style={{
+            position: 'fixed',
+            top: Math.max(popoverPos.y - 120, 20),
+            left: Math.min(popoverPos.x + 20, window.innerWidth - 360),
+            width: '320px',
+            background: 'rgba(18, 23, 34, 0.95)',
+            backdropFilter: 'blur(12px)',
+            border: `1px solid ${hoveredTx.action === 'BLOCK' ? 'rgba(239, 68, 68, 0.4)' : 'rgba(59, 130, 246, 0.4)'}`,
+            borderRadius: '8px',
+            padding: '10px 14px',
+            zIndex: 1000,
+            boxShadow: '0 10px 30px -5px rgba(0,0,0,0.7)',
+            pointerEvents: 'none'
+          }}
+        >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
             <span className="mono" style={{ fontWeight: 800, color: '#fff', fontSize: '13px' }}>{hoveredTx.id}</span>
             {getActionBadge(hoveredTx.action)}
@@ -427,7 +441,7 @@ export default function MonitorView({ transactions, mode, onSelectTransaction })
             <span>Click row to open full dossier</span>
             <span style={{ color: '#60a5fa' }}>Score: {hoveredTx.risk_score || 0}/100</span>
           </div>
-        </div>
+        </motion.div>
       )}
 
     </div>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ShieldCheck, Activity, Search, Layers, Cpu, FileText, 
   Server, User, Lock, Radio, Zap, Sparkles, AlertCircle, 
@@ -33,15 +34,15 @@ export default function Navbar({
   return (
     <header style={{
       borderBottom: '1px solid var(--border-subtle)',
-      background: 'rgba(10, 14, 23, 0.95)',
+      background: 'rgba(8, 11, 17, 0.94)',
       backdropFilter: 'blur(16px)',
       position: 'sticky',
       top: 0,
       zIndex: 100,
-      boxShadow: '0 4px 24px -2px rgba(0, 0, 0, 0.6)'
+      boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.5)'
     }}>
       
-      {/* TOP BAR: CUSTOM LOGO & COLORFUL INTERACTIVE STATUS PILLS */}
+      {/* TOP BAR: LOGO & SPRING STATUS PILLS */}
       <div style={{
         maxWidth: '1440px',
         margin: '0 auto',
@@ -53,25 +54,29 @@ export default function Navbar({
         gap: '1rem'
       }}>
         
-        {/* CUSTOM GENERATED CERBERUSPAY LOGO & BRAND */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-          <div style={{
-            position: 'relative',
-            width: '38px',
-            height: '38px',
-            borderRadius: '10px',
-            overflow: 'hidden',
-            background: 'linear-gradient(135deg, #0284c7 0%, #1e1b4b 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 0 18px rgba(14, 165, 233, 0.65)',
-            border: '1.5px solid rgba(56, 189, 248, 0.6)',
-            cursor: 'pointer',
-            transition: 'transform 0.2s ease'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.06)'}
-          onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+        {/* BRAND LOGO WITH PHYSICS SPRING HOVER */}
+        <motion.div 
+          style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', cursor: 'pointer' }}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+        >
+          <motion.div 
+            style={{
+              position: 'relative',
+              width: '38px',
+              height: '38px',
+              borderRadius: '10px',
+              overflow: 'hidden',
+              background: 'linear-gradient(135deg, #0284c7 0%, #1e1b4b 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 0 20px rgba(14, 165, 233, 0.5)',
+              border: '1.5px solid rgba(56, 189, 248, 0.6)'
+            }}
+            whileHover={{ rotate: [0, -5, 5, 0] }}
+            transition={{ duration: 0.4 }}
           >
             <img 
               src="/cerberuspay_logo.png" 
@@ -85,7 +90,7 @@ export default function Navbar({
                 e.target.style.display = 'none';
               }}
             />
-          </div>
+          </motion.div>
 
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -118,15 +123,18 @@ export default function Navbar({
               Payment Risk & Fraud Defense Console
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        {/* ULTRA-COLORFUL & INTERACTIVE STATUS PILLS */}
+        {/* STATUS PILLS WITH SPRING PHYSICS */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
           
           {/* 1. EMERALD SYSTEM ONLINE PILL */}
-          <div 
+          <motion.div 
             onMouseEnter={() => setHoveredPill('system')}
             onMouseLeave={() => setHoveredPill(null)}
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.96 }}
+            transition={{ type: 'spring', stiffness: 500, damping: 25 }}
             style={{
               position: 'relative',
               display: 'flex',
@@ -140,38 +148,45 @@ export default function Navbar({
               padding: '5px 11px',
               borderRadius: '7px',
               boxShadow: '0 0 14px rgba(16, 185, 129, 0.25)',
-              cursor: 'default',
-              transition: 'all 0.2s ease'
+              cursor: 'default'
             }}
           >
             <div className="beacon-pulse-green" />
             <span>SYSTEM ONLINE</span>
             {hoveredPill === 'system' && (
-              <div style={{
-                position: 'absolute',
-                top: '100%',
-                right: 0,
-                marginTop: '8px',
-                background: '#0d1522',
-                border: '1px solid rgba(52, 211, 153, 0.4)',
-                borderRadius: '7px',
-                padding: '7px 12px',
-                fontSize: '11px',
-                color: '#a7f3d0',
-                whiteSpace: 'nowrap',
-                zIndex: 200,
-                boxShadow: '0 10px 25px rgba(0,0,0,0.6)'
-              }}>
+              <motion.div 
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 5 }}
+                style={{
+                  position: 'absolute',
+                  top: '100%',
+                  right: 0,
+                  marginTop: '8px',
+                  background: '#0d1522',
+                  border: '1px solid rgba(52, 211, 153, 0.4)',
+                  borderRadius: '7px',
+                  padding: '7px 12px',
+                  fontSize: '11px',
+                  color: '#a7f3d0',
+                  whiteSpace: 'nowrap',
+                  zIndex: 200,
+                  boxShadow: '0 10px 25px rgba(0,0,0,0.6)'
+                }}
+              >
                 ● ML Risk Engine & SQLite Operational • 99.99% Uptime
-              </div>
+              </motion.div>
             )}
-          </div>
+          </motion.div>
 
-          {/* 2. GOLDEN SUNFIRE SIMULATION MODE PILL */}
-          <div 
+          {/* 2. SUNFIRE SIMULATION MODE PILL */}
+          <motion.div 
             onMouseEnter={() => setHoveredPill('mode')}
             onMouseLeave={() => setHoveredPill(null)}
             onClick={() => setMode(mode === 'SIMULATION' ? 'SANDBOX' : 'SIMULATION')}
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.94 }}
+            transition={{ type: 'spring', stiffness: 500, damping: 25 }}
             style={{
               position: 'relative',
               display: 'flex',
@@ -187,43 +202,48 @@ export default function Navbar({
               padding: '5px 11px',
               borderRadius: '7px',
               boxShadow: mode === 'SIMULATION' ? '0 0 14px rgba(245, 158, 11, 0.3)' : '0 0 14px rgba(59, 130, 246, 0.3)',
-              cursor: 'pointer',
-              transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-              transform: hoveredPill === 'mode' ? 'translateY(-1.5px)' : 'translateY(0)'
+              cursor: 'pointer'
             }}
           >
             <Zap size={13} color={mode === 'SIMULATION' ? '#fbbf24' : '#60a5fa'} />
             <span>{mode} MODE</span>
             {hoveredPill === 'mode' && (
-              <div style={{
-                position: 'absolute',
-                top: '100%',
-                right: 0,
-                marginTop: '8px',
-                background: '#0d1522',
-                border: '1px solid rgba(251, 191, 36, 0.4)',
-                borderRadius: '7px',
-                padding: '7px 12px',
-                fontSize: '11px',
-                color: '#fde68a',
-                whiteSpace: 'nowrap',
-                zIndex: 200,
-                boxShadow: '0 10px 25px rgba(0,0,0,0.6)'
-              }}>
+              <motion.div 
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                style={{
+                  position: 'absolute',
+                  top: '100%',
+                  right: 0,
+                  marginTop: '8px',
+                  background: '#0d1522',
+                  border: '1px solid rgba(251, 191, 36, 0.4)',
+                  borderRadius: '7px',
+                  padding: '7px 12px',
+                  fontSize: '11px',
+                  color: '#fde68a',
+                  whiteSpace: 'nowrap',
+                  zIndex: 200,
+                  boxShadow: '0 10px 25px rgba(0,0,0,0.6)'
+                }}
+              >
                 ⚡ Click to toggle between Simulation & Sandbox traffic
-              </div>
+              </motion.div>
             )}
-          </div>
+          </motion.div>
 
-          {/* 3. ELECTRIC CYAN RADAR STREAM PILL */}
-          <button
+          {/* 3. RADAR STREAM PILL */}
+          <motion.button
             onMouseEnter={() => setHoveredPill('stream')}
             onMouseLeave={() => setHoveredPill(null)}
             onClick={() => setIsStreamLive(!isStreamLive)}
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.94 }}
+            transition={{ type: 'spring', stiffness: 500, damping: 25 }}
             style={{
               position: 'relative',
               background: isStreamLive 
-                ? 'linear-gradient(135deg, rgba(6, 182, 212, 0.18) 0%, rgba(59, 130, 246, 0.28) 100%)' 
+                ? 'linear-gradient(135deg, rgba(14, 165, 233, 0.18) 0%, rgba(2, 132, 199, 0.28) 100%)' 
                 : 'linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.08) 100%)',
               border: `1px solid ${isStreamLive ? 'rgba(56, 189, 248, 0.55)' : 'var(--border-subtle)'}`,
               color: isStreamLive ? '#38bdf8' : 'var(--text-muted)',
@@ -235,51 +255,53 @@ export default function Navbar({
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              boxShadow: isStreamLive ? '0 0 14px rgba(6, 182, 212, 0.3)' : 'none',
-              transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-              transform: hoveredPill === 'stream' ? 'translateY(-1.5px)' : 'translateY(0)'
+              boxShadow: isStreamLive ? '0 0 14px rgba(14, 165, 233, 0.3)' : 'none'
             }}
           >
             <Radio size={13} className={isStreamLive ? 'animate-pulse' : ''} />
             <span>{isStreamLive ? 'Stream: Live' : 'Stream: Paused'}</span>
             {hoveredPill === 'stream' && (
-              <div style={{
-                position: 'absolute',
-                top: '100%',
-                right: 0,
-                marginTop: '8px',
-                background: '#0d1522',
-                border: '1px solid rgba(56, 189, 248, 0.4)',
-                borderRadius: '7px',
-                padding: '7px 12px',
-                fontSize: '11px',
-                color: '#bae6fd',
-                whiteSpace: 'nowrap',
-                zIndex: 200,
-                boxShadow: '0 10px 25px rgba(0,0,0,0.6)'
-              }}>
+              <motion.div 
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                style={{
+                  position: 'absolute',
+                  top: '100%',
+                  right: 0,
+                  marginTop: '8px',
+                  background: '#0d1522',
+                  border: '1px solid rgba(56, 189, 248, 0.4)',
+                  borderRadius: '7px',
+                  padding: '7px 12px',
+                  fontSize: '11px',
+                  color: '#bae6fd',
+                  whiteSpace: 'nowrap',
+                  zIndex: 200,
+                  boxShadow: '0 10px 25px rgba(0,0,0,0.6)'
+                }}
+              >
                 {isStreamLive ? 'Ingesting live payment events • Click to pause' : 'Stream paused • Click to resume'}
-              </div>
+              </motion.div>
             )}
-          </button>
+          </motion.button>
 
-          {/* 4. PURPLE / INDIGO OPERATOR PROFILE BADGE */}
-          <div 
+          {/* 4. CHIEF RISK OFFICER OPERATOR PROFILE */}
+          <motion.div 
             onMouseEnter={() => setHoveredPill('operator')}
             onMouseLeave={() => setHoveredPill(null)}
+            whileHover={{ scale: 1.03 }}
             style={{
               position: 'relative',
               display: 'flex',
               alignItems: 'center',
               gap: '7px',
-              background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.18) 0%, rgba(99, 102, 241, 0.28) 100%)',
-              border: '1px solid rgba(167, 139, 250, 0.45)',
+              background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.15) 0%, rgba(126, 34, 206, 0.25) 100%)',
+              border: '1px solid rgba(192, 132, 252, 0.45)',
               padding: '4px 10px',
               borderRadius: '7px',
               fontSize: '11px',
-              color: '#c4b5fd',
-              boxShadow: '0 0 14px rgba(139, 92, 246, 0.25)',
-              transition: 'all 0.2s ease'
+              color: '#e9d5ff',
+              boxShadow: '0 0 14px rgba(168, 85, 247, 0.25)'
             }}
           >
             <div style={{
@@ -300,41 +322,22 @@ export default function Navbar({
             <span className="mono" style={{ 
               fontSize: '10px', 
               background: 'rgba(255,255,255,0.1)', 
-              color: '#ddd6fe', 
+              color: '#d8b4fe', 
               padding: '1px 5px', 
               borderRadius: '3px',
               fontWeight: 700 
             }}>
               OPR_LEAD_ANALYST
             </span>
+          </motion.div>
 
-            {hoveredPill === 'operator' && (
-              <div style={{
-                position: 'absolute',
-                top: '100%',
-                right: 0,
-                marginTop: '8px',
-                background: '#0d1522',
-                border: '1px solid rgba(167, 139, 250, 0.4)',
-                borderRadius: '7px',
-                padding: '7px 12px',
-                fontSize: '11px',
-                color: '#e9d5ff',
-                whiteSpace: 'nowrap',
-                zIndex: 200,
-                boxShadow: '0 10px 25px rgba(0,0,0,0.6)'
-              }}>
-                Role: <strong>Lead Fraud Operations Analyst</strong>
-              </div>
-            )}
-          </div>
-
-          {/* 5. CRIMSON NEON SIGN OUT BUTTON */}
-          <button
+          {/* 5. CRIMSON SIGN OUT BUTTON */}
+          <motion.button
             onClick={onLogout}
             title="Lock Session & Sign Out"
-            onMouseEnter={() => setHoveredPill('signout')}
-            onMouseLeave={() => setHoveredPill(null)}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.94 }}
+            transition={{ type: 'spring', stiffness: 500, damping: 25 }}
             style={{ 
               display: 'inline-flex',
               alignItems: 'center',
@@ -347,20 +350,18 @@ export default function Navbar({
               background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.18) 0%, rgba(185, 28, 28, 0.28) 100%)',
               borderRadius: '7px',
               cursor: 'pointer',
-              boxShadow: '0 0 12px rgba(239, 68, 68, 0.3)',
-              transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-              transform: hoveredPill === 'signout' ? 'translateY(-1.5px)' : 'translateY(0)'
+              boxShadow: '0 0 12px rgba(239, 68, 68, 0.3)'
             }}
           >
             <Lock size={12} />
             <span>Sign Out</span>
-          </button>
+          </motion.button>
 
         </div>
 
       </div>
 
-      {/* LOWER TAB NAVIGATION BAR */}
+      {/* LOWER TAB NAVIGATION BAR WITH SPRING INERTIA INDICATOR */}
       <div style={{
         maxWidth: '1440px',
         margin: '0 auto',
@@ -372,19 +373,20 @@ export default function Navbar({
         overflowX: 'auto'
       }}>
         
-        {/* PRIMARY TABS */}
-        <div style={{ display: 'flex', gap: '0.35rem' }}>
+        {/* PRIMARY TABS WITH PHYSICAL SPRING GLIDE */}
+        <div style={{ display: 'flex', gap: '0.35rem', position: 'relative' }}>
           {primaryTabs.map(item => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
             return (
-              <button
+              <motion.button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
+                whileHover={{ y: -1 }}
+                whileTap={{ y: 0 }}
                 style={{
                   background: 'none',
                   border: 'none',
-                  borderBottom: isActive ? '2px solid #38bdf8' : '2px solid transparent',
                   color: isActive ? '#fff' : 'var(--text-secondary)',
                   fontWeight: isActive ? 800 : 500,
                   fontSize: '13px',
@@ -394,7 +396,6 @@ export default function Navbar({
                   alignItems: 'center',
                   gap: '7px',
                   whiteSpace: 'nowrap',
-                  transition: 'all 0.18s cubic-bezier(0.16, 1, 0.3, 1)',
                   position: 'relative'
                 }}
               >
@@ -402,24 +403,29 @@ export default function Navbar({
                   size={15} 
                   color={isActive ? '#38bdf8' : 'var(--text-muted)'} 
                   style={{ 
-                    transition: 'transform 0.2s ease', 
-                    transform: isActive ? 'scale(1.1)' : 'scale(1)',
-                    filter: isActive ? 'drop-shadow(0 0 6px rgba(56,189,248,0.7))' : 'none'
+                    filter: isActive ? 'drop-shadow(0 0 6px rgba(56,189,248,0.8))' : 'none'
                   }}
                 />
                 <span>{item.label}</span>
+
+                {/* SHARED SPRING PHYSICS UNDERLINE */}
                 {isActive && (
-                  <div style={{
-                    position: 'absolute',
-                    bottom: 0,
-                    left: '10%',
-                    right: '10%',
-                    height: '2px',
-                    background: 'linear-gradient(90deg, #38bdf8 0%, #818cf8 100%)',
-                    boxShadow: '0 0 10px #38bdf8'
-                  }} />
+                  <motion.div 
+                    layoutId="activeTabUnderline"
+                    transition={{ type: 'spring', stiffness: 450, damping: 32 }}
+                    style={{
+                      position: 'absolute',
+                      bottom: 0,
+                      left: '8%',
+                      right: '8%',
+                      height: '2.5px',
+                      background: 'linear-gradient(90deg, #38bdf8 0%, #3b82f6 100%)',
+                      boxShadow: '0 0 10px #38bdf8',
+                      borderRadius: '2px'
+                    }}
+                  />
                 )}
-              </button>
+              </motion.button>
             );
           })}
         </div>
@@ -430,13 +436,14 @@ export default function Navbar({
             const Icon = item.icon;
             const isActive = activeTab === item.id;
             return (
-              <button
+              <motion.button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
+                whileHover={{ y: -1 }}
+                whileTap={{ y: 0 }}
                 style={{
                   background: 'none',
                   border: 'none',
-                  borderBottom: isActive ? '2px solid var(--text-muted)' : '2px solid transparent',
                   color: isActive ? '#fff' : 'var(--text-muted)',
                   fontWeight: isActive ? 700 : 500,
                   fontSize: '12px',
@@ -446,12 +453,27 @@ export default function Navbar({
                   alignItems: 'center',
                   gap: '5px',
                   whiteSpace: 'nowrap',
-                  transition: 'color 0.15s ease'
+                  position: 'relative'
                 }}
               >
-                <Icon size={14} color={isActive ? '#cbd5e1' : 'var(--text-muted)'} />
+                <Icon size={14} color={isActive ? '#38bdf8' : 'var(--text-muted)'} />
                 <span>{item.label}</span>
-              </button>
+                {isActive && (
+                  <motion.div 
+                    layoutId="activeSecondaryTabUnderline"
+                    transition={{ type: 'spring', stiffness: 450, damping: 32 }}
+                    style={{
+                      position: 'absolute',
+                      bottom: 0,
+                      left: '10%',
+                      right: '10%',
+                      height: '2px',
+                      background: '#38bdf8',
+                      boxShadow: '0 0 8px #38bdf8'
+                    }}
+                  />
+                )}
+              </motion.button>
             );
           })}
         </div>
