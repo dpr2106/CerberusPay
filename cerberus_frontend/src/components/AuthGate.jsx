@@ -1,14 +1,18 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Lock, Mail, ArrowRight, AlertCircle } from 'lucide-react';
+import { 
+  ShieldCheck, Lock, Mail, ArrowRight, AlertCircle, 
+  KeyRound, Sparkles, Check, Copy, UserCheck, Zap, ShieldAlert
+} from 'lucide-react';
 
 export default function AuthGate({ onAuthSuccess }) {
   const [email, setEmail] = useState('security.operator@cerberuspay.internal');
   const [password, setPassword] = useState('operator123');
   const [errorMsg, setErrorMsg] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [copiedKey, setCopiedKey] = useState(null);
 
   const handleLogin = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     setErrorMsg(null);
     setIsLoading(true);
 
@@ -32,6 +36,19 @@ export default function AuthGate({ onAuthSuccess }) {
     }
   };
 
+  const autofillCredentials = () => {
+    setEmail('security.operator@cerberuspay.internal');
+    setPassword('operator123');
+    setCopiedKey('filled');
+    setTimeout(() => setCopiedKey(null), 2500);
+  };
+
+  const copyText = (text, type) => {
+    navigator.clipboard.writeText(text);
+    setCopiedKey(type);
+    setTimeout(() => setCopiedKey(null), 2000);
+  };
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -39,69 +56,217 @@ export default function AuthGate({ onAuthSuccess }) {
       flexDirection: 'column',
       justifyContent: 'center',
       alignItems: 'center',
-      background: 'radial-gradient(circle at 50% 20%, rgba(59, 130, 246, 0.08) 0%, var(--bg-primary) 70%)',
-      padding: '1.5rem',
-      color: 'var(--text-primary)'
+      background: 'radial-gradient(ellipse 90% 60% at 50% 15%, rgba(14, 165, 233, 0.16) 0%, rgba(99, 102, 241, 0.1) 40%, #06090e 85%)',
+      padding: '2rem 1.5rem',
+      color: 'var(--text-primary)',
+      position: 'relative',
+      overflow: 'hidden'
     }}>
       
-      {/* BRANDING */}
-      <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
+      {/* BACKGROUND GLOW ACCENTS */}
+      <div style={{
+        position: 'absolute',
+        top: '12%',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: '500px',
+        height: '350px',
+        background: 'radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, rgba(79, 70, 229, 0.08) 50%, transparent 80%)',
+        filter: 'blur(50px)',
+        pointerEvents: 'none'
+      }} />
+
+      {/* BRANDING & LOGO HEADER */}
+      <div style={{ textAlign: 'center', marginBottom: '1.75rem', position: 'relative', zIndex: 2 }}>
+        
+        {/* CUSTOM GENERATED GLOWING CERBERUS LOGO */}
         <div style={{
-          width: '54px',
-          height: '54px',
-          borderRadius: '14px',
-          background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+          position: 'relative',
+          width: '74px',
+          height: '74px',
+          borderRadius: '20px',
+          overflow: 'hidden',
+          background: 'linear-gradient(135deg, #0284c7 0%, #1e1b4b 100%)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          margin: '0 auto 1rem',
-          color: '#fff',
-          boxShadow: '0 8px 24px rgba(59, 130, 246, 0.3)'
+          margin: '0 auto 1.25rem',
+          boxShadow: '0 0 35px rgba(14, 165, 233, 0.65), 0 0 15px rgba(99, 102, 241, 0.4)',
+          border: '2px solid rgba(56, 189, 248, 0.7)'
         }}>
-          <ShieldCheck size={32} />
+          <img 
+            src="/cerberuspay_logo.png" 
+            alt="CerberusPay Logo" 
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover'
+            }}
+          />
         </div>
-        <h1 style={{ fontSize: '1.65rem', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', margin: 0 }}>
-          CERBERUSPAY
-        </h1>
-        <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '5px', fontWeight: 600, letterSpacing: '0.02em' }}>
-          Payment Risk Operations
-        </p>
-        <div style={{
-          display: 'inline-block',
-          marginTop: '8px',
-          background: 'rgba(239, 68, 68, 0.12)',
-          border: '1px solid rgba(239, 68, 68, 0.25)',
-          color: '#f87171',
-          padding: '3px 10px',
-          borderRadius: '4px',
-          fontSize: '11px',
-          fontWeight: 700,
-          letterSpacing: '0.05em',
-          textTransform: 'uppercase'
+
+        <h1 style={{ 
+          fontSize: '2rem', 
+          fontWeight: 900, 
+          color: '#ffffff', 
+          letterSpacing: '-0.03em', 
+          margin: 0,
+          textShadow: '0 0 20px rgba(255,255,255,0.2)'
         }}>
-          Authorized Personnel Only
+          CERBERUS<span style={{ color: '#38bdf8', textShadow: '0 0 25px rgba(56, 189, 248, 0.8)' }}>PAY</span>
+        </h1>
+
+        <p style={{ 
+          fontSize: '13.5px', 
+          color: '#94a3b8', 
+          marginTop: '6px', 
+          fontWeight: 600, 
+          letterSpacing: '0.02em' 
+        }}>
+          Payment Risk Intelligence & Fraud Operations Platform
+        </p>
+
+        <div style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '6px',
+          marginTop: '10px',
+          background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.25) 100%)',
+          border: '1px solid rgba(248, 113, 113, 0.4)',
+          color: '#fca5a5',
+          padding: '4px 12px',
+          borderRadius: '20px',
+          fontSize: '11px',
+          fontWeight: 800,
+          letterSpacing: '0.06em',
+          textTransform: 'uppercase',
+          boxShadow: '0 0 12px rgba(239, 68, 68, 0.2)'
+        }}>
+          <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#ef4444' }} />
+          <span>RESTRICTED ZERO-TRUST ACCESS • OPERATORS ONLY</span>
         </div>
       </div>
 
-      {/* LOGIN CARD */}
-      <div className="fintech-card" style={{ maxWidth: '420px', width: '100%', padding: '2rem', backdropFilter: 'blur(16px)' }}>
+      {/* VIBRANT GLASSMORPHIC LOGIN CARD */}
+      <div 
+        className="fintech-card" 
+        style={{ 
+          maxWidth: '440px', 
+          width: '100%', 
+          padding: '2.25rem', 
+          background: 'rgba(13, 18, 30, 0.82)',
+          backdropFilter: 'blur(24px)',
+          border: '1px solid rgba(56, 189, 248, 0.3)',
+          borderRadius: '16px',
+          boxShadow: '0 25px 60px -10px rgba(0, 0, 0, 0.8), 0 0 35px -5px rgba(14, 165, 233, 0.2)',
+          position: 'relative',
+          zIndex: 2
+        }}
+      >
         
         {/* NOTIFICATIONS */}
         {errorMsg && (
-          <div style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid #ef4444', color: '#f87171', padding: '10px 14px', borderRadius: '6px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1.25rem' }}>
+          <div style={{ 
+            background: 'rgba(239, 68, 68, 0.15)', 
+            border: '1px solid #ef4444', 
+            color: '#f87171', 
+            padding: '10px 14px', 
+            borderRadius: '8px', 
+            fontSize: '12.5px', 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '8px', 
+            marginBottom: '1.25rem',
+            boxShadow: '0 0 15px rgba(239, 68, 68, 0.2)'
+          }}>
             <AlertCircle size={16} />
             <span>{errorMsg}</span>
           </div>
         )}
 
+        {/* COLORFUL ONE-CLICK CREDENTIALS CALLOUT BOX */}
+        <div style={{
+          background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.12) 0%, rgba(99, 102, 241, 0.18) 100%)',
+          border: '1px solid rgba(56, 189, 248, 0.35)',
+          borderRadius: '10px',
+          padding: '12px 14px',
+          marginBottom: '1.5rem',
+          boxShadow: '0 0 15px rgba(14, 165, 233, 0.12)'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+            <span style={{ 
+              fontSize: '11px', 
+              fontWeight: 800, 
+              color: '#38bdf8', 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '5px', 
+              letterSpacing: '0.04em' 
+            }}>
+              <KeyRound size={13} /> OPERATOR CREDENTIALS
+            </span>
+            
+            <button
+              type="button"
+              onClick={autofillCredentials}
+              style={{
+                background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.3) 0%, rgba(59, 130, 246, 0.4) 100%)',
+                border: '1px solid rgba(56, 189, 248, 0.5)',
+                color: '#fff',
+                fontSize: '11px',
+                fontWeight: 700,
+                padding: '3px 8px',
+                borderRadius: '5px',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              {copiedKey === 'filled' ? <Check size={12} color="#34d399" /> : <Sparkles size={12} color="#38bdf8" />}
+              <span>{copiedKey === 'filled' ? 'Autofilled!' : 'Quick Autofill'}</span>
+            </button>
+          </div>
+
+          <div style={{ fontSize: '11.5px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span>Email:</span>
+              <span className="mono" style={{ color: '#e0f2fe', fontWeight: 700 }}>
+                security.operator@cerberuspay.internal
+              </span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2px' }}>
+              <span>Password:</span>
+              <span className="mono" style={{ color: '#fde68a', fontWeight: 700 }}>
+                operator123
+              </span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2px' }}>
+              <span>Role:</span>
+              <span style={{ color: '#c4b5fd', fontWeight: 600 }}>
+                Lead Fraud Operations Analyst
+              </span>
+            </div>
+          </div>
+        </div>
+
         {/* INTERNAL ANALYST LOGIN FORM */}
-        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1.15rem' }}>
+        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           <div>
-            <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            <label style={{ 
+              display: 'block', 
+              fontSize: '11px', 
+              fontWeight: 800, 
+              color: '#94a3b8', 
+              marginBottom: '6px', 
+              textTransform: 'uppercase', 
+              letterSpacing: '0.05em' 
+            }}>
               Operator Email
             </label>
             <div style={{ position: 'relative' }}>
-              <Mail size={15} style={{ position: 'absolute', left: '12px', top: '11px', color: 'var(--text-muted)' }} />
+              <Mail size={15} style={{ position: 'absolute', left: '12px', top: '12px', color: '#64748b' }} />
               <input
                 type="email"
                 required
@@ -110,23 +275,41 @@ export default function AuthGate({ onAuthSuccess }) {
                 onChange={(e) => setEmail(e.target.value)}
                 style={{
                   width: '100%',
-                  padding: '9px 12px 9px 34px',
-                  background: 'var(--bg-secondary)',
-                  border: '1px solid var(--border-subtle)',
-                  borderRadius: '6px',
+                  padding: '10px 12px 10px 36px',
+                  background: 'rgba(8, 11, 17, 0.8)',
+                  border: '1px solid rgba(56, 189, 248, 0.3)',
+                  borderRadius: '8px',
                   color: '#fff',
-                  fontSize: '13px'
+                  fontSize: '13px',
+                  outline: 'none',
+                  transition: 'all 0.18s ease'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#38bdf8';
+                  e.target.style.boxShadow = '0 0 15px rgba(56, 189, 248, 0.3)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = 'rgba(56, 189, 248, 0.3)';
+                  e.target.style.boxShadow = 'none';
                 }}
               />
             </div>
           </div>
 
           <div>
-            <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            <label style={{ 
+              display: 'block', 
+              fontSize: '11px', 
+              fontWeight: 800, 
+              color: '#94a3b8', 
+              marginBottom: '6px', 
+              textTransform: 'uppercase', 
+              letterSpacing: '0.05em' 
+            }}>
               Operator Password
             </label>
             <div style={{ position: 'relative' }}>
-              <Lock size={15} style={{ position: 'absolute', left: '12px', top: '11px', color: 'var(--text-muted)' }} />
+              <Lock size={15} style={{ position: 'absolute', left: '12px', top: '12px', color: '#64748b' }} />
               <input
                 type="password"
                 required
@@ -135,32 +318,70 @@ export default function AuthGate({ onAuthSuccess }) {
                 onChange={(e) => setPassword(e.target.value)}
                 style={{
                   width: '100%',
-                  padding: '9px 12px 9px 34px',
-                  background: 'var(--bg-secondary)',
-                  border: '1px solid var(--border-subtle)',
-                  borderRadius: '6px',
+                  padding: '10px 12px 10px 36px',
+                  background: 'rgba(8, 11, 17, 0.8)',
+                  border: '1px solid rgba(56, 189, 248, 0.3)',
+                  borderRadius: '8px',
                   color: '#fff',
-                  fontSize: '13px'
+                  fontSize: '13px',
+                  outline: 'none',
+                  transition: 'all 0.18s ease'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#38bdf8';
+                  e.target.style.boxShadow = '0 0 15px rgba(56, 189, 248, 0.3)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = 'rgba(56, 189, 248, 0.3)';
+                  e.target.style.boxShadow = 'none';
                 }}
               />
             </div>
           </div>
 
+          {/* VIBRANT GRADIENT SUBMIT BUTTON */}
           <button
             type="submit"
             disabled={isLoading}
-            className="btn-primary-fintech"
-            style={{ width: '100%', justifyContent: 'center', marginTop: '0.5rem', opacity: isLoading ? 0.7 : 1 }}
+            style={{
+              width: '100%',
+              justifyContent: 'center',
+              marginTop: '0.5rem',
+              padding: '11px 18px',
+              background: 'linear-gradient(135deg, #0284c7 0%, #2563eb 50%, #4f46e5 100%)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              borderRadius: '9px',
+              color: '#ffffff',
+              fontWeight: 800,
+              fontSize: '13.5px',
+              cursor: isLoading ? 'not-allowed' : 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              boxShadow: '0 4px 20px rgba(37, 99, 235, 0.55), 0 0 15px rgba(14, 165, 233, 0.4)',
+              transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+              opacity: isLoading ? 0.7 : 1
+            }}
+            onMouseEnter={(e) => {
+              if (!isLoading) {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 6px 28px rgba(37, 99, 235, 0.7), 0 0 25px rgba(14, 165, 233, 0.6)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 20px rgba(37, 99, 235, 0.55), 0 0 15px rgba(14, 165, 233, 0.4)';
+            }}
           >
-            {isLoading ? 'Verifying Security Token...' : 'Sign In to Operations Console'}
-            <ArrowRight size={14} />
+            {isLoading ? 'Authenticating Token...' : 'Sign In to Operations Console'}
+            <ArrowRight size={15} />
           </button>
         </form>
 
       </div>
 
       {/* FOOTER */}
-      <div style={{ marginTop: '1.5rem', fontSize: '11px', color: 'var(--text-muted)', textAlign: 'center' }}>
+      <div style={{ marginTop: '1.75rem', fontSize: '11.5px', color: 'var(--text-muted)', textAlign: 'center', zIndex: 2 }}>
         CERBERUSPAY • Internal Risk Intelligence Engine • Zero-Trust Operations Platform
       </div>
 
