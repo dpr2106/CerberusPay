@@ -79,6 +79,7 @@ export default function MonitorView({ transactions, mode, onSelectTransaction })
           style={{ 
             padding: '1.25rem', 
             borderLeft: '4px solid #ef4444',
+            position: 'relative',
             background: filterDecision === 'BLOCKED' ? 'rgba(239, 68, 68, 0.08)' : 'var(--bg-card)',
             boxShadow: filterDecision === 'BLOCKED' ? 'var(--shadow-glow-red)' : 'var(--shadow-sm)'
           }}
@@ -113,21 +114,22 @@ export default function MonitorView({ transactions, mode, onSelectTransaction })
             </span>
           </div>
 
+          {/* DOWNWARD POSITIONED TOOLTIP TO NEVER CLIP BEHIND NAVBAR */}
           {hoveredCard === 'blocked' && (
             <div style={{
               position: 'absolute',
-              bottom: '100%',
+              top: '100%',
               left: '50%',
               transform: 'translateX(-50%)',
-              marginBottom: '8px',
+              marginTop: '8px',
               background: '#161d2d',
               border: '1px solid var(--status-blocked-border)',
               borderRadius: '6px',
-              padding: '6px 12px',
+              padding: '7px 12px',
               fontSize: '11px',
               color: '#fca5a5',
               whiteSpace: 'nowrap',
-              zIndex: 50,
+              zIndex: 150,
               boxShadow: 'var(--shadow-lg)'
             }}>
               Transactions stopped by ML risk engine & heuristic security rules
@@ -144,6 +146,7 @@ export default function MonitorView({ transactions, mode, onSelectTransaction })
           style={{ 
             padding: '1.25rem', 
             borderLeft: '4px solid #f59e0b',
+            position: 'relative',
             background: filterDecision === 'REVIEW' ? 'rgba(245, 158, 11, 0.08)' : 'var(--bg-card)',
             boxShadow: filterDecision === 'REVIEW' ? 'var(--shadow-glow-amber)' : 'var(--shadow-sm)'
           }}
@@ -178,21 +181,22 @@ export default function MonitorView({ transactions, mode, onSelectTransaction })
             </span>
           </div>
 
+          {/* DOWNWARD POSITIONED TOOLTIP TO NEVER CLIP BEHIND NAVBAR */}
           {hoveredCard === 'review' && (
             <div style={{
               position: 'absolute',
-              bottom: '100%',
+              top: '100%',
               left: '50%',
               transform: 'translateX(-50%)',
-              marginBottom: '8px',
+              marginTop: '8px',
               background: '#161d2d',
               border: '1px solid var(--status-review-border)',
               borderRadius: '6px',
-              padding: '6px 12px',
+              padding: '7px 12px',
               fontSize: '11px',
               color: '#fde68a',
               whiteSpace: 'nowrap',
-              zIndex: 50,
+              zIndex: 150,
               boxShadow: 'var(--shadow-lg)'
             }}>
               Transactions requiring additional multi-factor / 3DS challenge review
@@ -209,6 +213,7 @@ export default function MonitorView({ transactions, mode, onSelectTransaction })
           style={{ 
             padding: '1.25rem', 
             borderLeft: '4px solid #10b981',
+            position: 'relative',
             background: filterDecision === 'ALLOWED' ? 'rgba(16, 185, 129, 0.08)' : 'var(--bg-card)',
             boxShadow: filterDecision === 'ALLOWED' ? 'var(--shadow-glow-green)' : 'var(--shadow-sm)'
           }}
@@ -243,21 +248,22 @@ export default function MonitorView({ transactions, mode, onSelectTransaction })
             </span>
           </div>
 
+          {/* DOWNWARD POSITIONED TOOLTIP TO NEVER CLIP BEHIND NAVBAR */}
           {hoveredCard === 'allowed' && (
             <div style={{
               position: 'absolute',
-              bottom: '100%',
+              top: '100%',
               left: '50%',
               transform: 'translateX(-50%)',
-              marginBottom: '8px',
+              marginTop: '8px',
               background: '#161d2d',
               border: '1px solid var(--status-allowed-border)',
               borderRadius: '6px',
-              padding: '6px 12px',
+              padding: '7px 12px',
               fontSize: '11px',
               color: '#a7f3d0',
               whiteSpace: 'nowrap',
-              zIndex: 50,
+              zIndex: 150,
               boxShadow: 'var(--shadow-lg)'
             }}>
               Authentic payments that successfully passed all risk checks
