@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import MonitorView from './components/MonitorView';
 import InvestigationView from './components/InvestigationView';
@@ -6,6 +6,7 @@ import NetworksView from './components/NetworksView';
 import ModelsView from './components/ModelsView';
 import ChargebacksView from './components/ChargebacksView';
 import SystemStatusView from './components/SystemStatusView';
+import CustomerPortal from './components/CustomerPortal';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('monitor');
@@ -17,9 +18,62 @@ export default function App() {
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [focusedNetworkTxn, setFocusedNetworkTxn] = useState(null);
 
+  // Customer Authentication State
+  const [customerUser, setCustomerUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem('cerberus_customer_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const [customerToken, setCustomerToken] = useState(() => {
+    return localStorage.getItem('cerberus_customer_token') || null;
+  });
+
+  // Verify stored token on mount
+  useEffect(() => {
+    if (customerToken) {
+      fetch('http://127.0.0.1:8000/api/auth/me', {
+        headers: { Authorization: `Bearer ${customerToken}` }
+      })
+        .then(res => {
+          if (!res.ok) throw new Error('Token expired');
+          return res.json();
+        })
+        .then(data => {
+          if (data.user) {
+            setCustomerUser(data.user);
+            localStorage.setItem('cerberus_customer_user', JSON.stringify(data.user));
+          }
+        })
+        .catch(() => {
+          setCustomerUser(null);
+          setCustomerToken(null);
+          localStorage.removeItem('cerberus_customer_user');
+          localStorage.removeItem('cerberus_customer_token');
+        });
+    }
+  }, [customerToken]);
+
+  const handleLoginSuccess = (userObj, tokenStr) => {
+    setCustomerUser(userObj);
+    setCustomerToken(tokenStr);
+    localStorage.setItem('cerberus_customer_user', JSON.stringify(userObj));
+    localStorage.setItem('cerberus_customer_token', tokenStr);
+  };
+
+  const handleLogout = () => {
+    setCustomerUser(null);
+    setCustomerToken(null);
+    localStorage.removeItem('cerberus_customer_user');
+    localStorage.removeItem('cerberus_customer_token');
+  };
+
   // Initial Fetch of Shared Unified Transactions & Metrics from FastAPI
   useEffect(() => {
-    fetch('http://localhost:8000/api/risk/transactions?limit=60')
+    fetch('http://127.0.0.1:8000/api/risk/transactions?limit=60')
       .then(res => res.json())
       .then(data => {
         if (data.transactions && data.transactions.length > 0) {
@@ -31,7 +85,7 @@ export default function App() {
       })
       .catch((err) => console.error('[CerberusPay] Failed to fetch transactions:', err));
 
-    fetch('http://localhost:8000/api/risk/metrics')
+    fetch('http://127.0.0.1:8000/api/risk/metrics')
       .then(res => res.json())
       .then(data => setMetrics(data))
       .catch((err) => console.error('[CerberusPay] Failed to fetch metrics:', err));
@@ -62,7 +116,7 @@ export default function App() {
         source: mode
       };
 
-      fetch('http://localhost:8000/api/risk/evaluate-transaction', {
+      fetch('http://127.0.0.1:8000/api/risk/evaluate-transaction', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -86,10 +140,10 @@ export default function App() {
     setActiveTab('investigate');
   };
 
-  // Real FastAPI Action Update Function (Requirement 4)
+  // Real FastAPI Action Update Function
   const handleUpdateAction = async (txId, newAction) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/risk/transactions/${txId}/action`, {
+      const response = await fetch(`http://127.0.0.1:8000/api/risk/transactions/${txId}/action`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json'
@@ -107,7 +161,6 @@ export default function App() {
       const result = await response.json();
       const updatedTxn = result.transaction;
 
-      // Update both transactions list and selectedTransaction with verified backend response
       setTransactions(prev => prev.map(t => (t.id === txId ? updatedTxn : t)));
       
       if (selectedTransaction?.id === txId) {
@@ -152,6 +205,8 @@ export default function App() {
         isStreamLive={isStreamLive}
         setIsStreamLive={setIsStreamLive}
         selectedTransaction={selectedTransaction}
+        customerUser={customerUser}
+        onLogout={handleLogout}
       />
 
       {/* MAIN OPERATIONS CANVAS */}
@@ -192,6 +247,15 @@ export default function App() {
 
         {activeTab === 'system' && (
           <SystemStatusView mode={mode} />
+        )}
+
+        {activeTab === 'customer' && (
+          <CustomerPortal
+            user={customerUser}
+            token={customerToken}
+            onLoginSuccess={handleLoginSuccess}
+            onLogout={handleLogout}
+          />
         )}
 
       </main>

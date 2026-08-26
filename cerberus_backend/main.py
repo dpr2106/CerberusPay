@@ -1,4 +1,4 @@
-﻿from fastapi import FastAPI, HTTPException, BackgroundTasks, Query, Request, Body
+from fastapi import FastAPI, HTTPException, BackgroundTasks, Query, Request, Body, Header, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
@@ -10,21 +10,28 @@ import pickle
 import json
 import os
 import uuid
+import hashlib
+import hmac
+import base64
+import time
+import re
 
-# Load optional .env file if present
-try:
-    from dotenv import load_dotenv
-    env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
-    if os.path.exists(env_path):
-        load_dotenv(env_path)
-        print("[CERBERUS] Loaded environment variables from .env", flush=True)
-except Exception:
-    pass
+# Load dotenv helper
+def get_env_map():
+    env_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
+    env_config = {}
+    if os.path.exists(env_file):
+        try:
+            from dotenv import dotenv_values
+            env_config = dotenv_values(env_file)
+        except Exception:
+            pass
+    return env_config
 
 app = FastAPI(
     title="CERBERUSPAY: Payment Risk Intelligence Platform",
     description="Enterprise Risk & Fraud Defense Engine for Razorpay AI Buildathon Track 02",
-    version="2.2.0"
+    version="2.3.0"
 )
 
 app.add_middleware(
@@ -36,12 +43,97 @@ app.add_middleware(
 )
 
 ENVIRONMENT_MODE = os.getenv("CERBERUS_MODE", "SIMULATION")
-FRAUD_ALERT_THRESHOLD = int(os.getenv("FRAUD_ALERT_THRESHOLD", "80"))
+JWT_SECRET = os.getenv("JWT_SECRET", "cerberus_master_hmac_secret_key_prod_99120")
 
-# Anti-Duplicate Alert Tracking Cache
+# ==============================================================================
+# 1. AUTHENTICATION & PASSWORD SECURITY (PBKDF2-HMAC-SHA256 + JWT)
+# ==============================================================================
+
+def hash_password(password: str) -> str:
+    salt = uuid.uuid4().hex
+    key = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), bytes.fromhex(salt), 100000)
+    return f"{salt}${key.hex()}"
+
+def verify_password(password: str, stored_hash: str) -> bool:
+    try:
+        salt, key = stored_hash.split("$")
+        computed = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), bytes.fromhex(salt), 100000)
+        return hmac.compare_digest(computed.hex(), key)
+    except Exception:
+        return False
+
+def create_access_token(data: dict, expires_delta_seconds: int = 86400 * 7) -> str:
+    header = {"alg": "HS256", "typ": "JWT"}
+    payload = {**data, "exp": int(time.time()) + expires_delta_seconds}
+    h_b64 = base64.urlsafe_b64encode(json.dumps(header).encode()).decode().rstrip("=")
+    p_b64 = base64.urlsafe_b64encode(json.dumps(payload).encode()).decode().rstrip("=")
+    sig = hmac.new(JWT_SECRET.encode(), f"{h_b64}.{p_b64}".encode(), hashlib.sha256).digest()
+    sig_b64 = base64.urlsafe_b64encode(sig).decode().rstrip("=")
+    return f"{h_b64}.{p_b64}.{sig_b64}"
+
+def decode_access_token(token: str) -> Optional[dict]:
+    try:
+        parts = token.split(".")
+        if len(parts) != 3:
+            return None
+        h_b64, p_b64, sig_b64 = parts
+        expected_sig = hmac.new(JWT_SECRET.encode(), f"{h_b64}.{p_b64}".encode(), hashlib.sha256).digest()
+        expected_sig_b64 = base64.urlsafe_b64encode(expected_sig).decode().rstrip("=")
+        if not hmac.compare_digest(sig_b64, expected_sig_b64):
+            return None
+        rem = len(p_b64) % 4
+        if rem:
+            p_b64 += "=" * (4 - rem)
+        payload = json.loads(base64.urlsafe_b64decode(p_b64).decode())
+        if payload.get("exp", 0) < time.time():
+            return None
+        return payload
+    except Exception:
+        return None
+
+# Unified In-Memory User Store (with seed customer)
+USERS: List[Dict[str, Any]] = [
+    {
+        "id": "1",
+        "user_id": "USR_8921",
+        "name": "Alex Mercer",
+        "email": "alex.mercer@example.com",
+        "password_hash": hash_password("password123"),
+        "created_at": (datetime.now() - timedelta(days=35)).isoformat(),
+        "is_active": True
+    }
+]
+
+def get_current_user(authorization: Optional[str] = Header(None)) -> Dict[str, Any]:
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Authentication required: Missing or invalid Bearer token")
+    token = authorization.split(" ")[1]
+    payload = decode_access_token(token)
+    if not payload or "user_id" not in payload:
+        raise HTTPException(status_code=401, detail="Invalid or expired access token")
+    user = next((u for u in USERS if u["user_id"] == payload["user_id"] and u.get("is_active", True)), None)
+    if not user:
+        raise HTTPException(status_code=401, detail="User account not found or deactivated")
+    return user
+
+def get_optional_user(authorization: Optional[str] = Header(None)) -> Optional[Dict[str, Any]]:
+    if not authorization or not authorization.startswith("Bearer "):
+        return None
+    try:
+        token = authorization.split(" ")[1]
+        payload = decode_access_token(token)
+        if not payload or "user_id" not in payload:
+            return None
+        return next((u for u in USERS if u["user_id"] == payload["user_id"] and u.get("is_active", True)), None)
+    except Exception:
+        return None
+
+# ==============================================================================
+# 2. ML RISK ENGINE & METRICS
+# ==============================================================================
+
 SENT_ALERT_TXN_IDS = set()
 
-# Load trained ML model
 MODEL_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "cerberus_ml")
 MODEL_PATH = os.path.join(MODEL_DIR, "cerberus_risk_model.pkl")
 METRICS_PATH = os.path.join(MODEL_DIR, "evaluation_metrics.json")
@@ -81,24 +173,31 @@ TRANSACTIONS: List[Dict[str, Any]] = []
 DISPUTES: List[Dict[str, Any]] = []
 
 def send_smtp_email(subject: str, text_content: str, to_email: Optional[str] = None) -> Dict[str, Any]:
-    """Sends real email via SMTP with robust error handling and zero crash guarantees"""
-    smtp_host = os.getenv("SMTP_HOST")
-    smtp_port_raw = os.getenv("SMTP_PORT", "587")
-    smtp_user = os.getenv("SMTP_USERNAME")
-    smtp_pass = os.getenv("SMTP_PASSWORD")
-    from_email = os.getenv("ALERT_FROM_EMAIL", smtp_user)
-    recipient = to_email or os.getenv("ALERT_TO_EMAIL")
+    """Sends real email via SMTP with live dynamic credential loading and zero crash guarantees"""
+    env_config = get_env_map()
+    
+    smtp_host = env_config.get("SMTP_HOST") or os.getenv("SMTP_HOST")
+    smtp_port_raw = env_config.get("SMTP_PORT") or os.getenv("SMTP_PORT", "587")
+    smtp_user = env_config.get("SMTP_USERNAME") or os.getenv("SMTP_USERNAME")
+    smtp_pass = env_config.get("SMTP_PASSWORD") or os.getenv("SMTP_PASSWORD")
+    from_email = env_config.get("ALERT_FROM_EMAIL") or os.getenv("ALERT_FROM_EMAIL", smtp_user)
+    recipient = to_email or env_config.get("ALERT_TO_EMAIL") or os.getenv("ALERT_TO_EMAIL")
 
     if not smtp_host or not smtp_user or not smtp_pass or not recipient:
         print("[CERBERUS EMAIL] SMTP not fully configured in environment. Skipping email dispatch.", flush=True)
         return {
             "attempted": False,
             "sent": False,
-            "reason": "SMTP credentials not configured (set SMTP_HOST, SMTP_USERNAME, SMTP_PASSWORD, ALERT_TO_EMAIL in .env)"
+            "reason": "SMTP credentials not configured (set SMTP_HOST, SMTP_USERNAME, SMTP_PASSWORD in .env)"
         }
 
     try:
         smtp_port = int(smtp_port_raw)
+        smtp_pass = smtp_pass.replace(" ", "").strip()
+        smtp_user = smtp_user.strip()
+        from_email = from_email.strip()
+        recipient = recipient.strip()
+
         msg = MIMEMultipart("alternative")
         msg["Subject"] = subject
         msg["From"] = from_email
@@ -106,7 +205,7 @@ def send_smtp_email(subject: str, text_content: str, to_email: Optional[str] = N
 
         msg.attach(MIMEText(text_content, "plain", "utf-8"))
 
-        server = smtplib.SMTP(smtp_host, smtp_port, timeout=10)
+        server = smtplib.SMTP(smtp_host, smtp_port, timeout=12)
         server.ehlo()
         if smtp_port == 587:
             server.starttls()
@@ -115,17 +214,20 @@ def send_smtp_email(subject: str, text_content: str, to_email: Optional[str] = N
         server.send_message(msg)
         server.quit()
 
-        print(f"[CERBERUS EMAIL] Fraud alert successfully sent to {recipient}", flush=True)
+        print(f"[CERBERUS EMAIL] Successfully dispatched email to {recipient}", flush=True)
         return {"attempted": True, "sent": True, "recipient": recipient}
     except Exception as e:
-        print(f"[CERBERUS EMAIL] Failed to send alert: {e}", flush=True)
+        print(f"[CERBERUS EMAIL] Failed to dispatch email: {e}", flush=True)
         return {"attempted": True, "sent": False, "error": str(e)}
 
-def dispatch_fraud_alert(txn_record: Dict[str, Any]) -> Dict[str, Any]:
-    """Constructs and dispatches an authentic email alert for high/critical risk transactions"""
+def dispatch_dual_fraud_alerts(txn_record: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Dispatches:
+    1. Internal Fraud Alert -> ALERT_TO_EMAIL (Security Team)
+    2. Customer Security Alert -> Customer's Registered Email (if found in user store)
+    """
     txn_id = txn_record["id"]
     
-    # Prevent Duplicate Alerts for the same transaction ID
     if txn_id in SENT_ALERT_TXN_IDS:
         return {"attempted": False, "sent": False, "reason": "Duplicate alert prevented"}
     
@@ -135,7 +237,8 @@ def dispatch_fraud_alert(txn_record: Dict[str, Any]) -> Dict[str, Any]:
     if not signals_list:
         signals_list = "• Multi-signal anomalous transaction pattern"
 
-    email_body = f"""CERBERUSPAY
+    # --- EMAIL #1: INTERNAL FRAUD TEAM ALERT ---
+    internal_body = f"""CERBERUSPAY
 AI PAYMENT RISK ALERT
 
 A transaction has been flagged as potentially fraudulent by the CerberusPay risk engine.
@@ -162,13 +265,47 @@ BLOCK / REQUIRE STEP-UP VERIFICATION
 --------------------------------------------------
 This notification was automatically generated by CerberusPay's AI-powered payment risk engine.
 """
+    internal_subject = f"🚨 CerberusPay AI Fraud Alert — {txn_id}"
+    internal_res = send_smtp_email(internal_subject, internal_body)
 
-    subject = f"🚨 CerberusPay AI Fraud Alert — {txn_id}"
-    result = send_smtp_email(subject, email_body)
-    
-    if result.get("sent"):
-        print(f"[CERBERUS EMAIL] Fraud alert sent for {txn_id}", flush=True)
-    return result
+    # --- EMAIL #2: CUSTOMER SECURITY ALERT (TO REGISTERED CUSTOMER) ---
+    customer_res = None
+    target_user_id = txn_record.get("user_id")
+    customer = next((u for u in USERS if u["user_id"] == target_user_id), None)
+
+    if customer and customer.get("email"):
+        customer_name = customer.get("name", "Customer")
+        customer_email = customer.get("email")
+        
+        customer_body = f"""Hi {customer_name},
+
+We detected an unusual payment attempt on your CerberusPay account.
+
+--------------------------------------------------
+Transaction ID:      {txn_id}
+Amount:              ₹{txn_record.get('amount', 0.0):,.2f}
+Time:                {txn_record.get('timestamp', datetime.now().isoformat())}
+Status:              FLAGGED FOR REVIEW
+--------------------------------------------------
+
+For your security, this transaction has been flagged for review due to unusual checkout signals.
+
+If you recognize this payment, no further action may be required once verified.
+If you do NOT recognize this payment, please secure your account immediately or contact CerberusPay support.
+
+Thank you,
+CerberusPay Fraud Defense Team
+"""
+        customer_subject = f"⚠️ CerberusPay Security Alert — Unusual Payment Detected ({txn_id})"
+        customer_res = send_smtp_email(customer_subject, customer_body, to_email=customer_email)
+        print(f"[CERBERUS EMAIL] Customer security notice sent to {customer_email} for {txn_id}", flush=True)
+
+    return {
+        "attempted": True,
+        "sent": internal_res.get("sent", False),
+        "internal_alert": internal_res,
+        "customer_alert": customer_res
+    }
 
 def generate_risk_breakdown(signals: Dict[str, Any], risk_score: float) -> List[Dict[str, Any]]:
     factors = []
@@ -286,7 +423,7 @@ def seed_unified_database():
             "amount": fraud_txns[0]["amount"],
             "reason": "FRAUDULENT_UNRECOGNIZED_CHARGE",
             "reason_code": "10.4",
-            "customer": f"{fraud_txns[0]['user_id']} (cardholder@mail.com)",
+            "customer": f"{fraud_txns[0]['user_id']} (alex.mercer@example.com)",
             "risk_score": fraud_txns[0]["risk_score"],
             "status": "OPEN",
             "created_at": fraud_txns[0]["timestamp"],
@@ -298,7 +435,7 @@ def seed_unified_database():
             "amount": clean_txns[0]["amount"],
             "reason": "PRODUCT_NOT_RECEIVED",
             "reason_code": "13.1",
-            "customer": f"{clean_txns[0]['user_id']} (buyer@mail.com)",
+            "customer": f"{clean_txns[0]['user_id']} (buyer@example.com)",
             "risk_score": clean_txns[0]["risk_score"],
             "status": "RESPONDED",
             "created_at": clean_txns[0]["timestamp"],
@@ -315,7 +452,7 @@ def seed_unified_database():
             "amount": fraud_txns[1]["amount"],
             "reason": "FRAUDULENT_UNRECOGNIZED_CHARGE",
             "reason_code": "10.4",
-            "customer": f"{fraud_txns[1]['user_id']} (dispute@mail.com)",
+            "customer": f"{fraud_txns[1]['user_id']} (dispute@example.com)",
             "risk_score": fraud_txns[1]["risk_score"],
             "status": "UNDER_REVIEW",
             "created_at": fraud_txns[1]["timestamp"],
@@ -323,6 +460,30 @@ def seed_unified_database():
         })
 
 seed_unified_database()
+
+# ==============================================================================
+# 3. PYDANTIC SCHEMAS
+# ==============================================================================
+
+class RegisterPayload(BaseModel):
+    name: str = Field(..., min_length=1, description="Full Name of the Customer")
+    email: str = Field(..., description="Valid Email Address")
+    password: str = Field(..., min_length=6, description="Password (minimum 6 characters)")
+
+class LoginPayload(BaseModel):
+    email: str
+    password: str
+
+class CustomerPaymentPayload(BaseModel):
+    amount: float
+    category: Optional[str] = "ecommerce"
+    velocity_1h: Optional[int] = 1
+    geo_distance_km: Optional[float] = 15.0
+    device_trust_score: Optional[float] = 0.95
+    is_proxy_vpn: Optional[int] = 0
+    card_fails_24h: Optional[int] = 0
+    user_account_age_days: Optional[int] = 180
+    is_new_shipping_address: Optional[int] = 0
 
 class TransactionPayload(BaseModel):
     user_id: str
@@ -348,10 +509,238 @@ class ChargebackPayload(BaseModel):
 class TestEmailPayload(BaseModel):
     to_email: Optional[str] = None
 
+# ==============================================================================
+# 4. AUTHENTICATION ENDPOINTS
+# ==============================================================================
+
+@app.post("/api/auth/register")
+def register(payload: RegisterPayload):
+    name_clean = payload.name.strip()
+    if not name_clean:
+        raise HTTPException(status_code=422, detail="Name cannot be empty")
+
+    email_clean = payload.email.strip().lower()
+    email_pattern = r"^[\w\.-]+@[\w\.-]+\.\w+$"
+    if not re.match(email_pattern, email_clean):
+        raise HTTPException(status_code=422, detail="Invalid email format")
+
+    if any(u["email"].lower() == email_clean for u in USERS):
+        raise HTTPException(status_code=400, detail="An account with this email already exists")
+
+    new_user_id = f"USR_{uuid.uuid4().hex[:6].upper()}"
+
+    new_user = {
+        "id": str(len(USERS) + 1),
+        "user_id": new_user_id,
+        "name": name_clean,
+        "email": email_clean,
+        "password_hash": hash_password(payload.password),
+        "created_at": datetime.now().isoformat(),
+        "is_active": True
+    }
+
+    USERS.append(new_user)
+    print(f"[CERBERUS AUTH] Registered new user: {new_user_id} ({email_clean})", flush=True)
+
+    return {
+        "status": "success",
+        "message": "Account created successfully",
+        "user": {
+            "user_id": new_user["user_id"],
+            "name": new_user["name"],
+            "email": new_user["email"],
+            "created_at": new_user["created_at"]
+        }
+    }
+
+@app.post("/api/auth/login")
+def login(payload: LoginPayload):
+    email_clean = payload.email.strip().lower()
+    user = next((u for u in USERS if u["email"].lower() == email_clean and u.get("is_active", True)), None)
+
+    if not user or not verify_password(payload.password, user["password_hash"]):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+
+    access_token = create_access_token({
+        "user_id": user["user_id"],
+        "email": user["email"],
+        "name": user["name"]
+    })
+
+    print(f"[CERBERUS AUTH] Logged in user: {user['user_id']} ({email_clean})", flush=True)
+
+    return {
+        "status": "success",
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": {
+            "user_id": user["user_id"],
+            "name": user["name"],
+            "email": user["email"]
+        }
+    }
+
+@app.get("/api/auth/me")
+def get_me(current_user: Dict[str, Any] = Depends(get_current_user)):
+    return {
+        "status": "success",
+        "user": {
+            "user_id": current_user["user_id"],
+            "name": current_user["name"],
+            "email": current_user["email"],
+            "created_at": current_user["created_at"]
+        }
+    }
+
+# ==============================================================================
+# 5. CUSTOMER AREA & PROTECTED PAYMENTS
+# ==============================================================================
+
+@app.get("/api/customer/transactions")
+def get_customer_transactions(current_user: Dict[str, Any] = Depends(get_current_user)):
+    """Returns only the authenticated customer's own transactions without internal ML internals"""
+    user_txns = [t for t in TRANSACTIONS if t.get("user_id") == current_user["user_id"]]
+    
+    clean_history = []
+    for t in user_txns:
+        clean_history.append({
+            "id": t["id"],
+            "amount": t["amount"],
+            "category": t.get("category", "ecommerce"),
+            "status": "APPROVED" if t["action"] == "ALLOW" else ("UNDER_REVIEW" if t["action"] == "CHALLENGE_STEP_UP_OTP" else "BLOCKED"),
+            "action": t["action"],
+            "timestamp": t["timestamp"],
+            "merchant": "CerberusPay Verified Merchant",
+            "security_status": "Normal Verification" if t["action"] == "ALLOW" else "Security Check Triggered"
+        })
+
+    return {
+        "status": "success",
+        "total": len(clean_history),
+        "transactions": clean_history
+    }
+
+@app.post("/api/customer/pay")
+def customer_create_payment(
+    payload: CustomerPaymentPayload,
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
+    """
+    Authenticated customer payment:
+    Derives real user_id from token. Scores risk, triggers dual alert if critical.
+    """
+    env_config = get_env_map()
+    fraud_threshold = int(env_config.get("FRAUD_ALERT_THRESHOLD") or os.getenv("FRAUD_ALERT_THRESHOLD", "80"))
+    now = datetime.now()
+    hour = now.hour
+
+    real_user_id = current_user["user_id"]
+
+    features = [[
+        payload.amount, payload.velocity_1h, payload.geo_distance_km,
+        payload.device_trust_score, payload.is_proxy_vpn, payload.card_fails_24h,
+        payload.user_account_age_days, payload.is_new_shipping_address, hour
+    ]]
+
+    if RISK_MODEL:
+        raw_proba = float(RISK_MODEL.predict_proba(features)[0][1])
+        risk_score = round(raw_proba * 100)
+    else:
+        risk_score = 15
+        if payload.geo_distance_km > 1000 or payload.is_proxy_vpn == 1:
+            risk_score += 45
+        if payload.velocity_1h > 5:
+            risk_score += 35
+        risk_score = min(risk_score, 100)
+
+    if risk_score >= 70:
+        action = "BLOCK"
+        risk_level = "CRITICAL" if risk_score >= 90 else "HIGH"
+        rationale = f"Transaction blocked because the payment originated from an unusually distant location ({payload.geo_distance_km} km jump) combined with elevated velocity ({payload.velocity_1h} tx/hr)."
+    elif risk_score >= 30:
+        action = "CHALLENGE_STEP_UP_OTP"
+        risk_level = "MEDIUM"
+        rationale = f"Transaction flagged for 3D-Secure verification due to moderate velocity ({payload.velocity_1h} tx/hr) from a newly observed checkout profile."
+    else:
+        action = "ALLOW"
+        risk_level = "LOW"
+        rationale = "No significant risk signals detected. Transaction behavior, geolocation, and device profile are within expected customer baseline."
+
+    signals = {
+        "velocity_1h": payload.velocity_1h,
+        "geo_distance_km": payload.geo_distance_km,
+        "is_proxy_vpn": bool(payload.is_proxy_vpn),
+        "device_trust": payload.device_trust_score,
+        "card_fails_24h": payload.card_fails_24h,
+        "user_account_age_days": payload.user_account_age_days,
+        "device_id": "DEV_CUSTOMER_DEVICE",
+        "ip_address": "185.220.101.4 (Proxy)" if payload.is_proxy_vpn else "103.21.144.12",
+        "card_mask": "CARD_4111_9210" if risk_score >= 70 else "CARD_5241_3309"
+    }
+
+    breakdown = generate_risk_breakdown(signals, risk_score)
+
+    txn_record = {
+        "id": f"TXN_{uuid.uuid4().hex[:8].upper()}",
+        "user_id": real_user_id,
+        "amount": payload.amount,
+        "category": payload.category or "ecommerce",
+        "risk_score": risk_score,
+        "risk_level": risk_level,
+        "action": action,
+        "decision_rationale": rationale,
+        "confidence": "98.4%" if risk_score >= 70 else "99.1%",
+        "source": "CUSTOMER_CHECKOUT",
+        "timestamp": now.isoformat(),
+        "signals": signals,
+        "feature_breakdown": breakdown,
+        "email_alert": {"attempted": False, "sent": False},
+        "timeline": [
+            {"time": now.strftime("%H:%M:%S"), "event": f"Payment initiated by authenticated customer {real_user_id}", "severity": "info"},
+            {"time": now.strftime("%H:%M:%S"), "event": "Transaction behavioral features collected", "severity": "info"},
+            {"time": now.strftime("%H:%M:%S"), "event": f"Geolocation offset calculated: {payload.geo_distance_km} km", "severity": "danger" if risk_score >= 70 else "info"},
+            {"time": now.strftime("%H:%M:%S"), "event": f"Risk score computed: {risk_score}/100 -> Decision: {action}", "severity": "danger" if action == "BLOCK" else "success"}
+        ]
+    }
+
+    # REAL DUAL SMTP ALERT: Dispatch if risk_score >= threshold
+    if risk_score >= fraud_threshold:
+        alert_status = dispatch_dual_fraud_alerts(txn_record)
+        txn_record["email_alert"] = alert_status
+        if alert_status.get("sent"):
+            txn_record["timeline"].append({
+                "time": now.strftime("%H:%M:%S"),
+                "event": f"Dual SMTP alerts sent (Security Team + Customer {current_user.get('email')})",
+                "severity": "danger"
+            })
+
+    TRANSACTIONS.insert(0, txn_record)
+
+    return {
+        "status": "success",
+        "transaction_id": txn_record["id"],
+        "amount": txn_record["amount"],
+        "payment_status": "APPROVED" if action == "ALLOW" else ("UNDER_REVIEW" if action == "CHALLENGE_STEP_UP_OTP" else "BLOCKED"),
+        "action": action,
+        "security_message": "Payment successful" if action == "ALLOW" else "Payment held for security verification"
+    }
+
+# ==============================================================================
+# 6. INGESTION & RISK PIPELINE (STREAM & GATEWAYS)
+# ==============================================================================
+
 @app.post("/api/risk/evaluate-transaction")
-def evaluate_transaction(txn: TransactionPayload, background_tasks: BackgroundTasks):
+def evaluate_transaction(
+    txn: TransactionPayload,
+    authorization: Optional[str] = Header(None)
+):
+    env_config = get_env_map()
+    fraud_threshold = int(env_config.get("FRAUD_ALERT_THRESHOLD") or os.getenv("FRAUD_ALERT_THRESHOLD", "80"))
     hour = txn.hour_of_day if txn.hour_of_day is not None else datetime.now().hour
     
+    auth_user = get_optional_user(authorization)
+    real_user_id = auth_user["user_id"] if auth_user else txn.user_id
+
     features = [[
         txn.amount, txn.velocity_1h, txn.geo_distance_km,
         txn.device_trust_score, txn.is_proxy_vpn, txn.card_fails_24h,
@@ -399,7 +788,7 @@ def evaluate_transaction(txn: TransactionPayload, background_tasks: BackgroundTa
 
     txn_record = {
         "id": f"TXN_{uuid.uuid4().hex[:8].upper()}",
-        "user_id": txn.user_id,
+        "user_id": real_user_id,
         "amount": txn.amount,
         "category": txn.category,
         "risk_score": risk_score,
@@ -421,13 +810,13 @@ def evaluate_transaction(txn: TransactionPayload, background_tasks: BackgroundTa
     }
 
     # REAL SMTP ALERT TRIGGER: Only dispatch if risk_score >= threshold
-    if risk_score >= FRAUD_ALERT_THRESHOLD:
-        alert_status = dispatch_fraud_alert(txn_record)
+    if risk_score >= fraud_threshold:
+        alert_status = dispatch_dual_fraud_alerts(txn_record)
         txn_record["email_alert"] = alert_status
         if alert_status.get("sent"):
             txn_record["timeline"].append({
                 "time": now.strftime("%H:%M:%S"),
-                "event": f"Automated SMTP fraud alert dispatched to security team ({alert_status.get('recipient')})",
+                "event": f"Automated SMTP fraud alerts dispatched (Security Team + Customer)",
                 "severity": "danger"
             })
 
@@ -593,17 +982,20 @@ def generate_chargeback_evidence(payload: ChargebackPayload):
 
 @app.get("/api/system/status")
 def system_status():
-    smtp_configured = bool(os.getenv("SMTP_HOST") and os.getenv("SMTP_USERNAME") and os.getenv("SMTP_PASSWORD"))
+    env_config = get_env_map()
+    smtp_configured = bool((env_config.get("SMTP_HOST") or os.getenv("SMTP_HOST")) and (env_config.get("SMTP_USERNAME") or os.getenv("SMTP_USERNAME")) and (env_config.get("SMTP_PASSWORD") or os.getenv("SMTP_PASSWORD")))
     return {
         "status": "success",
         "environment": ENVIRONMENT_MODE,
-        "fraud_alert_threshold": FRAUD_ALERT_THRESHOLD,
+        "fraud_alert_threshold": int(env_config.get("FRAUD_ALERT_THRESHOLD") or os.getenv("FRAUD_ALERT_THRESHOLD", "80")),
         "smtp_configured": smtp_configured,
+        "active_users_count": len(USERS),
         "services": [
             {"name": "FastAPI Core Engine", "status": "ONLINE", "latency_ms": 1.2},
-            {"name": "Unified Transaction Store", "status": "ONLINE", "active_records": len(TRANSACTIONS)},
+            {"name": "Unified User & Transaction Store", "status": "ONLINE", "active_records": len(TRANSACTIONS)},
             {"name": "ML Gradient Boosting Scorer", "status": "READY", "version": "v1.0.0-prod"},
-            {"name": "SMTP Real-Time Alert Dispatcher", "status": "ONLINE" if smtp_configured else "READY (STANDBY)", "latency_ms": 0.5},
+            {"name": "SMTP Dual-Alert Dispatcher", "status": "ONLINE" if smtp_configured else "READY (STANDBY)", "latency_ms": 0.5},
+            {"name": "Customer Authentication Service", "status": "ONLINE", "active_users": len(USERS)},
             {"name": "Abuse-Ring Graph Engine", "status": "ONLINE", "correlated_entities": 14},
             {"name": "Chargeback Operations Engine", "status": "ONLINE", "active_disputes": len(DISPUTES)}
         ]

@@ -1,7 +1,17 @@
-﻿import React from 'react';
-import { ShieldCheck, Activity, Search, Layers, Cpu, FileText, Server } from 'lucide-react';
+import React from 'react';
+import { ShieldCheck, Activity, Search, Layers, Cpu, FileText, Server, User, LogOut } from 'lucide-react';
 
-export default function Navbar({ activeTab, setActiveTab, mode, setMode, isStreamLive, setIsStreamLive, selectedTransaction }) {
+export default function Navbar({ 
+  activeTab, 
+  setActiveTab, 
+  mode, 
+  setMode, 
+  isStreamLive, 
+  setIsStreamLive, 
+  selectedTransaction,
+  customerUser,
+  onLogout
+}) {
   const primaryTabs = [
     { id: 'monitor', label: 'Monitor', icon: Activity },
     { id: 'investigate', label: selectedTransaction ? `Investigate (${selectedTransaction.id})` : 'Investigate', icon: Search },
@@ -12,6 +22,7 @@ export default function Navbar({ activeTab, setActiveTab, mode, setMode, isStrea
   const secondaryTabs = [
     { id: 'chargebacks', label: 'Chargebacks', icon: FileText },
     { id: 'system', label: 'System', icon: Server },
+    { id: 'customer', label: customerUser ? `Account (${customerUser.name.split(' ')[0]})` : 'Customer Portal', icon: User },
   ];
 
   return (
@@ -115,6 +126,24 @@ export default function Navbar({ activeTab, setActiveTab, mode, setMode, isStrea
             {isStreamLive ? 'Stream: Live' : 'Stream: Paused'}
           </button>
 
+          {/* CUSTOMER PROFILE PILL */}
+          {customerUser && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              background: 'rgba(59, 130, 246, 0.15)',
+              border: '1px solid rgba(59, 130, 246, 0.3)',
+              padding: '2px 8px',
+              borderRadius: '4px',
+              fontSize: '11px',
+              color: '#60a5fa'
+            }}>
+              <User size={12} />
+              <span className="mono" style={{ fontWeight: 700 }}>{customerUser.user_id}</span>
+            </div>
+          )}
+
         </div>
 
       </div>
@@ -168,6 +197,7 @@ export default function Navbar({ activeTab, setActiveTab, mode, setMode, isStrea
           {secondaryTabs.map(item => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
+            const isCustomerTab = item.id === 'customer';
             return (
               <button
                 key={item.id}
@@ -175,8 +205,8 @@ export default function Navbar({ activeTab, setActiveTab, mode, setMode, isStrea
                 style={{
                   background: 'none',
                   border: 'none',
-                  borderBottom: isActive ? '2px solid var(--text-muted)' : '2px solid transparent',
-                  color: isActive ? '#fff' : 'var(--text-muted)',
+                  borderBottom: isActive ? (isCustomerTab ? '2px solid #3b82f6' : '2px solid var(--text-muted)') : '2px solid transparent',
+                  color: isActive ? '#fff' : (isCustomerTab ? '#60a5fa' : 'var(--text-muted)'),
                   fontWeight: isActive ? 600 : 500,
                   fontSize: '12px',
                   padding: '0.65rem 0.65rem',
@@ -187,7 +217,7 @@ export default function Navbar({ activeTab, setActiveTab, mode, setMode, isStrea
                   whiteSpace: 'nowrap'
                 }}
               >
-                <Icon size={13} />
+                <Icon size={13} color={isCustomerTab ? '#60a5fa' : undefined} />
                 {item.label}
               </button>
             );
