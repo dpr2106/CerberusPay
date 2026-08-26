@@ -1,285 +1,233 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
-
 :root {
-  /* Slate & Navy Fintech Dark Theme */
-  --bg-primary: #080b11;
-  --bg-secondary: #0d121d;
-  --bg-tertiary: #131a29;
-  --bg-card: #101726;
-  --bg-card-hover: #151e32;
-  --bg-hover: rgba(59, 130, 246, 0.08);
+  /* OBSIDIAN BLACK & CYBER YELLOW / GOLDEN THEME */
+  --bg-primary: #06070a;
+  --bg-secondary: #0c0e14;
+  --bg-card: #12151d;
+  --bg-hover: #181d28;
+  --bg-input: #080a0f;
   
-  --border-subtle: #1c2638;
-  --border-muted: #27354d;
-  --border-active: #3b82f6;
+  /* ACCENT: RADIANT CYBER YELLOW / GOLD */
+  --accent: #eab308;
+  --accent-hover: #facc15;
+  --accent-bright: #fef08a;
+  --accent-muted: rgba(234, 179, 8, 0.14);
+  --accent-glow: 0 0 22px rgba(234, 179, 8, 0.45);
   
+  /* TEXT PALETTE */
   --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
+  --text-gold: #facc15;
   
-  /* Precision Status Colors */
-  --status-allowed: #10b981;
-  --status-allowed-bg: rgba(16, 185, 129, 0.1);
-  --status-allowed-border: rgba(16, 185, 129, 0.25);
-  --status-allowed-glow: rgba(16, 185, 129, 0.2);
+  /* STATUS INDICATORS */
+  --status-blocked: #ef4444;
+  --status-blocked-bg: rgba(239, 68, 68, 0.12);
+  --status-blocked-border: rgba(239, 68, 68, 0.4);
   
   --status-review: #f59e0b;
-  --status-review-bg: rgba(245, 158, 11, 0.1);
-  --status-review-border: rgba(245, 158, 11, 0.25);
-  --status-review-glow: rgba(245, 158, 11, 0.2);
+  --status-review-bg: rgba(245, 158, 11, 0.14);
+  --status-review-border: rgba(245, 158, 11, 0.45);
   
-  --status-blocked: #ef4444;
-  --status-blocked-bg: rgba(239, 68, 68, 0.1);
-  --status-blocked-border: rgba(239, 68, 68, 0.25);
-  --status-blocked-glow: rgba(239, 68, 68, 0.2);
+  --status-allowed: #10b981;
+  --status-allowed-bg: rgba(16, 185, 129, 0.12);
+  --status-allowed-border: rgba(16, 185, 129, 0.4);
   
-  /* Primary Fintech Accent */
-  --accent: #3b82f6;
-  --accent-hover: #2563eb;
-  --accent-muted: rgba(59, 130, 246, 0.12);
-  --accent-border: rgba(59, 130, 246, 0.3);
-  --accent-glow: rgba(59, 130, 246, 0.25);
+  /* BORDERS & SHADOWS */
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-card: rgba(255, 255, 255, 0.09);
+  --border-gold: rgba(234, 179, 8, 0.4);
   
-  /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.4), 0 2px 6px -1px rgba(0, 0, 0, 0.2);
-  --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
-  --shadow-glow-blue: 0 0 20px -5px rgba(59, 130, 246, 0.3);
-  --shadow-glow-red: 0 0 20px -5px rgba(239, 68, 68, 0.3);
-  --shadow-glow-amber: 0 0 20px -5px rgba(245, 158, 11, 0.3);
-  --shadow-glow-green: 0 0 20px -5px rgba(16, 185, 129, 0.3);
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  -webkit-font-smoothing: antialiased;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.6);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.7);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.85);
+  --shadow-glow-gold: 0 0 25px rgba(234, 179, 8, 0.28);
+  --shadow-glow-red: 0 0 25px rgba(239, 68, 68, 0.28);
+  --shadow-glow-amber: 0 0 25px rgba(245, 158, 11, 0.28);
+  --shadow-glow-green: 0 0 25px rgba(16, 185, 129, 0.28);
+  
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 }
 
 body {
+  margin: 0;
   background-color: var(--bg-primary);
   color: var(--text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
-  font-size: 13.5px;
-  line-height: 1.5;
-  background-image: 
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(59, 130, 246, 0.07), transparent),
-    radial-gradient(ellipse 60% 40% at 90% 10%, rgba(16, 185, 129, 0.03), transparent);
-  min-height: 100vh;
 }
 
 .mono {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
 }
 
-/* ==============================================================================
-   INTERACTIVE CARDS & PANELS
-   ============================================================================== */
+/* CUSTOM SCROLLBARS */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(234, 179, 8, 0.25);
+  border-radius: 3px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(234, 179, 8, 0.5);
+}
+
+/* CARDS & CONTAINERS */
 .fintech-card {
   background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--border-card);
   border-radius: 10px;
   box-shadow: var(--shadow-sm);
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-  position: relative;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .fintech-card-interactive {
   cursor: pointer;
 }
-
 .fintech-card-interactive:hover {
-  transform: translateY(-2.5px);
-  border-color: var(--border-muted);
+  transform: translateY(-2px);
   box-shadow: var(--shadow-md);
+  border-color: rgba(234, 179, 8, 0.3);
 }
 
 .card-glow-red:hover {
-  border-color: var(--status-blocked-border);
   box-shadow: var(--shadow-glow-red);
+  border-color: rgba(239, 68, 68, 0.45);
 }
-
 .card-glow-amber:hover {
-  border-color: var(--status-review-border);
   box-shadow: var(--shadow-glow-amber);
+  border-color: rgba(245, 158, 11, 0.45);
 }
-
 .card-glow-green:hover {
-  border-color: var(--status-allowed-border);
   box-shadow: var(--shadow-glow-green);
+  border-color: rgba(16, 185, 129, 0.45);
+}
+.card-glow-gold:hover {
+  box-shadow: var(--shadow-glow-gold);
+  border-color: rgba(234, 179, 8, 0.55);
 }
 
-.card-glow-blue:hover {
-  border-color: var(--accent-border);
-  box-shadow: var(--shadow-glow-blue);
-}
-
-/* ==============================================================================
-   STATUS BADGES
-   ============================================================================== */
-.badge-allowed {
-  background: var(--status-allowed-bg);
-  color: var(--status-allowed);
-  border: 1px solid var(--status-allowed-border);
-  padding: 3px 8px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  box-shadow: 0 0 10px -3px var(--status-allowed-glow);
-}
-
-.badge-review {
-  background: var(--status-review-bg);
-  color: var(--status-review);
-  border: 1px solid var(--status-review-border);
-  padding: 3px 8px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  box-shadow: 0 0 10px -3px var(--status-review-glow);
-}
-
-.badge-blocked {
-  background: var(--status-blocked-bg);
-  color: var(--status-blocked);
-  border: 1px solid var(--status-blocked-border);
-  padding: 3px 8px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  box-shadow: 0 0 10px -3px var(--status-blocked-glow);
-}
-
-.badge-source {
-  background: rgba(255, 255, 255, 0.04);
-  color: var(--text-muted);
-  border: 1px solid var(--border-subtle);
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-}
-
-/* ==============================================================================
-   BUTTONS
-   ============================================================================== */
+/* BUTTONS */
 .btn-primary-fintech {
-  background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);
+  color: #080a0f;
+  font-weight: 900;
+  font-size: 13px;
+  padding: 8px 16px;
   border-radius: 7px;
-  padding: 7px 15px;
-  font-weight: 600;
-  font-size: 12.5px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 16px rgba(234, 179, 8, 0.4);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.35);
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  gap: 7px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
-
-.btn-primary-fintech:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.45);
-  filter: brightness(1.06);
-}
-
-.btn-primary-fintech:active {
-  transform: translateY(0px);
-  filter: brightness(0.95);
+.btn-primary-fintech:hover:not(:disabled) {
+  transform: translateY(-1.5px);
+  background: linear-gradient(135deg, #facc15 0%, #eab308 100%);
+  box-shadow: 0 0 24px rgba(234, 179, 8, 0.65);
 }
 
 .btn-secondary-fintech {
   background: var(--bg-secondary);
-  color: var(--text-secondary);
-  border: 1px solid var(--border-subtle);
-  border-radius: 7px;
-  padding: 7px 14px;
+  color: var(--text-primary);
   font-weight: 600;
-  font-size: 12.5px;
+  font-size: 13px;
+  padding: 8px 14px;
+  border-radius: 7px;
+  border: 1px solid var(--border-subtle);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.18s ease;
 }
-
-.btn-secondary-fintech:hover {
+.btn-secondary-fintech:hover:not(:disabled) {
   background: var(--bg-hover);
-  color: var(--text-primary);
-  border-color: var(--border-muted);
-  transform: translateY(-1px);
+  border-color: var(--accent);
+  color: #fff;
 }
 
-.btn-secondary-fintech:active {
-  transform: translateY(0px);
+/* BADGES */
+.badge-blocked {
+  background: var(--status-blocked-bg);
+  border: 1px solid var(--status-blocked-border);
+  color: #f87171;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
-/* ==============================================================================
-   ANIMATIONS & PULSING BEACONS
-   ============================================================================== */
-@keyframes pulse-beacon {
-  0% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-  }
-  70% {
-    transform: scale(1.05);
-    box-shadow: 0 0 0 7px rgba(16, 185, 129, 0);
-  }
-  100% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
-  }
+.badge-review {
+  background: var(--status-review-bg);
+  border: 1px solid var(--status-review-border);
+  color: #fbbf24;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.badge-allowed {
+  background: var(--status-allowed-bg);
+  border: 1px solid var(--status-allowed-border);
+  color: #34d399;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.badge-source {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-family: var(--font-mono);
+}
+
+.badge-gold {
+  background: rgba(234, 179, 8, 0.15);
+  border: 1px solid rgba(234, 179, 8, 0.4);
+  color: #facc15;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  box-shadow: 0 0 10px rgba(234, 179, 8, 0.25);
+}
+
+/* ANIMATIONS */
+@keyframes beaconPulse {
+  0% { transform: scale(0.95); opacity: 0.8; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  70% { transform: scale(1.1); opacity: 1; box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+  100% { transform: scale(0.95); opacity: 0.8; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
 }
 
 .beacon-pulse-green {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background-color: #10b981;
-  animation: pulse-beacon 2.4s infinite cubic-bezier(0.4, 0, 0.6, 1);
-}
-
-@keyframes spin-subtle {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.animate-spin {
-  animation: spin-subtle 1s linear infinite;
-}
-
-/* ==============================================================================
-   CUSTOM SCROLLBAR
-   ============================================================================== */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.15);
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: var(--border-subtle);
-  border-radius: 3px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: var(--border-muted);
+  background: #10b981;
+  animation: beaconPulse 2s infinite cubic-bezier(0.66, 0, 0, 1);
 }

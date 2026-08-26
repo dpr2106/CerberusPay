@@ -33,15 +33,15 @@ export default function Navbar({
   return (
     <header style={{
       borderBottom: '1px solid var(--border-subtle)',
-      background: 'rgba(10, 14, 23, 0.95)',
+      background: 'rgba(8, 10, 14, 0.96)',
       backdropFilter: 'blur(16px)',
       position: 'sticky',
       top: 0,
       zIndex: 100,
-      boxShadow: '0 4px 24px -2px rgba(0, 0, 0, 0.6)'
+      boxShadow: '0 4px 24px -2px rgba(0, 0, 0, 0.8)'
     }}>
       
-      {/* TOP BAR: CUSTOM LOGO & COLORFUL INTERACTIVE STATUS PILLS */}
+      {/* TOP BAR: GOLD LOGO & INTERACTIVE STATUS PILLS */}
       <div style={{
         maxWidth: '1440px',
         margin: '0 auto',
@@ -53,7 +53,7 @@ export default function Navbar({
         gap: '1rem'
       }}>
         
-        {/* CUSTOM GENERATED CERBERUSPAY LOGO & BRAND */}
+        {/* GOLD CERBERUSPAY LOGO & BRAND */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
           <div style={{
             position: 'relative',
@@ -61,12 +61,12 @@ export default function Navbar({
             height: '38px',
             borderRadius: '10px',
             overflow: 'hidden',
-            background: 'linear-gradient(135deg, #0284c7 0%, #1e1b4b 100%)',
+            background: 'linear-gradient(135deg, #eab308 0%, #78350f 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 0 18px rgba(14, 165, 233, 0.65)',
-            border: '1.5px solid rgba(56, 189, 248, 0.6)',
+            boxShadow: '0 0 18px rgba(234, 179, 8, 0.55)',
+            border: '1.5px solid rgba(250, 204, 21, 0.65)',
             cursor: 'pointer',
             transition: 'transform 0.2s ease'
           }}
@@ -97,19 +97,19 @@ export default function Navbar({
                 textShadow: '0 0 12px rgba(255,255,255,0.2)'
               }}>
                 CERBERUS<span style={{ 
-                  color: '#38bdf8', 
-                  textShadow: '0 0 14px rgba(56, 189, 248, 0.7)' 
+                  color: '#facc15', 
+                  textShadow: '0 0 14px rgba(250, 204, 21, 0.7)' 
                 }}>PAY</span>
               </span>
               <span style={{ 
                 fontSize: '10px', 
-                background: 'linear-gradient(135deg, rgba(14,165,233,0.25) 0%, rgba(99,102,241,0.25) 100%)', 
-                color: '#7dd3fc', 
+                background: 'linear-gradient(135deg, rgba(234,179,8,0.25) 0%, rgba(202,138,4,0.25) 100%)', 
+                color: '#fef08a', 
                 padding: '2px 6px', 
                 borderRadius: '4px', 
                 fontWeight: 800,
-                border: '1px solid rgba(56,189,248,0.4)',
-                boxShadow: '0 0 10px rgba(14,165,233,0.25)'
+                border: '1px solid rgba(250,204,21,0.4)',
+                boxShadow: '0 0 10px rgba(234,179,8,0.25)'
               }}>
                 SOC v3.1
               </span>
@@ -120,7 +120,7 @@ export default function Navbar({
           </div>
         </div>
 
-        {/* ULTRA-COLORFUL & INTERACTIVE STATUS PILLS */}
+        {/* STATUS PILLS */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
           
           {/* 1. EMERALD SYSTEM ONLINE PILL */}
@@ -179,20 +179,20 @@ export default function Navbar({
               gap: '6px',
               fontSize: '11px',
               fontWeight: 800,
-              color: mode === 'SIMULATION' ? '#fbbf24' : '#60a5fa',
+              color: mode === 'SIMULATION' ? '#fbbf24' : '#eab308',
               background: mode === 'SIMULATION' 
-                ? 'linear-gradient(135deg, rgba(245, 158, 11, 0.18) 0%, rgba(217, 119, 6, 0.28) 100%)'
-                : 'linear-gradient(135deg, rgba(59, 130, 246, 0.18) 0%, rgba(37, 99, 235, 0.28) 100%)',
-              border: `1px solid ${mode === 'SIMULATION' ? 'rgba(251, 191, 36, 0.55)' : 'rgba(96, 165, 250, 0.55)'}`,
+                ? 'linear-gradient(135deg, rgba(234, 179, 8, 0.18) 0%, rgba(202, 138, 4, 0.28) 100%)'
+                : 'linear-gradient(135deg, rgba(250, 204, 21, 0.18) 0%, rgba(234, 179, 8, 0.28) 100%)',
+              border: `1px solid ${mode === 'SIMULATION' ? 'rgba(250, 204, 21, 0.55)' : 'rgba(234, 179, 8, 0.55)'}`,
               padding: '5px 11px',
               borderRadius: '7px',
-              boxShadow: mode === 'SIMULATION' ? '0 0 14px rgba(245, 158, 11, 0.3)' : '0 0 14px rgba(59, 130, 246, 0.3)',
+              boxShadow: '0 0 14px rgba(234, 179, 8, 0.3)',
               cursor: 'pointer',
               transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
               transform: hoveredPill === 'mode' ? 'translateY(-1.5px)' : 'translateY(0)'
             }}
           >
-            <Zap size={13} color={mode === 'SIMULATION' ? '#fbbf24' : '#60a5fa'} />
+            <Zap size={13} color={mode === 'SIMULATION' ? '#fbbf24' : '#facc15'} />
             <span>{mode} MODE</span>
             {hoveredPill === 'mode' && (
               <div style={{
@@ -215,7 +215,7 @@ export default function Navbar({
             )}
           </div>
 
-          {/* 3. ELECTRIC CYAN RADAR STREAM PILL */}
+          {/* 3. GOLDEN RADAR STREAM PILL */}
           <button
             onMouseEnter={() => setHoveredPill('stream')}
             onMouseLeave={() => setHoveredPill(null)}
@@ -223,10 +223,10 @@ export default function Navbar({
             style={{
               position: 'relative',
               background: isStreamLive 
-                ? 'linear-gradient(135deg, rgba(6, 182, 212, 0.18) 0%, rgba(59, 130, 246, 0.28) 100%)' 
+                ? 'linear-gradient(135deg, rgba(234, 179, 8, 0.18) 0%, rgba(202, 138, 4, 0.28) 100%)' 
                 : 'linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.08) 100%)',
-              border: `1px solid ${isStreamLive ? 'rgba(56, 189, 248, 0.55)' : 'var(--border-subtle)'}`,
-              color: isStreamLive ? '#38bdf8' : 'var(--text-muted)',
+              border: `1px solid ${isStreamLive ? 'rgba(250, 204, 21, 0.55)' : 'var(--border-subtle)'}`,
+              color: isStreamLive ? '#facc15' : 'var(--text-muted)',
               borderRadius: '7px',
               padding: '5px 11px',
               fontSize: '11px',
@@ -235,7 +235,7 @@ export default function Navbar({
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              boxShadow: isStreamLive ? '0 0 14px rgba(6, 182, 212, 0.3)' : 'none',
+              boxShadow: isStreamLive ? '0 0 14px rgba(234, 179, 8, 0.3)' : 'none',
               transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
               transform: hoveredPill === 'stream' ? 'translateY(-1.5px)' : 'translateY(0)'
             }}
@@ -249,11 +249,11 @@ export default function Navbar({
                 right: 0,
                 marginTop: '8px',
                 background: '#0d1522',
-                border: '1px solid rgba(56, 189, 248, 0.4)',
+                border: '1px solid rgba(250, 204, 21, 0.4)',
                 borderRadius: '7px',
                 padding: '7px 12px',
                 fontSize: '11px',
-                color: '#bae6fd',
+                color: '#fef08a',
                 whiteSpace: 'nowrap',
                 zIndex: 200,
                 boxShadow: '0 10px 25px rgba(0,0,0,0.6)'
@@ -263,7 +263,7 @@ export default function Navbar({
             )}
           </button>
 
-          {/* 4. PURPLE / INDIGO OPERATOR PROFILE BADGE */}
+          {/* 4. CHIEF RISK OFFICER OPERATOR PROFILE BADGE */}
           <div 
             onMouseEnter={() => setHoveredPill('operator')}
             onMouseLeave={() => setHoveredPill(null)}
@@ -272,13 +272,13 @@ export default function Navbar({
               display: 'flex',
               alignItems: 'center',
               gap: '7px',
-              background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.18) 0%, rgba(99, 102, 241, 0.28) 100%)',
-              border: '1px solid rgba(167, 139, 250, 0.45)',
+              background: 'linear-gradient(135deg, rgba(234, 179, 8, 0.15) 0%, rgba(120, 53, 15, 0.25) 100%)',
+              border: '1px solid rgba(250, 204, 21, 0.45)',
               padding: '4px 10px',
               borderRadius: '7px',
               fontSize: '11px',
-              color: '#c4b5fd',
-              boxShadow: '0 0 14px rgba(139, 92, 246, 0.25)',
+              color: '#fef08a',
+              boxShadow: '0 0 14px rgba(234, 179, 8, 0.25)',
               transition: 'all 0.2s ease'
             }}
           >
@@ -286,11 +286,11 @@ export default function Navbar({
               width: '18px',
               height: '18px',
               borderRadius: '50%',
-              background: 'linear-gradient(135deg, #a855f7 0%, #6366f1 100%)',
+              background: 'linear-gradient(135deg, #facc15 0%, #ca8a04 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#fff',
+              color: '#000',
               fontWeight: 900,
               fontSize: '10px'
             }}>
@@ -300,7 +300,7 @@ export default function Navbar({
             <span className="mono" style={{ 
               fontSize: '10px', 
               background: 'rgba(255,255,255,0.1)', 
-              color: '#ddd6fe', 
+              color: '#fef08a', 
               padding: '1px 5px', 
               borderRadius: '3px',
               fontWeight: 700 
@@ -315,11 +315,11 @@ export default function Navbar({
                 right: 0,
                 marginTop: '8px',
                 background: '#0d1522',
-                border: '1px solid rgba(167, 139, 250, 0.4)',
+                border: '1px solid rgba(250, 204, 21, 0.4)',
                 borderRadius: '7px',
                 padding: '7px 12px',
                 fontSize: '11px',
-                color: '#e9d5ff',
+                color: '#fef08a',
                 whiteSpace: 'nowrap',
                 zIndex: 200,
                 boxShadow: '0 10px 25px rgba(0,0,0,0.6)'
@@ -329,7 +329,7 @@ export default function Navbar({
             )}
           </div>
 
-          {/* 5. CRIMSON NEON SIGN OUT BUTTON */}
+          {/* 5. CRIMSON SIGN OUT BUTTON */}
           <button
             onClick={onLogout}
             title="Lock Session & Sign Out"
@@ -384,7 +384,7 @@ export default function Navbar({
                 style={{
                   background: 'none',
                   border: 'none',
-                  borderBottom: isActive ? '2px solid #38bdf8' : '2px solid transparent',
+                  borderBottom: isActive ? '2px solid #facc15' : '2px solid transparent',
                   color: isActive ? '#fff' : 'var(--text-secondary)',
                   fontWeight: isActive ? 800 : 500,
                   fontSize: '13px',
@@ -400,11 +400,11 @@ export default function Navbar({
               >
                 <Icon 
                   size={15} 
-                  color={isActive ? '#38bdf8' : 'var(--text-muted)'} 
+                  color={isActive ? '#facc15' : 'var(--text-muted)'} 
                   style={{ 
                     transition: 'transform 0.2s ease', 
                     transform: isActive ? 'scale(1.1)' : 'scale(1)',
-                    filter: isActive ? 'drop-shadow(0 0 6px rgba(56,189,248,0.7))' : 'none'
+                    filter: isActive ? 'drop-shadow(0 0 6px rgba(250,204,21,0.8))' : 'none'
                   }}
                 />
                 <span>{item.label}</span>
@@ -415,8 +415,8 @@ export default function Navbar({
                     left: '10%',
                     right: '10%',
                     height: '2px',
-                    background: 'linear-gradient(90deg, #38bdf8 0%, #818cf8 100%)',
-                    boxShadow: '0 0 10px #38bdf8'
+                    background: 'linear-gradient(90deg, #facc15 0%, #eab308 100%)',
+                    boxShadow: '0 0 10px #facc15'
                   }} />
                 )}
               </button>
@@ -449,7 +449,7 @@ export default function Navbar({
                   transition: 'color 0.15s ease'
                 }}
               >
-                <Icon size={14} color={isActive ? '#cbd5e1' : 'var(--text-muted)'} />
+                <Icon size={14} color={isActive ? '#facc15' : 'var(--text-muted)'} />
                 <span>{item.label}</span>
               </button>
             );
