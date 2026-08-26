@@ -31,6 +31,7 @@ export default function App() {
   const [metrics, setMetrics] = useState(null);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [focusedNetworkTxn, setFocusedNetworkTxn] = useState(null);
+  const [focusedChargebackTxId, setFocusedChargebackTxId] = useState(null);
 
   // Authentication Handlers
   const handleAuthSuccess = (operatorObj, tokenStr) => {
@@ -54,7 +55,10 @@ export default function App() {
     if (!currentOperator) return;
 
     fetch('http://127.0.0.1:8000/api/risk/transactions?limit=60')
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error(`Transactions API status ${res.status}`);
+        return res.json();
+      })
       .then(data => {
         if (data.transactions && data.transactions.length > 0) {
           setTransactions(data.transactions);
@@ -63,12 +67,15 @@ export default function App() {
           setFocusedNetworkTxn(firstBlocked);
         }
       })
-      .catch((err) => console.error('[CerberusPay] Failed to fetch transactions:', err));
+      .catch((err) => console.error('[CerberusPay API Error] Failed to fetch transactions:', err));
 
     fetch('http://127.0.0.1:8000/api/risk/metrics')
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error(`Metrics API status ${res.status}`);
+        return res.json();
+      })
       .then(data => setMetrics(data))
-      .catch((err) => console.error('[CerberusPay] Failed to fetch metrics:', err));
+      .catch((err) => console.error('[CerberusPay API Error] Failed to fetch metrics:', err));
   }, [currentOperator]);
 
   // Background Stream Ingestion (Simulates payment gateway traffic)
@@ -110,7 +117,7 @@ export default function App() {
           setTransactions(prev => [data.evaluation, ...prev.slice(0, 59)]);
         }
       })
-      .catch((err) => console.error('[CerberusPay Stream Error]:', err));
+      .catch((err) => console.error('[CerberusPay Stream Ingestion Error]:', err));
     }, 3800);
 
     return () => clearInterval(interval);
@@ -138,7 +145,7 @@ export default function App() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail || `Server returned ${response.status}`);
+        throw new Error(errorData.detail || `Server returned HTTP ${response.status}`);
       }
 
       const result = await response.json();
@@ -166,6 +173,12 @@ export default function App() {
     setActiveTab('networks');
   };
 
+  // Jump from Investigation to Chargebacks with target transaction ID
+  const handleNavigateToChargebacks = (txId) => {
+    setFocusedChargebackTxId(txId || selectedTransaction?.id);
+    setActiveTab('chargebacks');
+  };
+
   // Jump from Chargebacks to Investigation
   const handleInvestigateDispute = (txId) => {
     const target = transactions.find(t => t.id === txId);
@@ -188,7 +201,12 @@ export default function App() {
       {/* NAVBAR */}
       <Navbar
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={(tab) => {
+          if (tab === 'chargebacks') {
+            setFocusedChargebackTxId(null); // Clear filter when clicking tab directly
+          }
+          setActiveTab(tab);
+        }}
         mode={mode}
         setMode={setMode}
         isStreamLive={isStreamLive}
@@ -214,6 +232,7 @@ export default function App() {
             transaction={selectedTransaction}
             onUpdateAction={handleUpdateAction}
             onNavigateToNetworks={handleNavigateToNetworks}
+            onNavigateToChargebacks={handleNavigateToChargebacks}
           />
         )}
 
@@ -230,7 +249,9 @@ export default function App() {
 
         {activeTab === 'chargebacks' && (
           <ChargebacksView
+            targetTransactionId={focusedChargebackTxId}
             onInvestigateDispute={handleInvestigateDispute}
+            onClearTransactionFilter={() => setFocusedChargebackTxId(null)}
           />
         )}
 
@@ -249,7 +270,7 @@ export default function App() {
         color: 'var(--text-muted)',
         background: 'var(--bg-secondary)'
       }}>
-        CERBERUSPAY • Internal Payment Risk Operations Platform • Authorized Personnel Only
+        CERBERUSPAY • Internal Payment Risk Operations Platform • Synchronized Chargeback Operations
       </footer>
 
     </div>

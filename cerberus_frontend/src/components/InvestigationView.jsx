@@ -1,11 +1,16 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   ShieldAlert, ShieldCheck, AlertTriangle, ArrowRight, 
   Layers, CheckCircle2, XCircle, Clock, MapPin, Activity, 
-  Globe, Smartphone, User, Lock, CreditCard
+  Globe, Smartphone, User, Lock, CreditCard, FileText
 } from 'lucide-react';
 
-export default function InvestigationView({ transaction, onUpdateAction, onNavigateToNetworks }) {
+export default function InvestigationView({ 
+  transaction, 
+  onUpdateAction, 
+  onNavigateToNetworks,
+  onNavigateToChargebacks
+}) {
   const [relatedData, setRelatedData] = useState(null);
   const [acting, setActing] = useState(false);
   const [actionSuccess, setActionSuccess] = useState(null);
@@ -60,7 +65,7 @@ export default function InvestigationView({ transaction, onUpdateAction, onNavig
 
   const riskMeta = getRiskMeta(score);
 
-  // Real Asynchronous API Action Handler (Requirement 5)
+  // Real Asynchronous API Action Handler
   const handleAction = async (newAction) => {
     setActing(true);
     setActionSuccess(null);
@@ -122,7 +127,7 @@ export default function InvestigationView({ transaction, onUpdateAction, onNavig
         </div>
       )}
 
-      {/* 1. TOP HEADER: TRANSACTION ID, AMOUNT, RISK SCORE, FINAL DECISION, CONFIDENCE, TIMESTAMP (RULE 2) */}
+      {/* 1. TOP HEADER: TRANSACTION ID, AMOUNT, RISK SCORE, FINAL DECISION, CONFIDENCE, TIMESTAMP */}
       <div className="fintech-card" style={{ padding: '1.5rem', borderLeft: `4px solid ${riskMeta.color}` }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
@@ -170,7 +175,7 @@ export default function InvestigationView({ transaction, onUpdateAction, onNavig
         </div>
       </div>
 
-      {/* 2. SECTION A: WHY? 3-5 STRONGEST RISK SIGNALS (RULE 2A) */}
+      {/* 2. SECTION A: WHY? 3-5 STRONGEST RISK SIGNALS */}
       <div className="fintech-card" style={{ padding: '1.5rem' }}>
         <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#fff', marginBottom: '0.35rem' }}>
           A. Why did CerberusPay {transaction.action === 'BLOCK' ? 'block' : (isReview ? 'challenge' : 'allow')} this transaction?
@@ -215,7 +220,7 @@ export default function InvestigationView({ transaction, onUpdateAction, onNavig
         </div>
       </div>
 
-      {/* 3. SECTION B: WHAT HAPPENED? PROCESSING TIMELINE (RULE 2B) */}
+      {/* 3. SECTION B: WHAT HAPPENED? PROCESSING TIMELINE */}
       <div className="fintech-card" style={{ padding: '1.5rem' }}>
         <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#fff', marginBottom: '0.75rem' }}>
           B. What Happened? (Processing Timeline)
@@ -247,7 +252,7 @@ export default function InvestigationView({ transaction, onUpdateAction, onNavig
         </div>
       </div>
 
-      {/* 4. SECTION C: WHO/WHAT IS CONNECTED? (RULE 2C) */}
+      {/* 4. SECTION C: WHO/WHAT IS CONNECTED? */}
       <div className="fintech-card" style={{ padding: '1.5rem' }}>
         <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#fff', marginBottom: '0.75rem' }}>
           C. Who & What is Connected? (Entity Context & History)
@@ -322,23 +327,35 @@ export default function InvestigationView({ transaction, onUpdateAction, onNavig
           </div>
         </div>
 
-        {/* Direct Link to Networks Graph */}
-        <div style={{ marginTop: '1rem', borderTop: '1px solid var(--border-subtle)', paddingTop: '0.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        {/* Direct Links to Networks Graph & Chargeback Dossier */}
+        <div style={{ marginTop: '1rem', borderTop: '1px solid var(--border-subtle)', paddingTop: '0.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
           <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-            Correlate this account and device in the interactive syndicate graph:
+            Correlate this transaction across the syndicate network or inspect dispute representment:
           </div>
-          <button
-            onClick={() => onNavigateToNetworks(transaction)}
-            className="btn-primary-fintech"
-            style={{ fontSize: '12px' }}
-          >
-            <span>VIEW RELATED NETWORK</span>
-            <ArrowRight size={14} />
-          </button>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            {onNavigateToChargebacks && (
+              <button
+                onClick={() => onNavigateToChargebacks(transaction.id)}
+                className="btn-secondary-fintech"
+                style={{ fontSize: '12px' }}
+              >
+                <FileText size={14} />
+                <span>CHARGEBACK DOSSIER</span>
+              </button>
+            )}
+            <button
+              onClick={() => onNavigateToNetworks(transaction)}
+              className="btn-primary-fintech"
+              style={{ fontSize: '12px' }}
+            >
+              <span>VIEW RELATED NETWORK</span>
+              <ArrowRight size={14} />
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* 5. SECTION D: WHAT CAN THE ANALYST DO? (RULE 2D & REQUIREMENT 5) */}
+      {/* 5. SECTION D: WHAT CAN THE ANALYST DO? */}
       <div className="fintech-card" style={{ padding: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>
