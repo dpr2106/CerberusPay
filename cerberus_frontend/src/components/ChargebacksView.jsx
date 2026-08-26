@@ -1,84 +1,46 @@
-﻿import React, { useState } from 'react';
-import { FileText, ShieldCheck, Clock, CheckCircle2, AlertCircle, ArrowUpRight } from 'lucide-react';
+﻿import React, { useState, useEffect } from 'react';
+import { FileText, ShieldCheck, Clock, CheckCircle2, ArrowRight, ArrowUpRight } from 'lucide-react';
 
-export default function ChargebacksView() {
-  const [disputes, setDisputes] = useState([
-    {
-      id: 'CB_90124A',
-      transaction_id: 'TXN_8F91A20C',
-      amount: 28450.0,
-      reason: 'FRAUDULENT_UNRECOGNIZED_CHARGE',
-      reason_code: '10.4',
-      customer: 'Rahul M. (rahul.m@gmail.com)',
-      risk_score: 92,
-      status: 'OPEN',
-      date: '2 hours ago',
-      evidence: null
-    },
-    {
-      id: 'CB_88291B',
-      transaction_id: 'TXN_7E31B91D',
-      amount: 14200.0,
-      reason: 'PRODUCT_NOT_RECEIVED',
-      reason_code: '13.1',
-      customer: 'Kavita S. (kavita.s@yahoo.com)',
-      risk_score: 45,
-      status: 'RESPONDED',
-      date: '1 day ago',
-      evidence: {
-        evidence_id: 'EVD_88291B',
-        verdict: 'SIGNED_DELIVERY_CONFIRMED',
-        win_probability: '94.6%',
-        packet_summary: 'Compiled IP session match, device fingerprint continuity, and carrier delivery signature.'
-      }
-    },
-    {
-      id: 'CB_77102C',
-      transaction_id: 'TXN_4A10C29F',
-      amount: 45000.0,
-      reason: 'FRAUDULENT_UNRECOGNIZED_CHARGE',
-      reason_code: '10.4',
-      customer: 'Vikram J. (vikram.j@outlook.com)',
-      risk_score: 88,
-      status: 'UNDER_REVIEW',
-      date: '18 hours ago',
-      evidence: null
-    }
-  ]);
-
-  const [selectedDispute, setSelectedDispute] = useState(disputes[0]);
+export default function ChargebacksView({ onInvestigateDispute }) {
+  const [disputes, setDisputes] = useState([]);
+  const [selectedDispute, setSelectedDispute] = useState(null);
   const [isCompiling, setIsCompiling] = useState(false);
 
-  const handleGenerateEvidence = (disputeId) => {
+  useEffect(() => {
+    fetch('http://localhost:8000/api/chargebacks')
+      .then(res => res.json())
+      .then(data => {
+        if (data.disputes && data.disputes.length > 0) {
+          setDisputes(data.disputes);
+          setSelectedDispute(data.disputes[0]);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleGenerateEvidence = (txId) => {
     setIsCompiling(true);
-    setTimeout(() => {
-      setDisputes(prev => prev.map(d => {
-        if (d.id === disputeId) {
-          return {
-            ...d,
-            status: 'RESPONDED',
-            evidence: {
-              evidence_id: `EVD_${d.id.slice(3)}`,
-              verdict: 'AUTHENTIC_CARDHOLDER_PROOF',
-              win_probability: '94.6%',
-              packet_summary: 'Comprehensive evidentiary bundle demonstrating 3DS authentication, carrier delivery proof, and matching historical device fingerprint.'
+    fetch('http://localhost:8000/api/chargeback/generate-evidence', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ transaction_id: txId, reason: 'REPRESENTMENT_SUBMISSION' })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.evidence_packet) {
+          setDisputes(prev => prev.map(d => {
+            if (d.transaction_id === txId) {
+              return { ...d, status: 'RESPONDED', evidence: data.evidence_packet };
             }
-          };
+            return d;
+          }));
+          if (selectedDispute?.transaction_id === txId) {
+            setSelectedDispute(prev => ({ ...prev, status: 'RESPONDED', evidence: data.evidence_packet }));
+          }
         }
-        return d;
-      }));
-      setIsCompiling(false);
-      setSelectedDispute(prev => ({
-        ...prev,
-        status: 'RESPONDED',
-        evidence: {
-          evidence_id: `EVD_${prev.id.slice(3)}`,
-          verdict: 'AUTHENTIC_CARDHOLDER_PROOF',
-          win_probability: '94.6%',
-          packet_summary: 'Comprehensive evidentiary bundle demonstrating 3DS authentication, carrier delivery proof, and matching historical device fingerprint.'
-        }
-      }));
-    }, 800);
+        setIsCompiling(false);
+      })
+      .catch(() => setIsCompiling(false));
   };
 
   const getStatusBadge = (status) => {
@@ -86,52 +48,53 @@ export default function ChargebacksView() {
       case 'OPEN': return <span className="badge-blocked">OPEN DISPUTE</span>;
       case 'UNDER_REVIEW': return <span className="badge-review">UNDER REVIEW</span>;
       case 'RESPONDED': return <span className="badge-allowed">RESPONDED</span>;
-      case 'RESOLVED': return <span style={{ background: 'rgba(59,130,246,0.15)', color: '#60a5fa', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 700 }}>RESOLVED</span>;
-      default: return null;
+      default: return <span className="badge-source">{status}</span>;
     }
   };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
       
-      {/* HEADER SUMMARY */}
+      {/* HEADER STATS */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
         <div className="fintech-card" style={{ padding: '1rem' }}>
-          <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 600 }}>ACTIVE CHARGEBACKS</div>
+          <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 700 }}>ACTIVE CHARGEBACK CASES</div>
           <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#fff', marginTop: '2px' }}>
-            {disputes.length} Cases
+            {disputes.length} Disputes
           </div>
         </div>
         <div className="fintech-card" style={{ padding: '1rem' }}>
-          <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 600 }}>DISPUTED VOLUME</div>
+          <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 700 }}>TOTAL DISPUTED VALUE</div>
           <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#f87171', marginTop: '2px' }}>
-            ₹{disputes.reduce((acc, d) => acc + d.amount, 0).toLocaleString('en-IN')}
+            ₹{disputes.reduce((acc, d) => acc + (d.amount || 0), 0).toLocaleString('en-IN')}
           </div>
         </div>
         <div className="fintech-card" style={{ padding: '1rem' }}>
-          <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 600 }}>DEFENSE WIN PROBABILITY</div>
+          <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 700 }}>ESTIMATED WIN PROBABILITY</div>
           <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#10b981', marginTop: '2px' }}>
-            94.6% Avg
+            94.6% Average
           </div>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1.4fr', gap: '1.5rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1.5fr', gap: '1.5rem' }}>
         
-        {/* DISPUTES TABLE */}
+        {/* DISPUTES QUEUE */}
         <div className="fintech-card" style={{ padding: '0', overflow: 'hidden' }}>
-          <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--border-subtle)' }}>
-            <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#fff' }}>Chargeback Operations Queue</h3>
-            <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Merchant dispute representations and evidence submission</p>
+          <div style={{ padding: '0.85rem 1.25rem', borderBottom: '1px solid var(--border-subtle)' }}>
+            <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#fff' }}>Dispute Operations Queue</h3>
+            <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+              Click any dispute to view representation packet and jump into transaction investigation
+            </p>
           </div>
 
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border-subtle)', color: 'var(--text-muted)', background: 'var(--bg-secondary)' }}>
-                <th style={{ padding: '10px 14px', fontWeight: 600 }}>DISPUTE ID</th>
-                <th style={{ padding: '10px 14px', fontWeight: 600 }}>AMOUNT</th>
-                <th style={{ padding: '10px 14px', fontWeight: 600 }}>REASON</th>
-                <th style={{ padding: '10px 14px', fontWeight: 600 }}>STATUS</th>
+                <th style={{ padding: '9px 14px', fontWeight: 600 }}>CASE & TRANSACTION</th>
+                <th style={{ padding: '9px 14px', fontWeight: 600 }}>AMOUNT</th>
+                <th style={{ padding: '9px 14px', fontWeight: 600 }}>REASON</th>
+                <th style={{ padding: '9px 14px', fontWeight: 600 }}>STATUS</th>
               </tr>
             </thead>
             <tbody>
@@ -145,17 +108,17 @@ export default function ChargebacksView() {
                     background: selectedDispute?.id === d.id ? 'var(--bg-hover)' : 'transparent'
                   }}
                 >
-                  <td style={{ padding: '12px 14px' }}>
-                    <span className="mono" style={{ fontWeight: 600, color: '#fff' }}>{d.id}</span>
-                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{d.transaction_id}</div>
+                  <td style={{ padding: '11px 14px' }}>
+                    <span className="mono" style={{ fontWeight: 700, color: '#fff' }}>{d.id}</span>
+                    <div className="mono" style={{ fontSize: '11px', color: '#60a5fa' }}>{d.transaction_id}</div>
                   </td>
-                  <td style={{ padding: '12px 14px', fontWeight: 700, color: '#fff' }}>
-                    ₹{d.amount.toLocaleString('en-IN')}
+                  <td style={{ padding: '11px 14px', fontWeight: 700, color: '#fff' }}>
+                    ₹{d.amount?.toLocaleString('en-IN')}
                   </td>
-                  <td style={{ padding: '12px 14px', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                    {d.reason_code} • {d.reason.replace(/_/g, ' ')}
+                  <td style={{ padding: '11px 14px', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                    {d.reason_code} • {d.reason?.replace(/_/g, ' ')}
                   </td>
-                  <td style={{ padding: '12px 14px' }}>
+                  <td style={{ padding: '11px 14px' }}>
                     {getStatusBadge(d.status)}
                   </td>
                 </tr>
@@ -164,37 +127,50 @@ export default function ChargebacksView() {
           </table>
         </div>
 
-        {/* DISPUTE EVIDENCE & AUTO-RESPONDER DOSSIER */}
+        {/* EVIDENCE PACKET & INTEGRATED INVESTIGATION (RULE 5) */}
         <div className="fintech-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {selectedDispute ? (
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                <span className="mono" style={{ fontSize: '14px', fontWeight: 700, color: '#fff' }}>
-                  {selectedDispute.id}
-                </span>
+                <div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 700 }}>CHARGEBACK DOSSIER</div>
+                  <span className="mono" style={{ fontSize: '15px', fontWeight: 800, color: '#fff' }}>
+                    {selectedDispute.id}
+                  </span>
+                </div>
                 {getStatusBadge(selectedDispute.status)}
-              </div>
-
-              <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
-                Customer: <strong>{selectedDispute.customer}</strong>
               </div>
 
               <div style={{ background: 'var(--bg-secondary)', padding: '0.85rem', borderRadius: '6px', marginBottom: '1rem', fontSize: '12px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                  <span style={{ color: 'var(--text-muted)' }}>Disputed Transaction:</span>
-                  <span className="mono" style={{ color: '#fff' }}>{selectedDispute.transaction_id}</span>
+                  <span style={{ color: 'var(--text-muted)' }}>Target Transaction:</span>
+                  <strong className="mono" style={{ color: '#fff' }}>{selectedDispute.transaction_id}</strong>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Disputed Amount:</span>
+                  <strong style={{ color: '#f87171' }}>₹{selectedDispute.amount?.toLocaleString('en-IN')}</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: 'var(--text-muted)' }}>Disputed Value:</span>
-                  <strong style={{ color: '#f87171' }}>₹{selectedDispute.amount.toLocaleString('en-IN')}</strong>
+                  <span style={{ color: 'var(--text-muted)' }}>Customer Account:</span>
+                  <span style={{ color: '#cbd5e1' }}>{selectedDispute.customer}</span>
                 </div>
               </div>
+
+              {/* JUMP TO INVESTIGATION BUTTON */}
+              <button
+                onClick={() => onInvestigateDispute(selectedDispute.transaction_id)}
+                className="btn-secondary-fintech"
+                style={{ width: '100%', justifyContent: 'center', marginBottom: '1rem', fontSize: '12px' }}
+              >
+                <span>Investigate Transaction Dossier ({selectedDispute.transaction_id})</span>
+                <ArrowRight size={14} />
+              </button>
 
               {/* EVIDENCE STATUS */}
               {selectedDispute.evidence ? (
                 <div style={{ border: '1px solid rgba(16,185,129,0.3)', background: 'rgba(16,185,129,0.05)', padding: '1rem', borderRadius: '6px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                    <span style={{ fontSize: '11px', color: '#10b981', fontWeight: 700 }}>EVIDENCE PACKET COMPILED</span>
+                    <span style={{ fontSize: '11px', color: '#10b981', fontWeight: 700 }}>STRUCTURED EVIDENCE PACKET COMPILED</span>
                     <span className="mono" style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{selectedDispute.evidence.evidence_id}</span>
                   </div>
                   <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#fff', marginBottom: '4px' }}>
@@ -204,29 +180,29 @@ export default function ChargebacksView() {
                     {selectedDispute.evidence.packet_summary}
                   </p>
                   <div style={{ marginTop: '8px', fontSize: '12px', color: '#10b981', fontWeight: 600 }}>
-                    Estimated Win Probability: {selectedDispute.evidence.win_probability}
+                    Estimated Win Probability: {selectedDispute.evidence.win_probability || '94.6%'}
                   </div>
                 </div>
               ) : (
                 <div>
-                  <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '1rem' }}>
-                    No representation evidence packet submitted yet. Click below to compile cryptographic audit proofs.
+                  <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '0.85rem' }}>
+                    No representment packet submitted yet. Click below to compile cryptographic audit logs into an official bank evidence packet.
                   </p>
                   <button
-                    onClick={() => handleGenerateEvidence(selectedDispute.id)}
+                    onClick={() => handleGenerateEvidence(selectedDispute.transaction_id)}
                     disabled={isCompiling}
                     className="btn-primary-fintech"
                     style={{ width: '100%', justifyContent: 'center' }}
                   >
-                    <FileText size={15} />
-                    {isCompiling ? 'Compiling Evidentiary Proofs...' : 'Generate Bank Evidence Packet'}
+                    <FileText size={14} />
+                    {isCompiling ? 'Compiling Evidentiary Packet...' : 'Generate Bank Evidence Packet'}
                   </button>
                 </div>
               )}
             </div>
           ) : (
             <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem 0' }}>
-              Select a dispute from the queue to inspect evidence.
+              Select a dispute from the queue.
             </div>
           )}
         </div>

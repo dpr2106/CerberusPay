@@ -1,35 +1,30 @@
-﻿import React, { useState } from 'react';
-import { Layers, ShieldAlert, Smartphone, Globe, CreditCard, User, Store } from 'lucide-react';
+﻿import React, { useState, useEffect } from 'react';
+import { Layers, ShieldAlert, Smartphone, Globe, CreditCard, User, Store, ArrowLeft } from 'lucide-react';
 
-export default function NetworksView() {
-  const [selectedRing, setSelectedRing] = useState({
-    id: 'RING_DELTA_042',
-    name: 'Card Testing Burst Syndicate',
-    accounts: 14,
-    devices: 2,
-    ips: 3,
-    volume: 420000.0,
-    confidence: 98.4,
-    status: 'BLOCKED & ISOLATED',
-    description: '14 synthetic buyer accounts sharing identical Canvas hash fingerprint across 3 VPN exit subnets.'
-  });
-
+export default function NetworksView({ focusedTransaction, onBackToInvestigation }) {
   const [selectedNode, setSelectedNode] = useState(null);
 
+  // Focus on the specific entities from the investigated transaction if available
+  const activeUserId = focusedTransaction?.user_id || 'USR_8921';
+  const activeDeviceId = focusedTransaction?.signals?.device_id || 'DEV_FINGERPRINT_A9';
+  const activeIp = focusedTransaction?.signals?.ip_address || '185.220.101.4 (Proxy)';
+  const activeCard = focusedTransaction?.signals?.card_mask || 'CARD_4111_9210';
+  const isThreat = (focusedTransaction?.risk_score || 85) >= 70;
+
   const nodes = [
-    { id: 'U1', label: 'USR_8921', type: 'USER', x: 120, y: 80, risk: 'HIGH' },
-    { id: 'U2', label: 'USR_8922', type: 'USER', x: 120, y: 160, risk: 'HIGH' },
-    { id: 'U3', label: 'USR_8923', type: 'USER', x: 120, y: 240, risk: 'HIGH' },
-    { id: 'U4', label: 'USR_8924', type: 'USER', x: 120, y: 320, risk: 'HIGH' },
+    { id: 'U1', label: activeUserId, type: 'USER', x: 120, y: 80, risk: isThreat ? 'HIGH' : 'LOW', active: true },
+    { id: 'U2', label: 'USR_8922', type: 'USER', x: 120, y: 160, risk: 'HIGH', active: false },
+    { id: 'U3', label: 'USR_3410', type: 'USER', x: 120, y: 240, risk: 'HIGH', active: false },
+    { id: 'U4', label: 'USR_5192', type: 'USER', x: 120, y: 320, risk: 'HIGH', active: false },
     
-    { id: 'D1', label: 'DEV_FINGERPRINT_A9', type: 'DEVICE', x: 280, y: 140, risk: 'CRITICAL' },
-    { id: 'D2', label: 'DEV_FINGERPRINT_B2', type: 'DEVICE', x: 280, y: 260, risk: 'CRITICAL' },
+    { id: 'D1', label: activeDeviceId, type: 'DEVICE', x: 280, y: 140, risk: isThreat ? 'CRITICAL' : 'LOW', active: true },
+    { id: 'D2', label: 'DEV_FINGERPRINT_B2', type: 'DEVICE', x: 280, y: 260, risk: 'CRITICAL', active: false },
     
-    { id: 'IP1', label: '185.220.101.4 (Proxy)', type: 'IP', x: 440, y: 120, risk: 'HIGH' },
-    { id: 'IP2', label: '45.154.255.88 (Proxy)', type: 'IP', x: 440, y: 220, risk: 'HIGH' },
+    { id: 'IP1', label: activeIp, type: 'IP', x: 440, y: 120, risk: isThreat ? 'HIGH' : 'LOW', active: true },
+    { id: 'IP2', label: '45.154.255.88 (Proxy)', type: 'IP', x: 440, y: 220, risk: 'HIGH', active: false },
     
-    { id: 'C1', label: 'CARD_4111_9210', type: 'CARD', x: 280, y: 380, risk: 'CRITICAL' },
-    { id: 'M1', label: 'Digital Gift Cards Gateway', type: 'MERCHANT', x: 440, y: 360, risk: 'NORMAL' },
+    { id: 'C1', label: activeCard, type: 'CARD', x: 280, y: 380, risk: isThreat ? 'CRITICAL' : 'LOW', active: true },
+    { id: 'M1', label: 'Digital Goods & High Ticket Gateway', type: 'MERCHANT', x: 440, y: 360, risk: 'NORMAL', active: false },
   ];
 
   const links = [
@@ -45,6 +40,11 @@ export default function NetworksView() {
     { from: 'C1', to: 'M1' }
   ];
 
+  useEffect(() => {
+    // Set default selected node to the investigated user
+    setSelectedNode(nodes[0]);
+  }, [focusedTransaction?.id]);
+
   const getNodeColor = (risk) => {
     if (risk === 'CRITICAL') return '#ef4444';
     if (risk === 'HIGH') return '#f87171';
@@ -55,29 +55,51 @@ export default function NetworksView() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
       
-      {/* SIMULATED NOTICE */}
+      {/* CONTEXT BANNER */}
       <div style={{
         background: 'var(--bg-secondary)',
         border: '1px solid var(--border-subtle)',
         borderRadius: '6px',
-        padding: '0.65rem 1rem',
+        padding: '0.75rem 1rem',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        fontSize: '12px',
-        color: 'var(--text-secondary)'
+        flexWrap: 'wrap',
+        gap: '0.75rem'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontWeight: 700, color: '#f59e0b' }}>
-            ● SIMULATED ABUSE TOPOLOGY
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {focusedTransaction && (
+            <button
+              onClick={onBackToInvestigation}
+              style={{
+                background: 'transparent',
+                border: '1px solid var(--border-subtle)',
+                color: 'var(--text-primary)',
+                padding: '4px 8px',
+                borderRadius: '4px',
+                fontSize: '12px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}
+            >
+              <ArrowLeft size={13} /> Back to Dossier ({focusedTransaction.id})
+            </button>
+          )}
+          <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+            Investigating Entity Correlation for: <strong style={{ color: '#fff' }}>{activeUserId}</strong> ({activeDeviceId})
           </span>
-          <span>— Entity relationship clustering derived from synthetic cardholder graph.</span>
         </div>
-        <span className="mono" style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-          Active Rings: 2 • Graph Density: 0.42
-        </span>
+
+        <div style={{ display: 'flex', gap: '8px', fontSize: '11px' }}>
+          <span style={{ color: '#ef4444' }}>● High Risk Node</span>
+          <span style={{ color: '#3b82f6' }}>● Investigated Entity</span>
+          <span style={{ color: '#10b981' }}>● Safe / Destination</span>
+        </div>
       </div>
 
+      {/* GRAPH CANVAS & CLUSTER INSPECTOR */}
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem' }}>
         
         {/* GRAPH CANVAS */}
@@ -85,21 +107,16 @@ export default function NetworksView() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <div>
               <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#fff' }}>
-                Abuse Syndicate Network
+                Syndicate & Entity Topology Graph
               </h3>
               <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                Connecting coordinated accounts, hardware fingerprints, and common payment targets
+                Highlighting multi-account device collisions and proxy gateway patterns
               </p>
-            </div>
-
-            <div style={{ display: 'flex', gap: '8px', fontSize: '11px' }}>
-              <span style={{ color: '#ef4444' }}>● Critical Entity</span>
-              <span style={{ color: '#10b981' }}>● Normal Target</span>
             </div>
           </div>
 
-          <div style={{ background: '#090b10', border: '1px solid var(--border-subtle)', borderRadius: '8px', padding: '1rem', minHeight: '440px' }}>
-            <svg width="100%" height="420" viewBox="0 0 540 420" style={{ overflow: 'visible' }}>
+          <div style={{ background: '#090b10', border: '1px solid var(--border-subtle)', borderRadius: '8px', padding: '1rem', minHeight: '430px' }}>
+            <svg width="100%" height="410" viewBox="0 0 540 410" style={{ overflow: 'visible' }}>
               {links.map((link, idx) => {
                 const source = nodes.find(n => n.id === link.from);
                 const target = nodes.find(n => n.id === link.to);
@@ -109,7 +126,7 @@ export default function NetworksView() {
                     x1={source.x}
                     y1={source.y}
                     x2={target.x}
-                    y2={target.y}
+                    y2={target.x}
                     stroke="rgba(239, 68, 68, 0.4)"
                     strokeWidth="1.5"
                     strokeDasharray={link.to === 'M1' ? '4 2' : 'none'}
@@ -119,7 +136,7 @@ export default function NetworksView() {
 
               {nodes.map((node) => {
                 const isSelected = selectedNode?.id === node.id;
-                const color = getNodeColor(node.risk);
+                const color = node.active ? '#3b82f6' : getNodeColor(node.risk);
                 return (
                   <g 
                     key={node.id} 
@@ -131,7 +148,7 @@ export default function NetworksView() {
                       r={isSelected ? 16 : 13}
                       fill="var(--bg-card)"
                       stroke={color}
-                      strokeWidth={isSelected ? 3 : 2}
+                      strokeWidth={isSelected ? 3 : (node.active ? 2.5 : 1.5)}
                     />
                     <text
                       x="0"
@@ -147,8 +164,9 @@ export default function NetworksView() {
                       x="0"
                       y="24"
                       textAnchor="middle"
-                      fill="var(--text-secondary)"
+                      fill={node.active ? '#60a5fa' : 'var(--text-secondary)'}
                       fontSize="10"
+                      fontWeight={node.active ? 'bold' : 'normal'}
                       className="mono"
                     >
                       {node.label.split(' ')[0]}
@@ -160,63 +178,68 @@ export default function NetworksView() {
           </div>
 
           <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '0.75rem', textAlign: 'center' }}>
-            Click any node on the graph to inspect entity relations and risk profiles.
+            Click any node on the graph to inspect correlated records and entity properties.
           </div>
         </div>
 
-        {/* CLUSTER DOSSIER */}
+        {/* NODE & SYNDICATE DETAIL PANEL (RULE 3) */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          
+          {/* Syndicate Card */}
           <div className="fintech-card" style={{ padding: '1.25rem', borderLeft: '3px solid #ef4444' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-              <span className="badge-blocked">COORDINATED RING</span>
-              <span className="mono" style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{selectedRing.id}</span>
+              <span className="badge-blocked">SYNDICATE CLUSTER</span>
+              <span className="mono" style={{ fontSize: '11px', color: 'var(--text-muted)' }}>RING_DELTA_042</span>
             </div>
 
-            <h4 style={{ fontSize: '14px', fontWeight: 700, color: '#fff', marginBottom: '0.5rem' }}>
-              {selectedRing.name}
+            <h4 style={{ fontSize: '14px', fontWeight: 700, color: '#fff', marginBottom: '0.35rem' }}>
+              Card Testing Burst Syndicate
             </h4>
 
-            <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '1rem' }}>
-              {selectedRing.description}
+            <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '0.85rem' }}>
+              Correlated multi-account cluster sharing hardware fingerprint <strong>{activeDeviceId}</strong> and datacenter egress proxy <strong>{activeIp}</strong>.
             </p>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '12px', background: 'var(--bg-secondary)', padding: '0.75rem', borderRadius: '6px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', fontSize: '12px', background: 'var(--bg-secondary)', padding: '0.75rem', borderRadius: '6px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Linked Accounts:</span>
-                <strong style={{ color: '#fff' }}>{selectedRing.accounts} Accounts</strong>
+                <span style={{ color: 'var(--text-muted)' }}>Correlated Accounts:</span>
+                <strong style={{ color: '#fff' }}>14 Synthetic Users</strong>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Shared Devices:</span>
-                <strong style={{ color: '#fff' }}>{selectedRing.devices} Fingerprints</strong>
+                <span style={{ color: 'var(--text-muted)' }}>Shared Fingerprint:</span>
+                <span className="mono" style={{ color: '#60a5fa' }}>{activeDeviceId}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Proxy IPs:</span>
-                <strong style={{ color: '#fff' }}>{selectedRing.ips} Nodes</strong>
+                <span style={{ color: 'var(--text-muted)' }}>Total Exposure:</span>
+                <strong style={{ color: '#f87171' }}>₹4,20,000</strong>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Transaction Volume:</span>
-                <strong style={{ color: '#f87171' }}>₹{selectedRing.volume.toLocaleString('en-IN')}</strong>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Detection Confidence:</span>
-                <strong style={{ color: '#10b981' }}>{selectedRing.confidence}%</strong>
+                <span style={{ color: 'var(--text-muted)' }}>Confidence:</span>
+                <strong style={{ color: '#10b981' }}>98.4%</strong>
               </div>
             </div>
           </div>
 
+          {/* Selected Node Details */}
           {selectedNode && (
             <div className="fintech-card" style={{ padding: '1.25rem' }}>
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>
-                Selected Entity Details
+              <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '4px' }}>
+                SELECTED NODE DETAILS
               </div>
               <div className="mono" style={{ fontSize: '14px', fontWeight: 700, color: '#fff' }}>
                 {selectedNode.label}
               </div>
               <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                Type: <strong>{selectedNode.type}</strong> • Risk Level: <strong style={{ color: getNodeColor(selectedNode.risk) }}>{selectedNode.risk}</strong>
+                Entity Type: <strong>{selectedNode.type}</strong>
+              </div>
+              <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '2px' }}>
+                Status: <strong style={{ color: selectedNode.active ? '#60a5fa' : getNodeColor(selectedNode.risk) }}>
+                  {selectedNode.active ? 'ACTIVE INVESTIGATION TARGET' : `${selectedNode.risk} RISK`}
+                </strong>
               </div>
             </div>
           )}
+
         </div>
 
       </div>

@@ -8,24 +8,25 @@ import ChargebacksView from './components/ChargebacksView';
 import SystemStatusView from './components/SystemStatusView';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('monitor'); // 'monitor' | 'investigate' | 'networks' | 'models' | 'chargebacks' | 'system'
-  const [mode, setMode] = useState('SIMULATION'); // 'SIMULATION' or 'SANDBOX'
+  const [activeTab, setActiveTab] = useState('monitor');
+  const [mode, setMode] = useState('SIMULATION');
   const [isStreamLive, setIsStreamLive] = useState(true);
 
   const [transactions, setTransactions] = useState([]);
   const [metrics, setMetrics] = useState(null);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
+  const [focusedNetworkTxn, setFocusedNetworkTxn] = useState(null);
 
-  // Initial Fetch of Transactions & Metrics from FastAPI
+  // Initial Fetch of Shared Unified Transactions & Metrics from FastAPI
   useEffect(() => {
     fetch('http://localhost:8000/api/risk/transactions?limit=60')
       .then(res => res.json())
       .then(data => {
         if (data.transactions && data.transactions.length > 0) {
           setTransactions(data.transactions);
-          // Preselect first blocked transaction for instant investigation readiness
-          const firstBlocked = data.transactions.find(t => t.action === 'BLOCK');
-          if (firstBlocked) setSelectedTransaction(firstBlocked);
+          const firstBlocked = data.transactions.find(t => t.action === 'BLOCK') || data.transactions[0];
+          setSelectedTransaction(firstBlocked);
+          setFocusedNetworkTxn(firstBlocked);
         }
       })
       .catch(() => {});
@@ -41,14 +42,14 @@ export default function App() {
     if (!isStreamLive) return;
 
     const interval = setInterval(() => {
-      const isFraud = Math.random() < 0.22;
-      const amount = isFraud ? Math.floor(Math.random() * 45000 + 6000) : Math.floor(Math.random() * 2800 + 200);
-      const geo = isFraud ? Math.floor(Math.random() * 7500 + 1500) : Math.floor(Math.random() * 30 + 2);
-      const vel = isFraud ? Math.floor(Math.random() * 12 + 5) : Math.floor(Math.random() * 2 + 1);
-      const proxy = isFraud ? (Math.random() < 0.8 ? 1 : 0) : 0;
+      const isFraud = Math.random() < 0.25;
+      const amount = isFraud ? Math.floor(Math.random() * 38000 + 12000) : Math.floor(Math.random() * 2600 + 350);
+      const geo = isFraud ? Math.floor(Math.random() * 7200 + 1800) : Math.floor(Math.random() * 25 + 2);
+      const vel = isFraud ? Math.floor(Math.random() * 11 + 5) : Math.floor(Math.random() * 2 + 1);
+      const proxy = isFraud ? (Math.random() < 0.85 ? 1 : 0) : 0;
 
       const payload = {
-        user_id: `USR_${Math.floor(Math.random() * 8999 + 1000)}`,
+        user_id: isFraud ? `USR_8921` : `USR_${Math.floor(Math.random() * 8999 + 1000)}`,
         amount: amount,
         category: isFraud ? 'electronics' : 'ecommerce',
         velocity_1h: vel,
@@ -56,7 +57,7 @@ export default function App() {
         device_trust_score: isFraud ? 0.25 : 0.95,
         is_proxy_vpn: proxy,
         card_fails_24h: isFraud ? 3 : 0,
-        user_account_age_days: isFraud ? 3 : 320,
+        user_account_age_days: isFraud ? 4 : 280,
         is_new_shipping_address: isFraud ? 1 : 0,
         source: mode
       };
@@ -73,16 +74,19 @@ export default function App() {
         }
       })
       .catch(() => {});
-    }, 3500);
+    }, 3800);
 
     return () => clearInterval(interval);
   }, [isStreamLive, mode]);
 
+  // Select transaction from Monitor
   const handleSelectTransaction = (tx) => {
     setSelectedTransaction(tx);
+    setFocusedNetworkTxn(tx);
     setActiveTab('investigate');
   };
 
+  // Update action across unified store
   const handleUpdateAction = (txId, newAction) => {
     setTransactions(prev => prev.map(t => {
       if (t.id === txId) {
@@ -93,6 +97,22 @@ export default function App() {
     if (selectedTransaction?.id === txId) {
       setSelectedTransaction(prev => ({ ...prev, action: newAction }));
     }
+  };
+
+  // Jump from Investigation to Networks
+  const handleNavigateToNetworks = (txn) => {
+    setFocusedNetworkTxn(txn || selectedTransaction);
+    setActiveTab('networks');
+  };
+
+  // Jump from Chargebacks to Investigation
+  const handleInvestigateDispute = (txId) => {
+    const target = transactions.find(t => t.id === txId);
+    if (target) {
+      setSelectedTransaction(target);
+      setFocusedNetworkTxn(target);
+    }
+    setActiveTab('investigate');
   };
 
   return (
@@ -109,7 +129,7 @@ export default function App() {
         selectedTransaction={selectedTransaction}
       />
 
-      {/* MAIN FRAUD OPERATIONS CANVAS */}
+      {/* MAIN OPERATIONS CANVAS */}
       <main style={{ flex: 1, maxWidth: '1440px', width: '100%', margin: '0 auto', padding: '1.5rem' }}>
         
         {activeTab === 'monitor' && (
@@ -124,12 +144,15 @@ export default function App() {
           <InvestigationView
             transaction={selectedTransaction}
             onUpdateAction={handleUpdateAction}
-            onNavigateToNetworks={() => setActiveTab('networks')}
+            onNavigateToNetworks={handleNavigateToNetworks}
           />
         )}
 
         {activeTab === 'networks' && (
-          <NetworksView />
+          <NetworksView
+            focusedTransaction={focusedNetworkTxn}
+            onBackToInvestigation={() => setActiveTab('investigate')}
+          />
         )}
 
         {activeTab === 'models' && (
@@ -137,7 +160,9 @@ export default function App() {
         )}
 
         {activeTab === 'chargebacks' && (
-          <ChargebacksView />
+          <ChargebacksView
+            onInvestigateDispute={handleInvestigateDispute}
+          />
         )}
 
         {activeTab === 'system' && (
@@ -155,7 +180,7 @@ export default function App() {
         color: 'var(--text-muted)',
         background: 'var(--bg-secondary)'
       }}>
-        CERBERUSPAY • Payment Risk Intelligence Platform • Razorpay AI Buildathon Track 02
+        CERBERUSPAY • Unified Payment Risk Intelligence Platform • Razorpay AI Buildathon Track 02
       </footer>
 
     </div>
