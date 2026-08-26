@@ -1,0 +1,31 @@
+{
+  "model_name": "Cerberus Gradient Boosting Risk Classifier v1.0",
+  "evaluation_dataset_size": 6000,
+  "precision": 1.0,
+  "recall": 1.0,
+  "f1_score": 1.0,
+  "roc_auc": 1.0,
+  "confusion_matrix": {
+    "true_negatives": 5597,
+    "false_positives": 0,
+    "false_negatives": 0,
+    "true_positives": 403
+  },
+  "financial_cost_analysis": {
+    "false_positive_friction_cost_inr": 0.0,
+    "fraud_leakage_loss_inr": 0.0,
+    "total_prevented_fraud_value_inr": 2619500.0,
+    "net_roi_ratio": 2619500.0
+  },
+  "feature_importances": {
+    "amount": 0.0,
+    "velocity_1h": 0.0,
+    "geo_distance_km": 0.9422,
+    "device_trust_score": 0.0,
+    "is_proxy_vpn": 0.0,
+    "card_fails_24h": 0.0159,
+    "user_account_age_days": 0.0337,
+    "is_new_shipping_address": 0.0081,
+    "hour_of_day": 0.0
+  }
+}

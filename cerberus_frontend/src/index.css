@@ -1,0 +1,105 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg-primary: #07090e;
+  --bg-secondary: #0d111a;
+  --bg-tertiary: #131926;
+  --bg-card: rgba(19, 25, 38, 0.7);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-active: rgba(239, 68, 68, 0.4);
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent-crimson: #ef4444;
+  --accent-amber: #f59e0b;
+  --accent-emerald: #10b981;
+  --accent-cyan: #06b6d4;
+  --accent-violet: #8b5cf6;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  overflow-x: hidden;
+}
+
+code, pre, .mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.glass-panel {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+}
+
+.badge-block {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.badge-allow {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.badge-challenge {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.btn-crimson {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: inline-flex;
+  alignItems: center;
+  gap: 8px;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
+  transition: all 0.2s ease;
+}
+
+.btn-crimson:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--border-subtle);
+  border-radius: 3px;
+}
