@@ -15,6 +15,12 @@ export default function AuthGate({ onAuthSuccess }) {
   const [isLoading, setIsLoading] = useState(false);
   const [resending, setResending] = useState(false);
 
+  // Dynamic Backend Host resolver (matches current origin hostname)
+  const getBackendUrl = (path) => {
+    const host = window.location.hostname || 'localhost';
+    return `http://${host}:8000${path}`;
+  };
+
   // Mask email for UI privacy (e.g. p***4@gmail.com)
   const maskEmail = (val) => {
     if (!val || !val.includes('@')) return 'registered operator email';
@@ -31,11 +37,24 @@ export default function AuthGate({ onAuthSuccess }) {
     setIsLoading(true);
 
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim().toLowerCase(), password })
-      });
+      let res;
+      try {
+        res = await fetch(getBackendUrl('/api/auth/login'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email.trim().toLowerCase(), password })
+        });
+      } catch (networkErr) {
+        // Fallback to 127.0.0.1 if localhost failed or vice versa
+        const fallbackUrl = window.location.hostname === '127.0.0.1' 
+          ? 'http://localhost:8000/api/auth/login'
+          : 'http://127.0.0.1:8000/api/auth/login';
+        res = await fetch(fallbackUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email.trim().toLowerCase(), password })
+        });
+      }
 
       const data = await res.json();
       if (!res.ok) {
@@ -44,7 +63,7 @@ export default function AuthGate({ onAuthSuccess }) {
 
       if (data.requires_otp || data.status === 'otp_sent') {
         setStep('OTP');
-        setInfoMsg(`Security verification code dispatched. Please check your inbox or spam folder.`);
+        setInfoMsg(`Security verification code dispatched to your email. Check inbox or spam folder.`);
       } else if (data.access_token) {
         onAuthSuccess(data.operator, data.access_token);
       }
@@ -67,11 +86,23 @@ export default function AuthGate({ onAuthSuccess }) {
     setIsLoading(true);
 
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/auth/verify-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim().toLowerCase(), otp: otp.trim() })
-      });
+      let res;
+      try {
+        res = await fetch(getBackendUrl('/api/auth/verify-otp'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email.trim().toLowerCase(), otp: otp.trim() })
+        });
+      } catch (networkErr) {
+        const fallbackUrl = window.location.hostname === '127.0.0.1' 
+          ? 'http://localhost:8000/api/auth/verify-otp'
+          : 'http://127.0.0.1:8000/api/auth/verify-otp';
+        res = await fetch(fallbackUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email.trim().toLowerCase(), otp: otp.trim() })
+        });
+      }
 
       const data = await res.json();
       if (!res.ok) {
@@ -93,7 +124,7 @@ export default function AuthGate({ onAuthSuccess }) {
     setInfoMsg(null);
 
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/auth/login', {
+      const res = await fetch(getBackendUrl('/api/auth/login'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email.trim().toLowerCase(), password })
@@ -120,14 +151,15 @@ export default function AuthGate({ onAuthSuccess }) {
       flexDirection: 'column',
       justifyContent: 'center',
       alignItems: 'center',
-      background: 'radial-gradient(ellipse 90% 60% at 50% 15%, rgba(14, 165, 233, 0.16) 0%, rgba(99, 102, 241, 0.1) 40%, #06090e 85%)',
+      background: 'radial-gradient(ellipse 80% 50% at 50% 15%, rgba(56, 189, 248, 0.12) 0%, rgba(99, 102, 241, 0.06) 40%, #080b11 85%)',
       padding: '2rem 1.5rem',
       color: 'var(--text-primary)',
       position: 'relative',
-      overflow: 'hidden'
+      overflow: 'hidden',
+      boxSizing: 'border-box'
     }}>
       
-      {/* BACKGROUND AMBIENT MESH GLOW */}
+      {/* BACKGROUND AMBIENT GLOW */}
       <div style={{
         position: 'absolute',
         top: '12%',
@@ -135,17 +167,17 @@ export default function AuthGate({ onAuthSuccess }) {
         transform: 'translateX(-50%)',
         width: '500px',
         height: '350px',
-        background: 'radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, rgba(79, 70, 229, 0.08) 50%, transparent 80%)',
+        background: 'radial-gradient(circle, rgba(56, 189, 248, 0.14) 0%, rgba(99, 102, 241, 0.06) 50%, transparent 80%)',
         filter: 'blur(50px)',
         pointerEvents: 'none'
       }} />
 
-      {/* BRANDING & LOGO HEADER - CLEAN PROJECT NAME ONLY */}
+      {/* BRANDING & LOGO HEADER */}
       <div style={{ textAlign: 'center', marginBottom: '1.75rem', position: 'relative', zIndex: 2 }}>
         <div style={{
           position: 'relative',
-          width: '76px',
-          height: '76px',
+          width: '78px',
+          height: '78px',
           borderRadius: '20px',
           overflow: 'hidden',
           background: 'linear-gradient(135deg, #0284c7 0%, #1e1b4b 100%)',
@@ -156,7 +188,8 @@ export default function AuthGate({ onAuthSuccess }) {
           boxShadow: '0 0 35px rgba(14, 165, 233, 0.65), 0 0 15px rgba(99, 102, 241, 0.4)',
           border: '2px solid rgba(56, 189, 248, 0.7)',
           cursor: 'pointer',
-          transition: 'transform 0.2s ease'
+          transition: 'transform 0.2s ease',
+          boxSizing: 'border-box'
         }}
         onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
         onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
@@ -191,13 +224,14 @@ export default function AuthGate({ onAuthSuccess }) {
           maxWidth: '420px', 
           width: '100%', 
           padding: '2.25rem', 
-          background: 'rgba(13, 18, 30, 0.82)',
+          background: 'rgba(13, 18, 30, 0.88)',
           backdropFilter: 'blur(24px)',
           border: '1px solid rgba(56, 189, 248, 0.3)',
           borderRadius: '16px',
           boxShadow: '0 25px 60px -10px rgba(0, 0, 0, 0.8), 0 0 35px -5px rgba(14, 165, 233, 0.2)',
           position: 'relative',
-          zIndex: 2
+          zIndex: 2,
+          boxSizing: 'border-box'
         }}
       >
         
@@ -214,9 +248,10 @@ export default function AuthGate({ onAuthSuccess }) {
             alignItems: 'center', 
             gap: '8px', 
             marginBottom: '1.25rem',
-            boxShadow: '0 0 15px rgba(239, 68, 68, 0.2)'
+            boxShadow: '0 0 15px rgba(239, 68, 68, 0.2)',
+            boxSizing: 'border-box'
           }}>
-            <AlertCircle size={16} />
+            <AlertCircle size={16} style={{ flexShrink: 0 }} />
             <span>{errorMsg}</span>
           </div>
         )}
@@ -233,17 +268,18 @@ export default function AuthGate({ onAuthSuccess }) {
             alignItems: 'center', 
             gap: '8px', 
             marginBottom: '1.25rem',
-            boxShadow: '0 0 15px rgba(14, 165, 233, 0.2)'
+            boxShadow: '0 0 15px rgba(14, 165, 233, 0.2)',
+            boxSizing: 'border-box'
           }}>
-            <CheckCircle2 size={16} />
+            <CheckCircle2 size={16} style={{ flexShrink: 0 }} />
             <span>{infoMsg}</span>
           </div>
         )}
 
         {/* STEP 1: OPERATOR CREDENTIALS */}
         {step === 'CREDENTIALS' && (
-          <form onSubmit={handleRequestOtp} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            <div>
+          <form onSubmit={handleRequestOtp} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', width: '100%', boxSizing: 'border-box' }}>
+            <div style={{ width: '100%', boxSizing: 'border-box' }}>
               <label style={{ 
                 display: 'block', 
                 fontSize: '11px', 
@@ -255,8 +291,8 @@ export default function AuthGate({ onAuthSuccess }) {
               }}>
                 Operator Email
               </label>
-              <div style={{ position: 'relative' }}>
-                <Mail size={15} style={{ position: 'absolute', left: '12px', top: '12px', color: '#64748b' }} />
+              <div style={{ position: 'relative', width: '100%', boxSizing: 'border-box' }}>
+                <Mail size={15} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#64748b', pointerEvents: 'none' }} />
                 <input
                   type="email"
                   required
@@ -265,8 +301,9 @@ export default function AuthGate({ onAuthSuccess }) {
                   onChange={(e) => setEmail(e.target.value)}
                   style={{
                     width: '100%',
+                    boxSizing: 'border-box',
                     padding: '10px 12px 10px 36px',
-                    background: 'rgba(8, 11, 17, 0.8)',
+                    background: 'rgba(8, 11, 17, 0.85)',
                     border: '1px solid rgba(56, 189, 248, 0.3)',
                     borderRadius: '8px',
                     color: '#fff',
@@ -286,7 +323,7 @@ export default function AuthGate({ onAuthSuccess }) {
               </div>
             </div>
 
-            <div>
+            <div style={{ width: '100%', boxSizing: 'border-box' }}>
               <label style={{ 
                 display: 'block', 
                 fontSize: '11px', 
@@ -298,8 +335,8 @@ export default function AuthGate({ onAuthSuccess }) {
               }}>
                 Operator Password
               </label>
-              <div style={{ position: 'relative' }}>
-                <Lock size={15} style={{ position: 'absolute', left: '12px', top: '12px', color: '#64748b' }} />
+              <div style={{ position: 'relative', width: '100%', boxSizing: 'border-box' }}>
+                <Lock size={15} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#64748b', pointerEvents: 'none' }} />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
@@ -308,8 +345,9 @@ export default function AuthGate({ onAuthSuccess }) {
                   onChange={(e) => setPassword(e.target.value)}
                   style={{
                     width: '100%',
+                    boxSizing: 'border-box',
                     padding: '10px 38px 10px 36px',
-                    background: 'rgba(8, 11, 17, 0.8)',
+                    background: 'rgba(8, 11, 17, 0.85)',
                     border: '1px solid rgba(56, 189, 248, 0.3)',
                     borderRadius: '8px',
                     color: '#fff',
@@ -350,38 +388,39 @@ export default function AuthGate({ onAuthSuccess }) {
               </div>
             </div>
 
-            {/* SEND SECURITY OTP BUTTON */}
+            {/* GLOWING SUBMIT BUTTON */}
             <button
               type="submit"
               disabled={isLoading}
               style={{
                 width: '100%',
+                boxSizing: 'border-box',
                 justifyContent: 'center',
                 marginTop: '0.5rem',
                 padding: '11px 18px',
-                background: 'linear-gradient(135deg, #0284c7 0%, #2563eb 50%, #4f46e5 100%)',
+                background: 'linear-gradient(135deg, #0284c7 0%, #2563eb 100%)',
                 border: '1px solid rgba(255, 255, 255, 0.2)',
                 borderRadius: '9px',
-                color: '#ffffff',
+                color: '#fff',
                 fontWeight: 800,
                 fontSize: '13.5px',
                 cursor: isLoading ? 'not-allowed' : 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '8px',
-                boxShadow: '0 4px 20px rgba(37, 99, 235, 0.55), 0 0 15px rgba(14, 165, 233, 0.4)',
+                boxShadow: '0 4px 20px rgba(14, 165, 233, 0.45), 0 0 15px rgba(99, 102, 241, 0.3)',
                 transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
                 opacity: isLoading ? 0.7 : 1
               }}
               onMouseEnter={(e) => {
                 if (!isLoading) {
                   e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 6px 28px rgba(37, 99, 235, 0.7), 0 0 25px rgba(14, 165, 233, 0.6)';
+                  e.currentTarget.style.boxShadow = '0 6px 28px rgba(14, 165, 233, 0.65)';
                 }
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 4px 20px rgba(37, 99, 235, 0.55), 0 0 15px rgba(14, 165, 233, 0.4)';
+                e.currentTarget.style.boxShadow = '0 4px 20px rgba(14, 165, 233, 0.45)';
               }}
             >
               {isLoading ? 'Sending Security OTP...' : 'Send Verification OTP'}
@@ -392,13 +431,13 @@ export default function AuthGate({ onAuthSuccess }) {
 
         {/* STEP 2: 2FA EMAIL OTP VERIFICATION */}
         {step === 'OTP' && (
-          <form onSubmit={handleVerifyOtp} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <form onSubmit={handleVerifyOtp} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', width: '100%', boxSizing: 'border-box' }}>
             <div style={{ textAlign: 'center' }}>
               <div style={{
                 width: '44px',
                 height: '44px',
                 borderRadius: '12px',
-                background: 'linear-gradient(135deg, rgba(56, 189, 248, 0.2) 0%, rgba(99, 102, 241, 0.3) 100%)',
+                background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.2) 0%, rgba(99, 102, 241, 0.3) 100%)',
                 border: '1px solid rgba(56, 189, 248, 0.5)',
                 display: 'flex',
                 alignItems: 'center',
@@ -420,7 +459,7 @@ export default function AuthGate({ onAuthSuccess }) {
             </div>
 
             {/* 6-DIGIT OTP INPUT */}
-            <div>
+            <div style={{ width: '100%', boxSizing: 'border-box' }}>
               <input
                 type="text"
                 required
@@ -432,6 +471,7 @@ export default function AuthGate({ onAuthSuccess }) {
                 className="mono"
                 style={{
                   width: '100%',
+                  boxSizing: 'border-box',
                   padding: '12px 14px',
                   background: 'rgba(8, 11, 17, 0.9)',
                   border: '1.5px solid rgba(56, 189, 248, 0.45)',
@@ -442,7 +482,7 @@ export default function AuthGate({ onAuthSuccess }) {
                   textAlign: 'center',
                   letterSpacing: '10px',
                   outline: 'none',
-                  boxShadow: '0 0 20px rgba(56, 189, 248, 0.2)',
+                  boxShadow: '0 0 20px rgba(14, 165, 233, 0.2)',
                   transition: 'all 0.18s ease'
                 }}
                 onFocus={(e) => {
@@ -451,7 +491,7 @@ export default function AuthGate({ onAuthSuccess }) {
                 }}
                 onBlur={(e) => {
                   e.target.style.borderColor = 'rgba(56, 189, 248, 0.45)';
-                  e.target.style.boxShadow = '0 0 20px rgba(56, 189, 248, 0.2)';
+                  e.target.style.boxShadow = '0 0 20px rgba(14, 165, 233, 0.2)';
                 }}
               />
             </div>
@@ -466,7 +506,8 @@ export default function AuthGate({ onAuthSuccess }) {
               alignItems: 'center',
               gap: '8px',
               fontSize: '11px',
-              color: '#fde68a'
+              color: '#fde68a',
+              boxSizing: 'border-box'
             }}>
               <AlertTriangle size={14} color="#f59e0b" style={{ flexShrink: 0 }} />
               <span>Please check your <strong>Inbox</strong> or <strong>Spam folder</strong> for the OTP email.</span>
@@ -478,19 +519,20 @@ export default function AuthGate({ onAuthSuccess }) {
               disabled={isLoading || otp.length !== 6}
               style={{
                 width: '100%',
+                boxSizing: 'border-box',
                 justifyContent: 'center',
                 padding: '11px 18px',
-                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                background: 'linear-gradient(135deg, #0284c7 0%, #2563eb 100%)',
                 border: '1px solid rgba(255, 255, 255, 0.2)',
                 borderRadius: '9px',
-                color: '#ffffff',
-                fontWeight: 800,
+                color: '#fff',
+                fontWeight: 900,
                 fontSize: '13.5px',
                 cursor: (isLoading || otp.length !== 6) ? 'not-allowed' : 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '8px',
-                boxShadow: '0 4px 20px rgba(16, 185, 129, 0.55)',
+                boxShadow: '0 4px 20px rgba(14, 165, 233, 0.45)',
                 transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
                 opacity: (isLoading || otp.length !== 6) ? 0.6 : 1
               }}
