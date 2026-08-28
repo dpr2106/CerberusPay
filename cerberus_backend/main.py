@@ -944,9 +944,9 @@ def simulate_gateway_checkout(payload: GatewayCheckoutPayload):
     features = [payload.amount, payload.velocity_1h, payload.geo_distance_km, payload.is_proxy]
     
     # 2. Sub-5ms Gradient Boosting Scoring
-    if ML_MODEL:
+    if RISK_MODEL:
         try:
-            prob_arr = ML_MODEL.predict_proba([features])[0]
+            prob_arr = RISK_MODEL.predict_proba([features])[0]
             fraud_prob = float(prob_arr[1])
         except Exception:
             fraud_prob = 0.95 if (payload.is_proxy == 1 or payload.geo_distance_km > 1000) else 0.05
@@ -1117,9 +1117,9 @@ def get_next_stream_event(force_fraud: Optional[bool] = None):
     features = [raw_event["amount"], raw_event["velocity_1h"], raw_event["geo_distance_km"], raw_event["is_proxy"]]
     
     # 3. Model Sub-5ms Scoring
-    if ML_MODEL:
+    if RISK_MODEL:
         try:
-            prob_arr = ML_MODEL.predict_proba([features])[0]
+            prob_arr = RISK_MODEL.predict_proba([features])[0]
             fraud_prob = float(prob_arr[1])
         except Exception:
             fraud_prob = 0.95 if (raw_event["is_proxy"] == 1 or raw_event["geo_distance_km"] > 1000) else 0.05
