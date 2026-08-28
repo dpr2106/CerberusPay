@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import AuthGate from './components/AuthGate';
-import HeroLanding from './components/HeroLanding';
 import MonitorView from './components/MonitorView';
 import InvestigationView from './components/InvestigationView';
 import NetworksView from './components/NetworksView';
@@ -24,11 +23,6 @@ export default function App() {
     return localStorage.getItem('cerberus_operator_token') || null;
   });
 
-  // Toggle between Hero Landing & SOC Console
-  const [showLanding, setShowLanding] = useState(() => {
-    return !localStorage.getItem('cerberus_operator_session');
-  });
-
   const [activeTab, setActiveTab] = useState('monitor');
   const [mode, setMode] = useState('SIMULATION');
   const [isStreamLive, setIsStreamLive] = useState(true);
@@ -45,7 +39,6 @@ export default function App() {
     setOperatorToken(tokenStr);
     localStorage.setItem('cerberus_operator_session', JSON.stringify(operatorObj));
     localStorage.setItem('cerberus_operator_token', tokenStr);
-    setShowLanding(false);
     setActiveTab('monitor');
   };
 
@@ -54,7 +47,6 @@ export default function App() {
     setOperatorToken(null);
     localStorage.removeItem('cerberus_operator_session');
     localStorage.removeItem('cerberus_operator_token');
-    setShowLanding(true);
     setActiveTab('monitor');
   };
 
@@ -106,9 +98,12 @@ export default function App() {
         category: isFraud ? 'electronics' : 'ecommerce',
         velocity_1h: vel,
         geo_distance_km: geo,
-        is_proxy: proxy,
-        payment_method: 'card',
-        merchant_category: 'electronics_high_value'
+        device_trust_score: isFraud ? 0.25 : 0.95,
+        is_proxy_vpn: proxy,
+        card_fails_24h: isFraud ? 3 : 0,
+        user_account_age_days: isFraud ? 4 : 280,
+        is_new_shipping_address: isFraud ? 1 : 0,
+        source: mode
       };
 
       fetch('http://127.0.0.1:8000/api/risk/evaluate-transaction', {
@@ -116,175 +111,99 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       })
-      .then(res => {
-        if (!res.ok) throw new Error(`Status ${res.status}`);
-        return res.json();
+      .then(res => res.json())
+      .then(data => {
+        if (data.evaluation) {
+          setTransactions(prev => [data.evaluation, ...prev.slice(0, 59)]);
+        }
       })
-      .then(newEvaluation => {
-        const enrichedTx = {
-          id: newEvaluation.transaction_id || `TXN_${Math.random().toString(36).substring(2, 9).toUpperCase()}`,
-          user_id: randomUser,
-          amount: amount,
-          timestamp: new Date().toISOString(),
-          risk_score: Math.round(newEvaluation.fraud_probability * 100),
-          risk_level: newEvaluation.fraud_probability >= 0.70 ? 'CRITICAL' : (newEvaluation.fraud_probability >= 0.40 ? 'MEDIUM' : 'LOW'),
-          action: newEvaluation.action,
-          signals: {
-            geo_distance_km: geo,
-            velocity_1h: vel,
-            is_proxy: proxy === 1,
-            anomaly_score: Number((newEvaluation.fraud_probability * 0.95).toFixed(2)),
-            device_id: isFraud ? 'DEV_FINGERPRINT_A9' : `DEV_${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
-            ip_address: isFraud ? '185.220.101.4 (Proxy)' : '103.21.144.12'
-          },
-          decision_rationale: newEvaluation.decision_rationale,
-          source: 'SIMULATED'
-        };
-
-        setTransactions(prev => [enrichedTx, ...prev.slice(0, 79)]);
-      })
-      .catch((err) => {
-        // Silent catch for background simulator to keep UX clean
-      });
-
+      .catch((err) => console.error('[CerberusPay Stream Ingestion Error]:', err));
     }, 3800);
 
     return () => clearInterval(interval);
-  }, [isStreamLive, currentOperator]);
+  }, [isStreamLive, mode, currentOperator]);
 
-  // Navigate to Investigation Dossier
+  // Select transaction from Monitor
   const handleSelectTransaction = (tx) => {
     setSelectedTransaction(tx);
+    setFocusedNetworkTxn(tx);
     setActiveTab('investigate');
   };
 
-  // Override / Update Transaction Action
-  const handleUpdateAction = (txId, newAction, rationale) => {
-    setTransactions(prev => prev.map(t => {
-      if (t.id === txId) {
-        return {
-          ...t,
-          action: newAction,
-          decision_rationale: rationale ? `[OPERATOR MANUAL OVERRIDE] ${rationale}` : t.decision_rationale
-        };
-      }
-      return t;
-    }));
+  // Real FastAPI Action Update Function
+  const handleUpdateAction = async (txId, newAction) => {
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/api/risk/transactions/${txId}/action`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          action: newAction
+        })
+      });
 
-    if (selectedTransaction && selectedTransaction.id === txId) {
-      setSelectedTransaction(prev => ({
-        ...prev,
-        action: newAction,
-        decision_rationale: rationale ? `[OPERATOR MANUAL OVERRIDE] ${rationale}` : prev.decision_rationale
-      }));
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || `Server returned HTTP ${response.status}`);
+      }
+
+      const result = await response.json();
+      const updatedTxn = result.transaction;
+
+      setTransactions(prev => prev.map(t => (t.id === txId ? updatedTxn : t)));
+      
+      if (selectedTransaction?.id === txId) {
+        setSelectedTransaction(updatedTxn);
+      }
+      if (focusedNetworkTxn?.id === txId) {
+        setFocusedNetworkTxn(updatedTxn);
+      }
+
+      return updatedTxn;
+    } catch (error) {
+      console.error(`[CerberusPay Action Error] Failed to update ${txId} to ${newAction}:`, error);
+      throw error;
     }
   };
 
-  // Cross-Navigation to Networks Graph
-  const handleNavigateToNetworks = (tx) => {
-    setFocusedNetworkTxn(tx);
+  // Jump from Investigation to Networks
+  const handleNavigateToNetworks = (txn) => {
+    setFocusedNetworkTxn(txn || selectedTransaction);
     setActiveTab('networks');
   };
 
-  // Cross-Navigation to Chargebacks View
-  const handleNavigateToChargebacks = (tx) => {
-    setFocusedChargebackTxId(tx.id);
+  // Jump from Investigation to Chargebacks with target transaction ID
+  const handleNavigateToChargebacks = (txId) => {
+    setFocusedChargebackTxId(txId || selectedTransaction?.id);
     setActiveTab('chargebacks');
   };
 
-  // Cross-Navigation from Chargebacks to Investigation Dossier
+  // Jump from Chargebacks to Investigation
   const handleInvestigateDispute = (txId) => {
-    const foundTx = transactions.find(t => t.id === txId);
-    if (foundTx) {
-      setSelectedTransaction(foundTx);
-    } else {
-      setSelectedTransaction({
-        id: txId,
-        user_id: 'USR_8921',
-        amount: 34999,
-        timestamp: new Date().toISOString(),
-        risk_score: 92,
-        risk_level: 'CRITICAL',
-        action: 'BLOCK',
-        signals: {
-          geo_distance_km: 4850,
-          velocity_1h: 9,
-          is_proxy: true,
-          anomaly_score: 0.94,
-          device_id: 'DEV_FINGERPRINT_A9',
-          ip_address: '185.220.101.4 (Proxy)'
-        },
-        decision_rationale: 'High velocity transaction anomaly with proxy egress detection across shared hardware fingerprint.'
-      });
+    const target = transactions.find(t => t.id === txId);
+    if (target) {
+      setSelectedTransaction(target);
+      setFocusedNetworkTxn(target);
     }
     setActiveTab('investigate');
   };
 
-  // 1. RENDER HERO LANDING PAGE
-  if (showLanding) {
-    return (
-      <HeroLanding
-        onLaunchConsole={() => setShowLanding(false)}
-        onSelectFeature={(feature) => {
-          setShowLanding(false);
-          const mapped = {
-            'labs': 'monitor',
-            'studio': 'investigate',
-            'openings': 'models',
-            'shop': 'chargebacks',
-            'models': 'models',
-            'monitor': 'monitor',
-            'networks': 'networks',
-            'chargebacks': 'chargebacks'
-          };
-          setActiveTab(mapped[feature] || 'monitor');
-        }}
-      />
-    );
-  }
-
-  // 2. RENDER 2FA OPERATOR AUTHENTICATION GATE IF NOT LOGGED IN
+  // 1. MANDATORY OPERATOR AUTHENTICATION GATE
   if (!currentOperator) {
-    return (
-      <div style={{ position: 'relative' }}>
-        <button
-          onClick={() => setShowLanding(true)}
-          style={{
-            position: 'absolute',
-            top: '1.25rem',
-            left: '1.5rem',
-            zIndex: 100,
-            background: 'rgba(13, 18, 29, 0.8)',
-            border: '1px solid var(--border-subtle)',
-            color: 'var(--text-secondary)',
-            padding: '6px 12px',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '12px',
-            fontWeight: 600,
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px'
-          }}
-        >
-          <span>&larr;</span>
-          <span>Back to Overview</span>
-        </button>
-        <AuthGate onAuthSuccess={handleAuthSuccess} />
-      </div>
-    );
+    return <AuthGate onAuthSuccess={handleAuthSuccess} />;
   }
 
-  // 3. RENDER SOC CONSOLE
+  // 2. AUTHENTICATED FRAUD OPERATIONS PLATFORM
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-primary)' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
       
       {/* NAVBAR */}
       <Navbar
         activeTab={activeTab}
         setActiveTab={(tab) => {
           if (tab === 'chargebacks') {
-            setFocusedChargebackTxId(null);
+            setFocusedChargebackTxId(null); // Clear filter when clicking tab directly
           }
           setActiveTab(tab);
         }}
@@ -295,7 +214,6 @@ export default function App() {
         selectedTransaction={selectedTransaction}
         currentOperator={currentOperator}
         onLogout={handleLogout}
-        onShowLanding={() => setShowLanding(true)}
       />
 
       {/* MAIN OPERATIONS CANVAS */}
