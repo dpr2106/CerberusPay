@@ -270,7 +270,7 @@ export default function MonitorView({ transactions, mode, onSelectTransaction })
                 gap: '5px'
               }}>
                 <Radio size={11} className="animate-pulse" />
-                <span>Stream: ULB & IEEE-CIS Real Bank Benchmark Feed</span>
+                <span>Live Feed: Public Global Mempool WebSocket (wss://ws.blockchain.info)</span>
               </span>
             </div>
             <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '2px' }}>

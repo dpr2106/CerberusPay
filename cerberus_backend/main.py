@@ -1082,17 +1082,36 @@ def razorpay_webhook_listener(request_body: Dict[str, Any] = Body(...), x_razorp
     }
 
 # ==============================================================================
-# 10. REAL-WORLD BANK FRAUD BENCHMARK STREAM (ULB / IEEE-CIS ENGINE)
+# 10. REAL-WORLD LIVE GLOBAL MEMPOOL & BANK FRAUD STREAM ENGINE
 # ==============================================================================
 
 from bank_stream_engine import benchmark_engine
+from live_mempool_stream import mempool_engine
+
+# Launch Global WebSocket Daemon Thread
+try:
+    mempool_engine.start_background_thread()
+except Exception as e:
+    print(f"[LIVE MEMPOOL] Init notice: {e}", flush=True)
 
 @app.get("/api/stream/next-event")
 def get_next_stream_event(force_fraud: Optional[bool] = None):
     start_time = time.time()
     
-    # 1. Fetch Next Event from ULB Banking Benchmark Feed
-    raw_event = benchmark_engine.generate_next_benchmark_transaction(force_fraud=force_fraud)
+    # 1. Prioritize Live Global Mempool WebSocket Event, or generate from Benchmark
+    live_tx = mempool_engine.get_latest_event()
+    if live_tx and force_fraud is None:
+        raw_event = live_tx
+        source_label = "LIVE_GLOBAL_MEMPOOL"
+        payment_method = live_tx.get("payment_method", "CRYPTO_MEMPOOL")
+        card_info = None
+        vpa_info = None
+    else:
+        raw_event = benchmark_engine.generate_next_benchmark_transaction(force_fraud=force_fraud)
+        source_label = "ULB_BANK_BENCHMARK"
+        payment_method = raw_event.get("payment_method", "UPI")
+        card_info = raw_event.get("card")
+        vpa_info = raw_event.get("vpa")
     
     # 2. Extract ML Feature Vector
     features = [raw_event["amount"], raw_event["velocity_1h"], raw_event["geo_distance_km"], raw_event["is_proxy"]]
@@ -1119,19 +1138,22 @@ def get_next_stream_event(force_fraud: Optional[bool] = None):
         rationale = f"Elevated anomaly score ({fraud_prob:.2f}). Stepped up to 3DS Multi-Factor OTP challenge."
     else:
         action = "ALLOW"
-        rationale = f"Authentic domestic {raw_event['card']['issuer']} {raw_event['payment_method']} checkout. Passed all risk parameters."
+        rationale = f"Authentic payment event ({source_label}). Verified customer behavioral parameters."
         
     enriched_tx = {
         "id": raw_event["id"],
+        "full_tx_hash": raw_event.get("full_tx_hash"),
         "user_id": raw_event["user_id"],
         "amount": raw_event["amount"],
         "timestamp": raw_event["timestamp"],
         "risk_score": risk_score,
         "risk_level": "CRITICAL" if fraud_prob >= 0.70 else ("MEDIUM" if fraud_prob >= 0.35 else "LOW"),
         "action": action,
-        "payment_method": raw_event["payment_method"],
-        "vpa": raw_event.get("vpa"),
-        "card": raw_event.get("card"),
+        "payment_method": payment_method,
+        "vpa": vpa_info,
+        "card": card_info,
+        "sender_address": raw_event.get("sender_address"),
+        "receiver_address": raw_event.get("receiver_address"),
         "signals": {
             "geo_distance_km": raw_event["geo_distance_km"],
             "velocity_1h": raw_event["velocity_1h"],
@@ -1139,8 +1161,8 @@ def get_next_stream_event(force_fraud: Optional[bool] = None):
             "anomaly_score": round(fraud_prob * 0.95, 2),
             "device_id": raw_event["device_id"],
             "ip_address": raw_event["ip_address"],
-            "card_mask": f"CARD_{raw_event['card']['last4']}_9210",
-            "vpa": raw_event.get("vpa")
+            "card_mask": f"CARD_{card_info['last4']}_9210" if card_info else f"ADDR_{raw_event['id'][-4:]}",
+            "vpa": vpa_info
         },
         "feature_breakdown": [
             f"Transaction Amount: INR {raw_event['amount']:,.2f}",
@@ -1150,7 +1172,7 @@ def get_next_stream_event(force_fraud: Optional[bool] = None):
         ],
         "decision_rationale": rationale,
         "evaluation_latency_ms": eval_latency_ms,
-        "source": "ULB_BANK_BENCHMARK"
+        "source": source_label
     }
     
     TRANSACTIONS.insert(0, enriched_tx)
@@ -1160,6 +1182,8 @@ def get_next_stream_event(force_fraud: Optional[bool] = None):
     return {
         "status": "success",
         "event": enriched_tx,
+        "mempool_connected": mempool_engine.connected,
+        "total_live_ingested": mempool_engine.total_live_ingested,
         "benchmark_meta": {
             "dataset": benchmark_engine.dataset_name,
             "total_streamed": benchmark_engine.total_streamed,
@@ -1172,6 +1196,8 @@ def get_next_stream_event(force_fraud: Optional[bool] = None):
 def get_benchmark_stream_stats():
     return {
         "status": "success",
+        "mempool_connected": mempool_engine.connected,
+        "total_live_ingested": mempool_engine.total_live_ingested,
         "dataset_name": benchmark_engine.dataset_name,
         "total_streamed": benchmark_engine.total_streamed,
         "fraud_intercepted": benchmark_engine.fraud_intercepted_count,

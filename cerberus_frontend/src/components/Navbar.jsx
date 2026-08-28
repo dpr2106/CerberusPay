@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ShieldCheck, Activity, Search, Layers, Cpu, FileText, 
   Server, User, Lock, Radio, Zap, Sparkles, AlertCircle, 
-  CheckCircle2, RefreshCw, Power, PlusCircle
+  CheckCircle2, RefreshCw, Power, Globe
 } from 'lucide-react';
 
 export default function Navbar({ 
@@ -15,8 +15,7 @@ export default function Navbar({
   setIsStreamLive, 
   selectedTransaction,
   currentOperator,
-  onLogout,
-  onOpenIngestModal
+  onLogout
 }) {
   const [hoveredPill, setHoveredPill] = useState(null);
 
@@ -129,32 +128,6 @@ export default function Navbar({
         {/* STATUS PILLS WITH SPRING PHYSICS */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
           
-          {/* ⚡ RAZORPAY GATEWAY INGESTION BUTTON */}
-          <motion.button
-            onClick={onOpenIngestModal}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.94 }}
-            transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '5px 12px',
-              fontSize: '11px',
-              fontWeight: 800,
-              color: '#fff',
-              background: 'linear-gradient(135deg, #0284c7 0%, #2563eb 100%)',
-              border: '1px solid rgba(56, 189, 248, 0.6)',
-              borderRadius: '7px',
-              cursor: 'pointer',
-              boxShadow: '0 0 16px rgba(14, 165, 233, 0.45)'
-            }}
-            title="Open Razorpay Gateway & Webhook Simulator"
-          >
-            <Zap size={13} />
-            <span>Ingest Payment</span>
-          </motion.button>
-
           {/* 1. EMERALD SYSTEM ONLINE PILL */}
           <motion.div 
             onMouseEnter={() => setHoveredPill('system')}
@@ -206,7 +179,57 @@ export default function Navbar({
             )}
           </motion.div>
 
-          {/* 2. SUNFIRE SIMULATION MODE PILL */}
+          {/* 2. LIVE GLOBAL PUBLIC MEMPOOL WEBSOCKET STATUS */}
+          <motion.div 
+            onMouseEnter={() => setHoveredPill('mempool')}
+            onMouseLeave={() => setHoveredPill(null)}
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.96 }}
+            transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+            style={{
+              position: 'relative',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '11px',
+              fontWeight: 800,
+              color: '#38bdf8',
+              background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.16) 0%, rgba(2, 132, 199, 0.26) 100%)',
+              border: '1px solid rgba(56, 189, 248, 0.55)',
+              padding: '5px 11px',
+              borderRadius: '7px',
+              boxShadow: '0 0 14px rgba(14, 165, 233, 0.3)',
+              cursor: 'default'
+            }}
+          >
+            <Globe size={12} className="animate-spin" style={{ animationDuration: '6s' }} />
+            <span>LIVE WS: MEMPOOL</span>
+            {hoveredPill === 'mempool' && (
+              <motion.div 
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                style={{
+                  position: 'absolute',
+                  top: '100%',
+                  right: 0,
+                  marginTop: '8px',
+                  background: '#0d1522',
+                  border: '1px solid rgba(56, 189, 248, 0.4)',
+                  borderRadius: '7px',
+                  padding: '7px 12px',
+                  fontSize: '11px',
+                  color: '#bae6fd',
+                  whiteSpace: 'nowrap',
+                  zIndex: 200,
+                  boxShadow: '0 10px 25px rgba(0,0,0,0.6)'
+                }}
+              >
+                ● Connected to wss://ws.blockchain.info/inv • Streaming global payments
+              </motion.div>
+            )}
+          </motion.div>
+
+          {/* 3. SUNFIRE SIMULATION MODE PILL */}
           <motion.div 
             onMouseEnter={() => setHoveredPill('mode')}
             onMouseLeave={() => setHoveredPill(null)}
@@ -259,7 +282,7 @@ export default function Navbar({
             )}
           </motion.div>
 
-          {/* 3. RADAR STREAM PILL */}
+          {/* 4. RADAR STREAM PILL */}
           <motion.button
             onMouseEnter={() => setHoveredPill('stream')}
             onMouseLeave={() => setHoveredPill(null)}
@@ -312,7 +335,7 @@ export default function Navbar({
             )}
           </motion.button>
 
-          {/* 4. CHIEF RISK OFFICER OPERATOR PROFILE */}
+          {/* 5. CHIEF RISK OFFICER OPERATOR PROFILE */}
           <motion.div 
             onMouseEnter={() => setHoveredPill('operator')}
             onMouseLeave={() => setHoveredPill(null)}
@@ -358,7 +381,7 @@ export default function Navbar({
             </span>
           </motion.div>
 
-          {/* 5. CRIMSON SIGN OUT BUTTON */}
+          {/* 6. CRIMSON SIGN OUT BUTTON */}
           <motion.button
             onClick={onLogout}
             title="Lock Session & Sign Out"
