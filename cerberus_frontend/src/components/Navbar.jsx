@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ShieldCheck, Activity, Search, Layers, Cpu, FileText, 
   Server, User, Lock, Radio, Zap, Sparkles, AlertCircle, 
-  CheckCircle2, RefreshCw, Power
+  CheckCircle2, RefreshCw, Power, PlusCircle
 } from 'lucide-react';
 
 export default function Navbar({ 
@@ -15,7 +15,8 @@ export default function Navbar({
   setIsStreamLive, 
   selectedTransaction,
   currentOperator,
-  onLogout
+  onLogout,
+  onOpenIngestModal
 }) {
   const [hoveredPill, setHoveredPill] = useState(null);
 
@@ -128,6 +129,32 @@ export default function Navbar({
         {/* STATUS PILLS WITH SPRING PHYSICS */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
           
+          {/* ⚡ RAZORPAY GATEWAY INGESTION BUTTON */}
+          <motion.button
+            onClick={onOpenIngestModal}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.94 }}
+            transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '5px 12px',
+              fontSize: '11px',
+              fontWeight: 800,
+              color: '#fff',
+              background: 'linear-gradient(135deg, #0284c7 0%, #2563eb 100%)',
+              border: '1px solid rgba(56, 189, 248, 0.6)',
+              borderRadius: '7px',
+              cursor: 'pointer',
+              boxShadow: '0 0 16px rgba(14, 165, 233, 0.45)'
+            }}
+            title="Open Razorpay Gateway & Webhook Simulator"
+          >
+            <Zap size={13} />
+            <span>Ingest Payment</span>
+          </motion.button>
+
           {/* 1. EMERALD SYSTEM ONLINE PILL */}
           <motion.div 
             onMouseEnter={() => setHoveredPill('system')}

@@ -7,6 +7,7 @@ import NetworksView from './components/NetworksView';
 import ModelsView from './components/ModelsView';
 import ChargebacksView from './components/ChargebacksView';
 import SystemStatusView from './components/SystemStatusView';
+import PaymentIngestModal from './components/PaymentIngestModal';
 
 export default function App() {
   // Operator Authentication Session State
@@ -26,6 +27,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('monitor');
   const [mode, setMode] = useState('SIMULATION');
   const [isStreamLive, setIsStreamLive] = useState(true);
+  const [isIngestModalOpen, setIsIngestModalOpen] = useState(false);
 
   const [transactions, setTransactions] = useState([]);
   const [metrics, setMetrics] = useState(null);
@@ -98,12 +100,9 @@ export default function App() {
         category: isFraud ? 'electronics' : 'ecommerce',
         velocity_1h: vel,
         geo_distance_km: geo,
-        device_trust_score: isFraud ? 0.25 : 0.95,
-        is_proxy_vpn: proxy,
-        card_fails_24h: isFraud ? 3 : 0,
-        user_account_age_days: isFraud ? 4 : 280,
-        is_new_shipping_address: isFraud ? 1 : 0,
-        source: mode
+        is_proxy: proxy,
+        payment_method: 'card',
+        merchant_category: 'electronics_high_value'
       };
 
       fetch('http://127.0.0.1:8000/api/risk/evaluate-transaction', {
@@ -111,99 +110,134 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       })
-      .then(res => res.json())
-      .then(data => {
-        if (data.evaluation) {
-          setTransactions(prev => [data.evaluation, ...prev.slice(0, 59)]);
-        }
+      .then(res => {
+        if (!res.ok) throw new Error(`Status ${res.status}`);
+        return res.json();
       })
-      .catch((err) => console.error('[CerberusPay Stream Ingestion Error]:', err));
+      .then(newEvaluation => {
+        const enrichedTx = {
+          id: newEvaluation.transaction_id || `TXN_${Math.random().toString(36).substring(2, 9).toUpperCase()}`,
+          user_id: randomUser,
+          amount: amount,
+          timestamp: new Date().toISOString(),
+          risk_score: Math.round(newEvaluation.fraud_probability * 100),
+          risk_level: newEvaluation.fraud_probability >= 0.70 ? 'CRITICAL' : (newEvaluation.fraud_probability >= 0.40 ? 'MEDIUM' : 'LOW'),
+          action: newEvaluation.action,
+          signals: {
+            geo_distance_km: geo,
+            velocity_1h: vel,
+            is_proxy: proxy === 1,
+            anomaly_score: Number((newEvaluation.fraud_probability * 0.95).toFixed(2)),
+            device_id: isFraud ? 'DEV_FINGERPRINT_A9' : `DEV_${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+            ip_address: isFraud ? '185.220.101.4 (Proxy)' : '103.21.144.12'
+          },
+          decision_rationale: newEvaluation.decision_rationale,
+          source: 'SIMULATED'
+        };
+
+        setTransactions(prev => [enrichedTx, ...prev.slice(0, 79)]);
+      })
+      .catch((err) => {
+        // Silent catch for background simulator
+      });
+
     }, 3800);
 
     return () => clearInterval(interval);
-  }, [isStreamLive, mode, currentOperator]);
+  }, [isStreamLive, currentOperator]);
 
-  // Select transaction from Monitor
+  // Handle Ingested Payment from Modal
+  const handlePaymentIngested = (newTxn) => {
+    setTransactions(prev => [newTxn, ...prev.slice(0, 79)]);
+    setSelectedTransaction(newTxn);
+    setFocusedNetworkTxn(newTxn);
+  };
+
+  // Navigate to Investigation Dossier
   const handleSelectTransaction = (tx) => {
     setSelectedTransaction(tx);
-    setFocusedNetworkTxn(tx);
     setActiveTab('investigate');
   };
 
-  // Real FastAPI Action Update Function
-  const handleUpdateAction = async (txId, newAction) => {
-    try {
-      const response = await fetch(`http://127.0.0.1:8000/api/risk/transactions/${txId}/action`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          action: newAction
-        })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail || `Server returned HTTP ${response.status}`);
+  // Override / Update Transaction Action
+  const handleUpdateAction = (txId, newAction, rationale) => {
+    setTransactions(prev => prev.map(t => {
+      if (t.id === txId) {
+        return {
+          ...t,
+          action: newAction,
+          decision_rationale: rationale ? `[OPERATOR MANUAL OVERRIDE] ${rationale}` : t.decision_rationale
+        };
       }
+      return t;
+    }));
 
-      const result = await response.json();
-      const updatedTxn = result.transaction;
-
-      setTransactions(prev => prev.map(t => (t.id === txId ? updatedTxn : t)));
-      
-      if (selectedTransaction?.id === txId) {
-        setSelectedTransaction(updatedTxn);
-      }
-      if (focusedNetworkTxn?.id === txId) {
-        setFocusedNetworkTxn(updatedTxn);
-      }
-
-      return updatedTxn;
-    } catch (error) {
-      console.error(`[CerberusPay Action Error] Failed to update ${txId} to ${newAction}:`, error);
-      throw error;
+    if (selectedTransaction && selectedTransaction.id === txId) {
+      setSelectedTransaction(prev => ({
+        ...prev,
+        action: newAction,
+        decision_rationale: rationale ? `[OPERATOR MANUAL OVERRIDE] ${rationale}` : prev.decision_rationale
+      }));
     }
   };
 
-  // Jump from Investigation to Networks
-  const handleNavigateToNetworks = (txn) => {
-    setFocusedNetworkTxn(txn || selectedTransaction);
+  // Cross-Navigation to Networks Graph
+  const handleNavigateToNetworks = (tx) => {
+    setFocusedNetworkTxn(tx);
     setActiveTab('networks');
   };
 
-  // Jump from Investigation to Chargebacks with target transaction ID
-  const handleNavigateToChargebacks = (txId) => {
-    setFocusedChargebackTxId(txId || selectedTransaction?.id);
+  // Cross-Navigation to Chargebacks View
+  const handleNavigateToChargebacks = (tx) => {
+    setFocusedChargebackTxId(tx.id);
     setActiveTab('chargebacks');
   };
 
-  // Jump from Chargebacks to Investigation
+  // Cross-Navigation from Chargebacks to Investigation Dossier
   const handleInvestigateDispute = (txId) => {
-    const target = transactions.find(t => t.id === txId);
-    if (target) {
-      setSelectedTransaction(target);
-      setFocusedNetworkTxn(target);
+    const foundTx = transactions.find(t => t.id === txId);
+    if (foundTx) {
+      setSelectedTransaction(foundTx);
+    } else {
+      setSelectedTransaction({
+        id: txId,
+        user_id: 'USR_8921',
+        amount: 34999,
+        timestamp: new Date().toISOString(),
+        risk_score: 92,
+        risk_level: 'CRITICAL',
+        action: 'BLOCK',
+        signals: {
+          geo_distance_km: 4850,
+          velocity_1h: 9,
+          is_proxy: true,
+          anomaly_score: 0.94,
+          device_id: 'DEV_FINGERPRINT_A9',
+          ip_address: '185.220.101.4 (Proxy)'
+        },
+        decision_rationale: 'High velocity transaction anomaly with proxy egress detection across shared hardware fingerprint.'
+      });
     }
     setActiveTab('investigate');
   };
 
-  // 1. MANDATORY OPERATOR AUTHENTICATION GATE
+  // 1. RENDER 2FA OPERATOR AUTHENTICATION GATE IF NOT LOGGED IN
   if (!currentOperator) {
-    return <AuthGate onAuthSuccess={handleAuthSuccess} />;
+    return (
+      <AuthGate onAuthSuccess={handleAuthSuccess} />
+    );
   }
 
-  // 2. AUTHENTICATED FRAUD OPERATIONS PLATFORM
+  // 2. RENDER MAIN SOC OPERATIONS CONSOLE
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-primary)' }}>
       
       {/* NAVBAR */}
       <Navbar
         activeTab={activeTab}
         setActiveTab={(tab) => {
           if (tab === 'chargebacks') {
-            setFocusedChargebackTxId(null); // Clear filter when clicking tab directly
+            setFocusedChargebackTxId(null);
           }
           setActiveTab(tab);
         }}
@@ -214,6 +248,7 @@ export default function App() {
         selectedTransaction={selectedTransaction}
         currentOperator={currentOperator}
         onLogout={handleLogout}
+        onOpenIngestModal={() => setIsIngestModalOpen(true)}
       />
 
       {/* MAIN OPERATIONS CANVAS */}
@@ -272,6 +307,13 @@ export default function App() {
       }}>
         CERBERUSPAY • Internal Payment Risk Operations Platform • Synchronized Chargeback Operations
       </footer>
+
+      {/* RAZORPAY GATEWAY INGESTION MODAL */}
+      <PaymentIngestModal
+        isOpen={isIngestModalOpen}
+        onClose={() => setIsIngestModalOpen(false)}
+        onPaymentIngested={handlePaymentIngested}
+      />
 
     </div>
   );

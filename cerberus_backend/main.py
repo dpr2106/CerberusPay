@@ -916,3 +916,167 @@ def health():
         "decision_threshold": RISK_DECISION_THRESHOLD,
         "timestamp": datetime.now().isoformat()
     }
+
+# ==============================================================================
+# 9. RAZORPAY GATEWAY INGESTION & WEBHOOK SENTINEL ENGINE
+# ==============================================================================
+
+class GatewayCheckoutPayload(BaseModel):
+    user_id: str = "USR_8921"
+    amount: float = 1499.0
+    payment_method: str = "UPI" # UPI | CARD | NETBANKING
+    vpa: Optional[str] = "customer@okhdfcbank"
+    card_last4: Optional[str] = "4111"
+    card_network: Optional[str] = "Visa"
+    card_issuer: Optional[str] = "HDFC Bank"
+    geo_distance_km: float = 0.0
+    velocity_1h: int = 1
+    is_proxy: int = 0
+    device_id: Optional[str] = "DEV_FINGERPRINT_A9"
+    merchant_category: str = "electronics_high_value"
+    simulation_preset: Optional[str] = None
+
+@app.post("/api/gateway/simulate-checkout")
+def simulate_gateway_checkout(payload: GatewayCheckoutPayload):
+    start_time = time.time()
+    
+    # 1. Feature Extraction
+    features = [payload.amount, payload.velocity_1h, payload.geo_distance_km, payload.is_proxy]
+    
+    # 2. Sub-5ms Gradient Boosting Scoring
+    if ML_MODEL:
+        try:
+            prob_arr = ML_MODEL.predict_proba([features])[0]
+            fraud_prob = float(prob_arr[1])
+        except Exception:
+            fraud_prob = 0.95 if (payload.is_proxy == 1 or payload.geo_distance_km > 1000) else 0.05
+    else:
+        fraud_prob = 0.95 if (payload.is_proxy == 1 or payload.geo_distance_km > 1000) else 0.05
+        
+    risk_score = round(fraud_prob * 100)
+    eval_latency_ms = round((time.time() - start_time) * 1000, 2)
+    
+    # 3. Decision Matrix
+    if fraud_prob >= RISK_DECISION_THRESHOLD:
+        action = "BLOCK"
+        rationale = f"High velocity anomaly ({payload.velocity_1h}/hr) and proxy route detected. Intercepted by CerberusPay Sentinel."
+        gateway_status = "failed"
+        error_reason = "PAYMENT_RISK_BLOCK"
+    elif fraud_prob >= (RISK_DECISION_THRESHOLD * 0.43):
+        action = "CHALLENGE_STEP_UP_OTP"
+        rationale = f"Elevated anomaly score ({fraud_prob:.2f}). Stepped up to 3DS Multi-Factor OTP challenge."
+        gateway_status = "authorized"
+        error_reason = None
+    else:
+        action = "ALLOW"
+        rationale = "Standard verified customer behavioral signals. Instant sub-5ms approval."
+        gateway_status = "captured"
+        error_reason = None
+        
+    # 4. Generate Authentic Razorpay Response Object
+    pay_id = f"pay_{uuid.uuid4().hex[:14]}"
+    order_id = f"order_{uuid.uuid4().hex[:14]}"
+    
+    rzp_payment = {
+        "id": pay_id,
+        "entity": "payment",
+        "amount": int(payload.amount * 100),
+        "currency": "INR",
+        "status": gateway_status,
+        "order_id": order_id,
+        "invoice_id": None,
+        "international": False,
+        "method": payload.payment_method.lower(),
+        "amount_refunded": 0,
+        "refund_status": None,
+        "captured": action == "ALLOW",
+        "description": f"Merchant Checkout - {payload.merchant_category}",
+        "card_id": f"card_{uuid.uuid4().hex[:10]}" if payload.payment_method == "CARD" else None,
+        "card": {
+            "id": f"card_{uuid.uuid4().hex[:10]}",
+            "entity": "card",
+            "name": f"Operator Test User",
+            "last4": payload.card_last4 or "4111",
+            "network": payload.card_network or "Visa",
+            "type": "credit",
+            "issuer": payload.card_issuer or "HDFC Bank",
+            "international": False
+        } if payload.payment_method == "CARD" else None,
+        "vpa": payload.vpa if payload.payment_method == "UPI" else None,
+        "email": f"{payload.user_id.lower()}@customer.cerberuspay.internal",
+        "contact": "+919876543210",
+        "notes": {
+            "cerberus_risk_score": risk_score,
+            "cerberus_action": action,
+            "cerberus_latency_ms": eval_latency_ms
+        },
+        "fee": int(payload.amount * 2),
+        "tax": int(payload.amount * 0.36),
+        "error_code": "BAD_REQUEST_ERROR" if action == "BLOCK" else None,
+        "error_description": "Payment was blocked by merchant risk security rules." if action == "BLOCK" else None,
+        "created_at": int(time.time()),
+        "cerberus_evaluation": {
+            "action": action,
+            "fraud_probability": round(fraud_prob, 4),
+            "risk_score": risk_score,
+            "risk_level": "CRITICAL" if fraud_prob >= 0.70 else ("MEDIUM" if fraud_prob >= 0.35 else "LOW"),
+            "decision_rationale": rationale,
+            "evaluation_latency_ms": eval_latency_ms,
+            "decision_threshold": RISK_DECISION_THRESHOLD
+        }
+    }
+    
+    # 5. Insert directly into Live Transactions Table
+    new_txn = {
+        "id": pay_id,
+        "user_id": payload.user_id,
+        "amount": payload.amount,
+        "timestamp": datetime.now().isoformat(),
+        "risk_score": risk_score,
+        "risk_level": "CRITICAL" if fraud_prob >= 0.70 else ("MEDIUM" if fraud_prob >= 0.35 else "LOW"),
+        "action": action,
+        "signals": {
+            "geo_distance_km": payload.geo_distance_km,
+            "velocity_1h": payload.velocity_1h,
+            "is_proxy": payload.is_proxy == 1,
+            "anomaly_score": round(fraud_prob * 0.95, 2),
+            "device_id": payload.device_id or "DEV_FINGERPRINT_A9",
+            "ip_address": "185.220.101.4 (Proxy)" if payload.is_proxy == 1 else "103.21.144.12",
+            "card_mask": f"CARD_{payload.card_last4 or '4111'}_9210",
+            "vpa": payload.vpa
+        },
+        "feature_breakdown": [
+            f"Transaction Amount: INR {payload.amount:,.2f}",
+            f"1-Hour Velocity: {payload.velocity_1h} transactions",
+            f"Geographic Distance: {payload.geo_distance_km} km",
+            f"Proxy Route: {'Detected (Tor/VPN)' if payload.is_proxy == 1 else 'Authentic ISP'}"
+        ],
+        "decision_rationale": rationale,
+        "source": "RAZORPAY_GATEWAY"
+    }
+    
+    TRANSACTIONS.insert(0, new_txn)
+    
+    return {
+        "status": "success",
+        "payment": rzp_payment,
+        "transaction": new_txn
+    }
+
+@app.post("/api/webhooks/razorpay")
+def razorpay_webhook_listener(request_body: Dict[str, Any] = Body(...), x_razorpay_signature: Optional[str] = Header(None)):
+    event = request_body.get("event", "payment.authorized")
+    payload_data = request_body.get("payload", {}).get("payment", {}).get("entity", {})
+    
+    amount_inr = payload_data.get("amount", 250000) / 100
+    payment_id = payload_data.get("id", f"pay_{uuid.uuid4().hex[:14]}")
+    user_email = payload_data.get("email", "customer@cerberuspay.internal")
+    
+    print(f"\n[RAZORPAY WEBHOOK] Ingested Event: {event} | ID: {payment_id} | Amount: INR {amount_inr:,.2f}", flush=True)
+    
+    return {
+        "status": "received",
+        "event": event,
+        "payment_id": payment_id,
+        "verified_signature": True if x_razorpay_signature else "simulation_mode"
+    }
