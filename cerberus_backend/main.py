@@ -601,6 +601,36 @@ def verify_operator_otp(payload: VerifyOtpPayload):
     # Clean up OTP record on successful verification
     del OTP_STORE[email_clean]
 
+    # Dispatch Security Login Confirmation Email via SMTP
+    confirm_subject = f"🛡️ CerberusPay Security Alert: Successful Operator Login ({operator['name']})"
+    confirm_body = f'''CERBERUSPAY ZERO-TRUST SECURITY GATEWAY
+Security Alert: Successful Operator Session Authenticated
+
+Hello {operator['name']},
+
+This is an automated confirmation that your CerberusPay operator account was successfully authenticated with Two-Factor OTP Verification.
+
+==================================================
+  OPERATOR IDENTITY:  {operator['name']}
+  OPERATOR ID:        {operator['operator_id']}
+  ROLE:               {operator['role']}
+  SESSION TIMESTAMP:  {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+  GATEWAY CONSOLE:    Internal Payment Risk Sentinel
+  SECURITY STATUS:    2FA Cryptographic Verification Passed
+==================================================
+
+If this was you, no further action is required.
+If you did not authorize this login, please lock your operator credentials immediately.
+
+Best regards,
+CerberusPay Automated Defense Sentinel
+'''
+    try:
+        confirm_res = send_smtp_email(confirm_subject, confirm_body, to_email=email_clean)
+        print(f"[SECURITY ALERT EMAIL] Dispatched login confirmation to {email_clean} (Sent: {confirm_res.get('sent', False)})", flush=True)
+    except Exception as e:
+        print(f"[SECURITY ALERT ERROR] Failed to dispatch login confirmation email: {e}", flush=True)
+
     print(f"\n==================================================", flush=True)
     print(f"[ANALYST AUTH SUCCESS] Operator Logged In via 2FA OTP: {operator['operator_id']} ({email_clean})", flush=True)
     print(f"Name: {operator['name']} | Role: {operator['role']} | Time: {datetime.now().strftime('%H:%M:%S')}", flush=True)
