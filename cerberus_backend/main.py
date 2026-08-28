@@ -585,7 +585,7 @@ def verify_operator_otp(payload: VerifyOtpPayload):
 
     if record.get("expires_at", 0) < time.time():
         del OTP_STORE[email_clean]
-        raise HTTPException(status_code=400, detail="Verification code has expired (10 min limit). Please request a new code.")
+        raise HTTPException(status_code=400, detail="Verification code has expired. Please request a new code.")
 
     if record.get("otp") != otp_clean:
         raise HTTPException(status_code=401, detail="Invalid verification code. Please check your email and try again.")

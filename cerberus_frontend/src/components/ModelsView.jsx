@@ -13,8 +13,31 @@ export default function ModelsView({ metrics }) {
   const [hoveredMetric, setHoveredMetric] = useState(null);
   const [hoveredFeature, setHoveredFeature] = useState(null);
 
+  const getBackendUrls = (path) => {
+    const host = window.location.hostname || 'localhost';
+    return [
+      `http://${host}:8000${path}`,
+      `http://127.0.0.1:8000${path}`,
+      `http://localhost:8000${path}`
+    ];
+  };
+
+  const robustFetch = async (path, options = {}) => {
+    const urls = getBackendUrls(path);
+    let lastError = null;
+    for (const url of urls) {
+      try {
+        const res = await fetch(url, options);
+        return res;
+      } catch (err) {
+        lastError = err;
+      }
+    }
+    throw lastError || new Error('Failed to connect to backend server');
+  };
+
   useEffect(() => {
-    fetch('http://127.0.0.1:8000/api/risk/config')
+    robustFetch('/api/risk/config')
       .then(res => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json();
@@ -36,8 +59,8 @@ export default function ModelsView({ metrics }) {
     setStatusMessage(`Applying ${label} to backend risk engine...`);
 
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/risk/config/threshold', {
-        method: 'PATCH',
+      const res = await robustFetch('/api/risk/config/threshold', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ threshold: val })
       });
