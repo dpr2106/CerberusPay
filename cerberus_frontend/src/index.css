@@ -1,53 +1,53 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap');
 
 :root {
-  /* Slate & Navy Fintech Dark Theme */
-  --bg-primary: #080b11;
-  --bg-secondary: #0d121d;
-  --bg-tertiary: #131a29;
-  --bg-card: #101726;
-  --bg-card-hover: #151e32;
-  --bg-hover: rgba(59, 130, 246, 0.08);
+  /* Slate & Deep Cyber-Fintech Dark Theme */
+  --bg-primary: #060910;
+  --bg-secondary: #0a0f1c;
+  --bg-tertiary: #10172b;
+  --bg-card: #0c1322;
+  --bg-card-hover: #121c33;
+  --bg-hover: rgba(56, 189, 248, 0.08);
   
-  --border-subtle: #1c2638;
-  --border-muted: #27354d;
-  --border-active: #3b82f6;
+  --border-subtle: #172338;
+  --border-muted: #243654;
+  --border-active: #38bdf8;
   
   --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
   
-  /* Precision Status Colors */
+  /* Precision Status Colors (Vibrant Neon Contrast) */
   --status-allowed: #10b981;
-  --status-allowed-bg: rgba(16, 185, 129, 0.1);
-  --status-allowed-border: rgba(16, 185, 129, 0.25);
-  --status-allowed-glow: rgba(16, 185, 129, 0.2);
+  --status-allowed-bg: rgba(16, 185, 129, 0.14);
+  --status-allowed-border: rgba(52, 211, 153, 0.45);
+  --status-allowed-glow: rgba(16, 185, 129, 0.35);
   
   --status-review: #f59e0b;
-  --status-review-bg: rgba(245, 158, 11, 0.1);
-  --status-review-border: rgba(245, 158, 11, 0.25);
-  --status-review-glow: rgba(245, 158, 11, 0.2);
+  --status-review-bg: rgba(245, 158, 11, 0.14);
+  --status-review-border: rgba(251, 191, 36, 0.45);
+  --status-review-glow: rgba(245, 158, 11, 0.35);
   
   --status-blocked: #ef4444;
-  --status-blocked-bg: rgba(239, 68, 68, 0.1);
-  --status-blocked-border: rgba(239, 68, 68, 0.25);
-  --status-blocked-glow: rgba(239, 68, 68, 0.2);
+  --status-blocked-bg: rgba(239, 68, 68, 0.14);
+  --status-blocked-border: rgba(248, 113, 113, 0.45);
+  --status-blocked-glow: rgba(239, 68, 68, 0.35);
   
-  /* Primary Fintech Accent */
-  --accent: #3b82f6;
-  --accent-hover: #2563eb;
-  --accent-muted: rgba(59, 130, 246, 0.12);
-  --accent-border: rgba(59, 130, 246, 0.3);
-  --accent-glow: rgba(59, 130, 246, 0.25);
+  /* Primary Fintech Accent (Electric Cyber Cyan) */
+  --accent: #38bdf8;
+  --accent-hover: #0ea5e9;
+  --accent-muted: rgba(56, 189, 248, 0.14);
+  --accent-border: rgba(56, 189, 248, 0.45);
+  --accent-glow: rgba(14, 165, 233, 0.4);
   
-  /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.4), 0 2px 6px -1px rgba(0, 0, 0, 0.2);
-  --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
-  --shadow-glow-blue: 0 0 20px -5px rgba(59, 130, 246, 0.3);
-  --shadow-glow-red: 0 0 20px -5px rgba(239, 68, 68, 0.3);
-  --shadow-glow-amber: 0 0 20px -5px rgba(245, 158, 11, 0.3);
-  --shadow-glow-green: 0 0 20px -5px rgba(16, 185, 129, 0.3);
+  /* Shadows with Neon Dispersion */
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 6px 16px -2px rgba(0, 0, 0, 0.5), 0 2px 6px -1px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 12px 30px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+  --shadow-glow-blue: 0 0 25px -3px rgba(56, 189, 248, 0.45);
+  --shadow-glow-red: 0 0 25px -3px rgba(239, 68, 68, 0.45);
+  --shadow-glow-amber: 0 0 25px -3px rgba(245, 158, 11, 0.45);
+  --shadow-glow-green: 0 0 25px -3px rgba(16, 185, 129, 0.45);
 }
 
 * {
@@ -65,8 +65,9 @@ body {
   font-size: 13.5px;
   line-height: 1.5;
   background-image: 
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(59, 130, 246, 0.07), transparent),
-    radial-gradient(ellipse 60% 40% at 90% 10%, rgba(16, 185, 129, 0.03), transparent);
+    radial-gradient(circle 800px at 50% -120px, rgba(14, 165, 233, 0.16), transparent 75%),
+    radial-gradient(circle 600px at 90% 15%, rgba(99, 102, 241, 0.09), transparent 70%),
+    radial-gradient(circle 500px at 10% 45%, rgba(16, 185, 129, 0.05), transparent 70%);
   min-height: 100vh;
 }
 
@@ -84,6 +85,7 @@ body {
   box-shadow: var(--shadow-sm);
   transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
+  backdrop-filter: blur(10px);
 }
 
 .fintech-card-interactive {
@@ -111,175 +113,144 @@ body {
   box-shadow: var(--shadow-glow-green);
 }
 
-.card-glow-blue:hover {
-  border-color: var(--accent-border);
-  box-shadow: var(--shadow-glow-blue);
-}
-
 /* ==============================================================================
-   STATUS BADGES
+   STATUS BADGES WITH VIBRANT NEON ACCENTS
    ============================================================================== */
 .badge-allowed {
-  background: var(--status-allowed-bg);
-  color: var(--status-allowed);
-  border: 1px solid var(--status-allowed-border);
-  padding: 3px 8px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.03em;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  box-shadow: 0 0 10px -3px var(--status-allowed-glow);
+  gap: 5px;
+  background: var(--status-allowed-bg);
+  color: #34d399;
+  border: 1px solid var(--status-allowed-border);
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
 }
 
 .badge-review {
-  background: var(--status-review-bg);
-  color: var(--status-review);
-  border: 1px solid var(--status-review-border);
-  padding: 3px 8px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.03em;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  box-shadow: 0 0 10px -3px var(--status-review-glow);
+  gap: 5px;
+  background: var(--status-review-bg);
+  color: #fbbf24;
+  border: 1px solid var(--status-review-border);
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.2);
 }
 
 .badge-blocked {
-  background: var(--status-blocked-bg);
-  color: var(--status-blocked);
-  border: 1px solid var(--status-blocked-border);
-  padding: 3px 8px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.03em;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  box-shadow: 0 0 10px -3px var(--status-blocked-glow);
+  gap: 5px;
+  background: var(--status-blocked-bg);
+  color: #f87171;
+  border: 1px solid var(--status-blocked-border);
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
 }
 
 .badge-source {
-  background: rgba(255, 255, 255, 0.04);
-  color: var(--text-muted);
-  border: 1px solid var(--border-subtle);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(56, 189, 248, 0.12);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.3);
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  font-weight: 700;
 }
 
 /* ==============================================================================
-   BUTTONS
+   BUTTON STYLES
    ============================================================================== */
 .btn-primary-fintech {
-  background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+  background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
   color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 7px;
-  padding: 7px 15px;
-  font-weight: 600;
-  font-size: 12.5px;
+  border: 1px solid rgba(56, 189, 248, 0.55);
+  padding: 7px 14px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 12px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.35);
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.18s ease;
+  box-shadow: 0 0 15px rgba(14, 165, 233, 0.35);
 }
 
 .btn-primary-fintech:hover {
+  background: linear-gradient(135deg, #0369a1 0%, #1d4ed8 100%);
+  box-shadow: 0 0 20px rgba(14, 165, 233, 0.55);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.45);
-  filter: brightness(1.06);
-}
-
-.btn-primary-fintech:active {
-  transform: translateY(0px);
-  filter: brightness(0.95);
 }
 
 .btn-secondary-fintech {
   background: var(--bg-secondary);
-  color: var(--text-secondary);
+  color: var(--text-primary);
   border: 1px solid var(--border-subtle);
-  border-radius: 7px;
   padding: 7px 14px;
+  border-radius: 6px;
   font-weight: 600;
-  font-size: 12.5px;
+  font-size: 12px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.18s ease;
 }
 
 .btn-secondary-fintech:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
+  background: var(--bg-tertiary);
   border-color: var(--border-muted);
   transform: translateY(-1px);
 }
 
-.btn-secondary-fintech:active {
-  transform: translateY(0px);
-}
-
-/* ==============================================================================
-   ANIMATIONS & PULSING BEACONS
-   ============================================================================== */
-@keyframes pulse-beacon {
-  0% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-  }
-  70% {
-    transform: scale(1.05);
-    box-shadow: 0 0 0 7px rgba(16, 185, 129, 0);
-  }
-  100% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
-  }
-}
-
+/* Beacon Pulses */
 .beacon-pulse-green {
   width: 7px;
   height: 7px;
-  border-radius: 50%;
   background-color: #10b981;
-  animation: pulse-beacon 2.4s infinite cubic-bezier(0.4, 0, 0.6, 1);
+  border-radius: 50%;
+  box-shadow: 0 0 8px #10b981;
+  animation: pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
 }
 
-@keyframes spin-subtle {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+@keyframes pulse-ring {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
 }
 
-.animate-spin {
-  animation: spin-subtle 1s linear infinite;
-}
-
-/* ==============================================================================
-   CUSTOM SCROLLBAR
-   ============================================================================== */
+/* Custom Scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
+
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.15);
+  background: var(--bg-secondary);
 }
+
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: var(--border-subtle);
+  background: var(--border-muted);
   border-radius: 3px;
 }
+
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: var(--border-muted);
+  background: var(--border-active);
 }

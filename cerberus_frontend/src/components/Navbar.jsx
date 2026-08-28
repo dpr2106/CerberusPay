@@ -19,34 +19,33 @@ export default function Navbar({
 }) {
   const [hoveredPill, setHoveredPill] = useState(null);
 
+  // 3 Core Focused Powerhouse Tabs
   const primaryTabs = [
     { id: 'monitor', label: 'Monitor', icon: Activity },
     { id: 'investigate', label: selectedTransaction ? `Investigate (${selectedTransaction.id})` : 'Investigate', icon: Search },
-    { id: 'networks', label: 'Networks', icon: Layers },
     { id: 'models', label: 'Models', icon: Cpu },
   ];
 
   const secondaryTabs = [
-    { id: 'chargebacks', label: 'Chargebacks', icon: FileText },
     { id: 'system', label: 'System', icon: Server },
   ];
 
   return (
     <header style={{
-      borderBottom: '1px solid var(--border-subtle)',
-      background: 'rgba(8, 11, 17, 0.94)',
-      backdropFilter: 'blur(16px)',
+      borderBottom: '1px solid rgba(56, 189, 248, 0.2)',
+      background: 'rgba(6, 9, 16, 0.92)',
+      backdropFilter: 'blur(20px)',
       position: 'sticky',
       top: 0,
       zIndex: 100,
-      boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.5)'
+      boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.6)'
     }}>
       
       {/* TOP BAR: LOGO & SPRING STATUS PILLS */}
       <div style={{
         maxWidth: '1440px',
         margin: '0 auto',
-        padding: '0.65rem 1.5rem',
+        padding: '0.75rem 1.5rem',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -54,9 +53,9 @@ export default function Navbar({
         gap: '1rem'
       }}>
         
-        {/* BRAND LOGO WITH PHYSICS SPRING HOVER */}
+        {/* BRAND LOGO WITH ELECTRIC NEON CYBER BLOOM */}
         <motion.div 
-          style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', cursor: 'pointer' }}
+          style={{ display: 'flex', alignItems: 'center', gap: '0.95rem', cursor: 'pointer' }}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           transition={{ type: 'spring', stiffness: 400, damping: 25 }}
@@ -64,18 +63,18 @@ export default function Navbar({
           <motion.div 
             style={{
               position: 'relative',
-              width: '38px',
-              height: '38px',
-              borderRadius: '10px',
+              width: '42px',
+              height: '42px',
+              borderRadius: '11px',
               overflow: 'hidden',
-              background: 'linear-gradient(135deg, #0284c7 0%, #1e1b4b 100%)',
+              background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 40%, #1e1b4b 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 0 20px rgba(14, 165, 233, 0.5)',
-              border: '1.5px solid rgba(56, 189, 248, 0.6)'
+              boxShadow: '0 0 25px rgba(14, 165, 233, 0.75), 0 0 50px rgba(56, 189, 248, 0.35), inset 0 0 15px rgba(56, 189, 248, 0.4)',
+              border: '1.5px solid #38bdf8'
             }}
-            whileHover={{ rotate: [0, -5, 5, 0] }}
+            whileHover={{ rotate: [0, -4, 4, 0] }}
             transition={{ duration: 0.4 }}
           >
             <img 
@@ -93,39 +92,42 @@ export default function Navbar({
           </motion.div>
 
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
               <span style={{ 
-                fontSize: '1.05rem', 
+                fontSize: '1.15rem', 
                 fontWeight: 900, 
                 letterSpacing: '-0.02em', 
                 color: '#ffffff',
-                textShadow: '0 0 12px rgba(255,255,255,0.2)'
+                textShadow: '0 0 16px rgba(255,255,255,0.45)'
               }}>
                 CERBERUS<span style={{ 
-                  color: '#38bdf8', 
-                  textShadow: '0 0 14px rgba(56, 189, 248, 0.7)' 
+                  background: 'linear-gradient(135deg, #38bdf8 0%, #818cf8 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  filter: 'drop-shadow(0 0 12px rgba(56, 189, 248, 0.85))',
+                  fontWeight: 900
                 }}>PAY</span>
               </span>
               <span style={{ 
                 fontSize: '10px', 
-                background: 'linear-gradient(135deg, rgba(14,165,233,0.25) 0%, rgba(99,102,241,0.25) 100%)', 
+                background: 'linear-gradient(135deg, rgba(14,165,233,0.3) 0%, rgba(99,102,241,0.3) 100%)', 
                 color: '#7dd3fc', 
-                padding: '2px 6px', 
+                padding: '2px 7px', 
                 borderRadius: '4px', 
                 fontWeight: 800,
-                border: '1px solid rgba(56,189,248,0.4)',
-                boxShadow: '0 0 10px rgba(14,165,233,0.25)'
+                border: '1px solid rgba(56,189,248,0.6)',
+                boxShadow: '0 0 12px rgba(14,165,233,0.4)'
               }}>
                 SOC v3.1
               </span>
             </div>
-            <div style={{ fontSize: '11px', color: 'var(--text-muted)', letterSpacing: '0.03em' }}>
-              Payment Risk & Fraud Defense Console
+            <div style={{ fontSize: '11px', color: 'var(--text-secondary)', letterSpacing: '0.03em', fontWeight: 500 }}>
+              AI Payment Risk & Fraud Defense Sentinel
             </div>
           </div>
         </motion.div>
 
-        {/* STATUS PILLS WITH SPRING PHYSICS */}
+        {/* STATUS PILLS WITH SPRING PHYSICS & NEON CONTRAST */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
           
           {/* 1. EMERALD SYSTEM ONLINE PILL */}
@@ -143,11 +145,11 @@ export default function Navbar({
               fontSize: '11px',
               fontWeight: 800,
               color: '#34d399',
-              background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.16) 0%, rgba(5, 150, 105, 0.25) 100%)',
-              border: '1px solid rgba(52, 211, 153, 0.45)',
-              padding: '5px 11px',
+              background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.3) 100%)',
+              border: '1px solid rgba(52, 211, 153, 0.55)',
+              padding: '5px 12px',
               borderRadius: '7px',
-              boxShadow: '0 0 14px rgba(16, 185, 129, 0.25)',
+              boxShadow: '0 0 18px rgba(16, 185, 129, 0.35)',
               cursor: 'default'
             }}
           >
@@ -194,11 +196,11 @@ export default function Navbar({
               fontSize: '11px',
               fontWeight: 800,
               color: '#38bdf8',
-              background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.16) 0%, rgba(2, 132, 199, 0.26) 100%)',
-              border: '1px solid rgba(56, 189, 248, 0.55)',
-              padding: '5px 11px',
+              background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.2) 0%, rgba(2, 132, 199, 0.3) 100%)',
+              border: '1px solid rgba(56, 189, 248, 0.65)',
+              padding: '5px 12px',
               borderRadius: '7px',
-              boxShadow: '0 0 14px rgba(14, 165, 233, 0.3)',
+              boxShadow: '0 0 18px rgba(14, 165, 233, 0.4)',
               cursor: 'default'
             }}
           >
@@ -224,7 +226,7 @@ export default function Navbar({
                   boxShadow: '0 10px 25px rgba(0,0,0,0.6)'
                 }}
               >
-                ● Connected to wss://ws.blockchain.info/inv • Streaming global payments
+                ● Connected to wss://ws.blockchain.info/inv • Streaming live global payments
               </motion.div>
             )}
           </motion.div>
@@ -246,12 +248,12 @@ export default function Navbar({
               fontWeight: 800,
               color: mode === 'SIMULATION' ? '#fbbf24' : '#60a5fa',
               background: mode === 'SIMULATION' 
-                ? 'linear-gradient(135deg, rgba(245, 158, 11, 0.18) 0%, rgba(217, 119, 6, 0.28) 100%)'
-                : 'linear-gradient(135deg, rgba(59, 130, 246, 0.18) 0%, rgba(37, 99, 235, 0.28) 100%)',
-              border: `1px solid ${mode === 'SIMULATION' ? 'rgba(251, 191, 36, 0.55)' : 'rgba(96, 165, 250, 0.55)'}`,
-              padding: '5px 11px',
+                ? 'linear-gradient(135deg, rgba(245, 158, 11, 0.22) 0%, rgba(217, 119, 6, 0.32) 100%)'
+                : 'linear-gradient(135deg, rgba(59, 130, 246, 0.22) 0%, rgba(37, 99, 235, 0.32) 100%)',
+              border: `1px solid ${mode === 'SIMULATION' ? 'rgba(251, 191, 36, 0.65)' : 'rgba(96, 165, 250, 0.65)'}`,
+              padding: '5px 12px',
               borderRadius: '7px',
-              boxShadow: mode === 'SIMULATION' ? '0 0 14px rgba(245, 158, 11, 0.3)' : '0 0 14px rgba(59, 130, 246, 0.3)',
+              boxShadow: mode === 'SIMULATION' ? '0 0 18px rgba(245, 158, 11, 0.4)' : '0 0 18px rgba(59, 130, 246, 0.4)',
               cursor: 'pointer'
             }}
           >
@@ -293,19 +295,19 @@ export default function Navbar({
             style={{
               position: 'relative',
               background: isStreamLive 
-                ? 'linear-gradient(135deg, rgba(14, 165, 233, 0.18) 0%, rgba(2, 132, 199, 0.28) 100%)' 
+                ? 'linear-gradient(135deg, rgba(14, 165, 233, 0.22) 0%, rgba(2, 132, 199, 0.32) 100%)' 
                 : 'linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.08) 100%)',
-              border: `1px solid ${isStreamLive ? 'rgba(56, 189, 248, 0.55)' : 'var(--border-subtle)'}`,
+              border: `1px solid ${isStreamLive ? 'rgba(56, 189, 248, 0.65)' : 'var(--border-subtle)'}`,
               color: isStreamLive ? '#38bdf8' : 'var(--text-muted)',
               borderRadius: '7px',
-              padding: '5px 11px',
+              padding: '5px 12px',
               fontSize: '11px',
               fontWeight: 800,
               cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              boxShadow: isStreamLive ? '0 0 14px rgba(14, 165, 233, 0.3)' : 'none'
+              boxShadow: isStreamLive ? '0 0 18px rgba(14, 165, 233, 0.4)' : 'none'
             }}
           >
             <Radio size={13} className={isStreamLive ? 'animate-pulse' : ''} />
@@ -345,18 +347,18 @@ export default function Navbar({
               display: 'flex',
               alignItems: 'center',
               gap: '7px',
-              background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.15) 0%, rgba(126, 34, 206, 0.25) 100%)',
-              border: '1px solid rgba(192, 132, 252, 0.45)',
-              padding: '4px 10px',
+              background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(126, 34, 206, 0.3) 100%)',
+              border: '1px solid rgba(192, 132, 252, 0.55)',
+              padding: '4px 11px',
               borderRadius: '7px',
               fontSize: '11px',
               color: '#e9d5ff',
-              boxShadow: '0 0 14px rgba(168, 85, 247, 0.25)'
+              boxShadow: '0 0 18px rgba(168, 85, 247, 0.35)'
             }}
           >
             <div style={{
-              width: '18px',
-              height: '18px',
+              width: '20px',
+              height: '20px',
               borderRadius: '50%',
               background: 'linear-gradient(135deg, #a855f7 0%, #6366f1 100%)',
               display: 'flex',
@@ -371,7 +373,7 @@ export default function Navbar({
             <span style={{ fontWeight: 800, color: '#fff' }}>Chief Risk Officer</span>
             <span className="mono" style={{ 
               fontSize: '10px', 
-              background: 'rgba(255,255,255,0.1)', 
+              background: 'rgba(255,255,255,0.12)', 
               color: '#d8b4fe', 
               padding: '1px 5px', 
               borderRadius: '3px',
@@ -396,11 +398,11 @@ export default function Navbar({
               fontSize: '11px', 
               fontWeight: 800,
               color: '#fca5a5', 
-              border: '1px solid rgba(248, 113, 113, 0.5)',
-              background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.18) 0%, rgba(185, 28, 28, 0.28) 100%)',
+              border: '1px solid rgba(248, 113, 113, 0.55)',
+              background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(185, 28, 28, 0.3) 100%)',
               borderRadius: '7px',
               cursor: 'pointer',
-              boxShadow: '0 0 12px rgba(239, 68, 68, 0.3)'
+              boxShadow: '0 0 16px rgba(239, 68, 68, 0.35)'
             }}
           >
             <Lock size={12} />
@@ -423,8 +425,8 @@ export default function Navbar({
         overflowX: 'auto'
       }}>
         
-        {/* PRIMARY TABS WITH PHYSICAL SPRING GLIDE */}
-        <div style={{ display: 'flex', gap: '0.35rem', position: 'relative' }}>
+        {/* PRIMARY FOCUSED 3 TABS WITH PHYSICAL SPRING GLIDE */}
+        <div style={{ display: 'flex', gap: '0.5rem', position: 'relative' }}>
           {primaryTabs.map(item => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -439,21 +441,21 @@ export default function Navbar({
                   border: 'none',
                   color: isActive ? '#fff' : 'var(--text-secondary)',
                   fontWeight: isActive ? 800 : 500,
-                  fontSize: '13px',
-                  padding: '0.65rem 0.95rem',
+                  fontSize: '13.5px',
+                  padding: '0.75rem 1.1rem',
                   cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '7px',
+                  gap: '8px',
                   whiteSpace: 'nowrap',
                   position: 'relative'
                 }}
               >
                 <Icon 
-                  size={15} 
+                  size={16} 
                   color={isActive ? '#38bdf8' : 'var(--text-muted)'} 
                   style={{ 
-                    filter: isActive ? 'drop-shadow(0 0 6px rgba(56,189,248,0.8))' : 'none'
+                    filter: isActive ? 'drop-shadow(0 0 8px rgba(56,189,248,0.9))' : 'none'
                   }}
                 />
                 <span>{item.label}</span>
@@ -469,8 +471,8 @@ export default function Navbar({
                       left: '8%',
                       right: '8%',
                       height: '2.5px',
-                      background: 'linear-gradient(90deg, #38bdf8 0%, #3b82f6 100%)',
-                      boxShadow: '0 0 10px #38bdf8',
+                      background: 'linear-gradient(90deg, #38bdf8 0%, #818cf8 100%)',
+                      boxShadow: '0 0 12px #38bdf8',
                       borderRadius: '2px'
                     }}
                   />
@@ -497,7 +499,7 @@ export default function Navbar({
                   color: isActive ? '#fff' : 'var(--text-muted)',
                   fontWeight: isActive ? 700 : 500,
                   fontSize: '12px',
-                  padding: '0.65rem 0.75rem',
+                  padding: '0.75rem 0.85rem',
                   cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
