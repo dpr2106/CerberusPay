@@ -80,67 +80,24 @@ export default function App() {
       .catch((err) => console.error('[CerberusPay API Error] Failed to fetch metrics:', err));
   }, [currentOperator]);
 
-  // Background Stream Ingestion (Simulates payment gateway traffic)
+  // Background ULB Real Bank Benchmark Stream Ingestion
   useEffect(() => {
     if (!isStreamLive || !currentOperator) return;
 
-    const customers = ["USR_8921", "USR_1049", "USR_3410", "USR_5192", "USR_7820", "USR_9941"];
-
     const interval = setInterval(() => {
-      const isFraud = Math.random() < 0.25;
-      const amount = isFraud ? Math.floor(Math.random() * 38000 + 12000) : Math.floor(Math.random() * 2600 + 350);
-      const geo = isFraud ? Math.floor(Math.random() * 7200 + 1800) : Math.floor(Math.random() * 25 + 2);
-      const vel = isFraud ? Math.floor(Math.random() * 11 + 5) : Math.floor(Math.random() * 2 + 1);
-      const proxy = isFraud ? (Math.random() < 0.85 ? 1 : 0) : 0;
-      const randomUser = customers[Math.floor(Math.random() * customers.length)];
-
-      const payload = {
-        user_id: randomUser,
-        amount: amount,
-        category: isFraud ? 'electronics' : 'ecommerce',
-        velocity_1h: vel,
-        geo_distance_km: geo,
-        is_proxy: proxy,
-        payment_method: 'card',
-        merchant_category: 'electronics_high_value'
-      };
-
-      fetch('http://127.0.0.1:8000/api/risk/evaluate-transaction', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      })
-      .then(res => {
-        if (!res.ok) throw new Error(`Status ${res.status}`);
-        return res.json();
-      })
-      .then(newEvaluation => {
-        const enrichedTx = {
-          id: newEvaluation.transaction_id || `TXN_${Math.random().toString(36).substring(2, 9).toUpperCase()}`,
-          user_id: randomUser,
-          amount: amount,
-          timestamp: new Date().toISOString(),
-          risk_score: Math.round(newEvaluation.fraud_probability * 100),
-          risk_level: newEvaluation.fraud_probability >= 0.70 ? 'CRITICAL' : (newEvaluation.fraud_probability >= 0.40 ? 'MEDIUM' : 'LOW'),
-          action: newEvaluation.action,
-          signals: {
-            geo_distance_km: geo,
-            velocity_1h: vel,
-            is_proxy: proxy === 1,
-            anomaly_score: Number((newEvaluation.fraud_probability * 0.95).toFixed(2)),
-            device_id: isFraud ? 'DEV_FINGERPRINT_A9' : `DEV_${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
-            ip_address: isFraud ? '185.220.101.4 (Proxy)' : '103.21.144.12'
-          },
-          decision_rationale: newEvaluation.decision_rationale,
-          source: 'SIMULATED'
-        };
-
-        setTransactions(prev => [enrichedTx, ...prev.slice(0, 79)]);
-      })
-      .catch((err) => {
-        // Silent catch for background simulator
-      });
-
+      fetch('http://127.0.0.1:8000/api/stream/next-event')
+        .then(res => {
+          if (!res.ok) throw new Error(`Stream API status ${res.status}`);
+          return res.json();
+        })
+        .then(data => {
+          if (data && data.event) {
+            setTransactions(prev => [data.event, ...prev.slice(0, 79)]);
+          }
+        })
+        .catch(() => {
+          // Fallback resilience
+        });
     }, 3800);
 
     return () => clearInterval(interval);

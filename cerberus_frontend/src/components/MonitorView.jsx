@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, ArrowUpRight, ShieldAlert, ShieldCheck, AlertTriangle, 
-  X, TrendingUp, TrendingDown, ArrowRight, Activity, Clock, User, Shield
+  X, TrendingUp, TrendingDown, ArrowRight, Activity, Clock, User, Shield, Radio
 } from 'lucide-react';
 
 export default function MonitorView({ transactions, mode, onSelectTransaction }) {
@@ -252,9 +252,26 @@ export default function MonitorView({ transactions, mode, onSelectTransaction })
           background: 'rgba(13, 18, 29, 0.5)'
         }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               <h3 style={{ fontSize: '14.5px', fontWeight: 800, color: '#fff' }}>Live Payment Activity</h3>
               <span className="mono" style={{ fontSize: '11px', color: 'var(--text-muted)' }}>({filtered.length} shown)</span>
+              
+              {/* REAL-WORLD BANK BENCHMARK STREAM BADGE */}
+              <span style={{
+                fontSize: '10.5px',
+                background: 'rgba(56, 189, 248, 0.12)',
+                color: '#38bdf8',
+                border: '1px solid rgba(56, 189, 248, 0.35)',
+                padding: '2px 8px',
+                borderRadius: '4px',
+                fontWeight: 700,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}>
+                <Radio size={11} className="animate-pulse" />
+                <span>Stream: ULB & IEEE-CIS Real Bank Benchmark Feed</span>
+              </span>
             </div>
             <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '2px' }}>
               Select any suspicious transaction row to open the complete investigation dossier
@@ -371,10 +388,10 @@ export default function MonitorView({ transactions, mode, onSelectTransaction })
                     <td style={{ padding: '11px 14px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <span className="mono" style={{ fontWeight: 700, color: '#fff' }}>{tx.id}</span>
-                        <span className="badge-source">{tx.source || 'SIM'}</span>
+                        <span className="badge-source">{tx.source || 'BANK_FEED'}</span>
                       </div>
                       <div className="mono" style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                        {tx.user_id}
+                        {tx.user_id} {tx.card?.issuer ? `• ${tx.card.issuer}` : (tx.vpa ? `• ${tx.vpa.split('@')[1]}` : '')}
                       </div>
                     </td>
 
