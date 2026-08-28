@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ShieldCheck, Activity, Search, Layers, Cpu, FileText, 
   Server, User, Lock, Radio, Zap, Sparkles, AlertCircle, 
-  CheckCircle2, RefreshCw, Power, Globe
+  CheckCircle2, RefreshCw, Power, Globe, Shield
 } from 'lucide-react';
 
 export default function Navbar({ 
@@ -33,46 +33,56 @@ export default function Navbar({
   return (
     <header style={{
       borderBottom: '1px solid rgba(56, 189, 248, 0.2)',
-      background: 'rgba(6, 9, 16, 0.92)',
+      background: 'rgba(6, 9, 16, 0.95)',
       backdropFilter: 'blur(20px)',
       position: 'sticky',
       top: 0,
       zIndex: 100,
-      boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.6)'
+      boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.7)'
     }}>
       
-      {/* TOP BAR: LOGO & SPRING STATUS PILLS */}
+      {/* GLOWING LASER ACCENT LINE AT TOP OF SCREEN */}
+      <div style={{
+        height: '2px',
+        width: '100%',
+        background: 'linear-gradient(90deg, transparent 0%, #0284c7 25%, #38bdf8 50%, #818cf8 75%, transparent 100%)',
+        boxShadow: '0 0 10px #38bdf8'
+      }} />
+
+      {/* TOP BAR: ENHANCED CENTERED LOGO & GHOST STATUS PILLS */}
       <div style={{
         maxWidth: '1440px',
         margin: '0 auto',
-        padding: '0.75rem 1.5rem',
+        padding: '0.85rem 1.5rem',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
         flexWrap: 'wrap',
-        gap: '1rem'
+        gap: '1.25rem'
       }}>
         
-        {/* BRAND LOGO WITH ELECTRIC NEON CYBER BLOOM */}
+        {/* BRAND LOGO WITH LARGER FITTED EMBLEM */}
         <motion.div 
-          style={{ display: 'flex', alignItems: 'center', gap: '0.95rem', cursor: 'pointer' }}
+          style={{ display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer' }}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           transition={{ type: 'spring', stiffness: 400, damping: 25 }}
         >
+          {/* LARGER PROMINENT LOGO BOX */}
           <motion.div 
             style={{
               position: 'relative',
-              width: '42px',
-              height: '42px',
-              borderRadius: '11px',
+              width: '46px',
+              height: '46px',
+              borderRadius: '12px',
               overflow: 'hidden',
               background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 40%, #1e1b4b 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 0 25px rgba(14, 165, 233, 0.75), 0 0 50px rgba(56, 189, 248, 0.35), inset 0 0 15px rgba(56, 189, 248, 0.4)',
-              border: '1.5px solid #38bdf8'
+              boxShadow: '0 0 28px rgba(14, 165, 233, 0.8), 0 0 55px rgba(56, 189, 248, 0.4), inset 0 0 15px rgba(56, 189, 248, 0.5)',
+              border: '1.5px solid #38bdf8',
+              flexShrink: 0
             }}
             whileHover={{ rotate: [0, -4, 4, 0] }}
             transition={{ duration: 0.4 }}
@@ -83,7 +93,8 @@ export default function Navbar({
               style={{
                 width: '100%',
                 height: '100%',
-                objectFit: 'cover'
+                objectFit: 'cover',
+                transform: 'scale(1.18)'
               }}
               onError={(e) => {
                 e.target.style.display = 'none';
@@ -91,46 +102,46 @@ export default function Navbar({
             />
           </motion.div>
 
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
               <span style={{ 
-                fontSize: '1.15rem', 
+                fontSize: '1.25rem', 
                 fontWeight: 900, 
                 letterSpacing: '-0.02em', 
                 color: '#ffffff',
-                textShadow: '0 0 16px rgba(255,255,255,0.45)'
+                textShadow: '0 0 18px rgba(255,255,255,0.45)'
               }}>
                 CERBERUS<span style={{ 
                   background: 'linear-gradient(135deg, #38bdf8 0%, #818cf8 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
-                  filter: 'drop-shadow(0 0 12px rgba(56, 189, 248, 0.85))',
+                  filter: 'drop-shadow(0 0 14px rgba(56, 189, 248, 0.9))',
                   fontWeight: 900
                 }}>PAY</span>
               </span>
               <span style={{ 
-                fontSize: '10px', 
-                background: 'linear-gradient(135deg, rgba(14,165,233,0.3) 0%, rgba(99,102,241,0.3) 100%)', 
+                fontSize: '10.5px', 
+                background: 'transparent', 
                 color: '#7dd3fc', 
-                padding: '2px 7px', 
-                borderRadius: '4px', 
+                padding: '2px 8px', 
+                borderRadius: '5px', 
                 fontWeight: 800,
-                border: '1px solid rgba(56,189,248,0.6)',
-                boxShadow: '0 0 12px rgba(14,165,233,0.4)'
+                border: '1px solid rgba(56,189,248,0.7)',
+                boxShadow: '0 0 12px rgba(14,165,233,0.35)'
               }}>
                 SOC v3.1
               </span>
             </div>
-            <div style={{ fontSize: '11px', color: 'var(--text-secondary)', letterSpacing: '0.03em', fontWeight: 500 }}>
+            <div style={{ fontSize: '11.5px', color: 'var(--text-secondary)', letterSpacing: '0.03em', fontWeight: 600, marginTop: '2px' }}>
               AI Payment Risk & Fraud Defense Sentinel
             </div>
           </div>
         </motion.div>
 
-        {/* STATUS PILLS WITH SPRING PHYSICS & NEON CONTRAST */}
+        {/* STATUS PILLS: CLEAN GHOST-NEON STYLE (NO HEAVY DARK BACKGROUND) */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
           
-          {/* 1. EMERALD SYSTEM ONLINE PILL */}
+          {/* 1. EMERALD SYSTEM ONLINE (GHOST) */}
           <motion.div 
             onMouseEnter={() => setHoveredPill('system')}
             onMouseLeave={() => setHoveredPill(null)}
@@ -145,11 +156,11 @@ export default function Navbar({
               fontSize: '11px',
               fontWeight: 800,
               color: '#34d399',
-              background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.3) 100%)',
-              border: '1px solid rgba(52, 211, 153, 0.55)',
+              background: 'transparent',
+              border: '1px solid #10b981',
               padding: '5px 12px',
               borderRadius: '7px',
-              boxShadow: '0 0 18px rgba(16, 185, 129, 0.35)',
+              boxShadow: '0 0 14px rgba(16, 185, 129, 0.35)',
               cursor: 'default'
             }}
           >
@@ -181,7 +192,7 @@ export default function Navbar({
             )}
           </motion.div>
 
-          {/* 2. LIVE GLOBAL PUBLIC MEMPOOL WEBSOCKET STATUS */}
+          {/* 2. LIVE GLOBAL PUBLIC MEMPOOL WEBSOCKET STATUS (GHOST) */}
           <motion.div 
             onMouseEnter={() => setHoveredPill('mempool')}
             onMouseLeave={() => setHoveredPill(null)}
@@ -196,11 +207,11 @@ export default function Navbar({
               fontSize: '11px',
               fontWeight: 800,
               color: '#38bdf8',
-              background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.2) 0%, rgba(2, 132, 199, 0.3) 100%)',
-              border: '1px solid rgba(56, 189, 248, 0.65)',
+              background: 'transparent',
+              border: '1px solid #38bdf8',
               padding: '5px 12px',
               borderRadius: '7px',
-              boxShadow: '0 0 18px rgba(14, 165, 233, 0.4)',
+              boxShadow: '0 0 14px rgba(14, 165, 233, 0.4)',
               cursor: 'default'
             }}
           >
@@ -231,7 +242,7 @@ export default function Navbar({
             )}
           </motion.div>
 
-          {/* 3. SUNFIRE SIMULATION MODE PILL */}
+          {/* 3. SUNFIRE SIMULATION MODE PILL (GHOST) */}
           <motion.div 
             onMouseEnter={() => setHoveredPill('mode')}
             onMouseLeave={() => setHoveredPill(null)}
@@ -247,13 +258,11 @@ export default function Navbar({
               fontSize: '11px',
               fontWeight: 800,
               color: mode === 'SIMULATION' ? '#fbbf24' : '#60a5fa',
-              background: mode === 'SIMULATION' 
-                ? 'linear-gradient(135deg, rgba(245, 158, 11, 0.22) 0%, rgba(217, 119, 6, 0.32) 100%)'
-                : 'linear-gradient(135deg, rgba(59, 130, 246, 0.22) 0%, rgba(37, 99, 235, 0.32) 100%)',
-              border: `1px solid ${mode === 'SIMULATION' ? 'rgba(251, 191, 36, 0.65)' : 'rgba(96, 165, 250, 0.65)'}`,
+              background: 'transparent',
+              border: `1px solid ${mode === 'SIMULATION' ? '#f59e0b' : '#3b82f6'}`,
               padding: '5px 12px',
               borderRadius: '7px',
-              boxShadow: mode === 'SIMULATION' ? '0 0 18px rgba(245, 158, 11, 0.4)' : '0 0 18px rgba(59, 130, 246, 0.4)',
+              boxShadow: mode === 'SIMULATION' ? '0 0 14px rgba(245, 158, 11, 0.35)' : '0 0 14px rgba(59, 130, 246, 0.35)',
               cursor: 'pointer'
             }}
           >
@@ -284,7 +293,7 @@ export default function Navbar({
             )}
           </motion.div>
 
-          {/* 4. RADAR STREAM PILL */}
+          {/* 4. RADAR STREAM PILL (GHOST) */}
           <motion.button
             onMouseEnter={() => setHoveredPill('stream')}
             onMouseLeave={() => setHoveredPill(null)}
@@ -294,10 +303,8 @@ export default function Navbar({
             transition={{ type: 'spring', stiffness: 500, damping: 25 }}
             style={{
               position: 'relative',
-              background: isStreamLive 
-                ? 'linear-gradient(135deg, rgba(14, 165, 233, 0.22) 0%, rgba(2, 132, 199, 0.32) 100%)' 
-                : 'linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.08) 100%)',
-              border: `1px solid ${isStreamLive ? 'rgba(56, 189, 248, 0.65)' : 'var(--border-subtle)'}`,
+              background: 'transparent',
+              border: `1px solid ${isStreamLive ? '#38bdf8' : 'var(--border-subtle)'}`,
               color: isStreamLive ? '#38bdf8' : 'var(--text-muted)',
               borderRadius: '7px',
               padding: '5px 12px',
@@ -307,7 +314,7 @@ export default function Navbar({
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              boxShadow: isStreamLive ? '0 0 18px rgba(14, 165, 233, 0.4)' : 'none'
+              boxShadow: isStreamLive ? '0 0 14px rgba(14, 165, 233, 0.35)' : 'none'
             }}
           >
             <Radio size={13} className={isStreamLive ? 'animate-pulse' : ''} />
@@ -337,7 +344,7 @@ export default function Navbar({
             )}
           </motion.button>
 
-          {/* 5. CHIEF RISK OFFICER OPERATOR PROFILE */}
+          {/* 5. CHIEF RISK OFFICER OPERATOR PROFILE (GHOST) */}
           <motion.div 
             onMouseEnter={() => setHoveredPill('operator')}
             onMouseLeave={() => setHoveredPill(null)}
@@ -347,18 +354,18 @@ export default function Navbar({
               display: 'flex',
               alignItems: 'center',
               gap: '7px',
-              background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(126, 34, 206, 0.3) 100%)',
-              border: '1px solid rgba(192, 132, 252, 0.55)',
+              background: 'transparent',
+              border: '1px solid #a855f7',
               padding: '4px 11px',
               borderRadius: '7px',
               fontSize: '11px',
               color: '#e9d5ff',
-              boxShadow: '0 0 18px rgba(168, 85, 247, 0.35)'
+              boxShadow: '0 0 14px rgba(168, 85, 247, 0.3)'
             }}
           >
             <div style={{
-              width: '20px',
-              height: '20px',
+              width: '18px',
+              height: '18px',
               borderRadius: '50%',
               background: 'linear-gradient(135deg, #a855f7 0%, #6366f1 100%)',
               display: 'flex',
@@ -373,7 +380,7 @@ export default function Navbar({
             <span style={{ fontWeight: 800, color: '#fff' }}>Chief Risk Officer</span>
             <span className="mono" style={{ 
               fontSize: '10px', 
-              background: 'rgba(255,255,255,0.12)', 
+              background: 'rgba(255,255,255,0.1)', 
               color: '#d8b4fe', 
               padding: '1px 5px', 
               borderRadius: '3px',
@@ -383,7 +390,7 @@ export default function Navbar({
             </span>
           </motion.div>
 
-          {/* 6. CRIMSON SIGN OUT BUTTON */}
+          {/* 6. CRIMSON SIGN OUT BUTTON (GHOST) */}
           <motion.button
             onClick={onLogout}
             title="Lock Session & Sign Out"
@@ -397,12 +404,12 @@ export default function Navbar({
               padding: '5px 12px', 
               fontSize: '11px', 
               fontWeight: 800,
-              color: '#fca5a5', 
-              border: '1px solid rgba(248, 113, 113, 0.55)',
-              background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(185, 28, 28, 0.3) 100%)',
+              color: '#f87171', 
+              border: '1px solid #ef4444',
+              background: 'transparent',
               borderRadius: '7px',
               cursor: 'pointer',
-              boxShadow: '0 0 16px rgba(239, 68, 68, 0.35)'
+              boxShadow: '0 0 12px rgba(239, 68, 68, 0.3)'
             }}
           >
             <Lock size={12} />
