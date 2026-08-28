@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ShieldCheck, Activity, Search, Layers, Cpu, FileText, 
   Server, User, Lock, Radio, Zap, Sparkles, AlertCircle, 
-  CheckCircle2, RefreshCw, Power
+  CheckCircle2, RefreshCw, Power, Globe
 } from 'lucide-react';
 
 export default function Navbar({ 
@@ -15,7 +15,8 @@ export default function Navbar({
   setIsStreamLive, 
   selectedTransaction,
   currentOperator,
-  onLogout
+  onLogout,
+  onShowLanding
 }) {
   const [hoveredPill, setHoveredPill] = useState(null);
 
@@ -54,8 +55,10 @@ export default function Navbar({
         gap: '1rem'
       }}>
         
-        {/* BRAND LOGO WITH PHYSICS SPRING HOVER */}
+        {/* BRAND LOGO WITH PHYSICS SPRING HOVER & OVERVIEW TRIGGER */}
         <motion.div 
+          onClick={onShowLanding}
+          title="Click to view Hero Landing Experience"
           style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', cursor: 'pointer' }}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
@@ -128,6 +131,32 @@ export default function Navbar({
         {/* STATUS PILLS WITH SPRING PHYSICS */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
           
+          {/* 0. HERO LANDING TOGGLE */}
+          {onShowLanding && (
+            <motion.button
+              onClick={onShowLanding}
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.94 }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '5px 10px',
+                fontSize: '11px',
+                fontWeight: 700,
+                color: '#93c5fd',
+                background: 'rgba(59, 130, 246, 0.12)',
+                border: '1px solid rgba(147, 197, 253, 0.3)',
+                borderRadius: '7px',
+                cursor: 'pointer'
+              }}
+              title="Return to Hero Landing Overview"
+            >
+              <Globe size={13} />
+              <span>Hero View</span>
+            </motion.button>
+          )}
+
           {/* 1. EMERALD SYSTEM ONLINE PILL */}
           <motion.div 
             onMouseEnter={() => setHoveredPill('system')}
