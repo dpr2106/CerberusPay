@@ -49,21 +49,21 @@ export default function Navbar({
         boxShadow: '0 0 10px #38bdf8'
       }} />
 
-      {/* TOP BAR: ENHANCED CENTERED LOGO & GHOST STATUS PILLS */}
+      {/* TOP BAR: SINGLE UNIFIED ROW (NO LINE WRAPPING, PERFECT ALIGNMENT) */}
       <div style={{
         maxWidth: '1440px',
         margin: '0 auto',
-        padding: '0.85rem 1.5rem',
+        padding: '0.65rem 1.25rem',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        flexWrap: 'wrap',
-        gap: '1.25rem'
+        flexWrap: 'nowrap',
+        gap: '1rem'
       }}>
         
         {/* BRAND LOGO WITH LARGER FITTED EMBLEM */}
         <motion.div 
-          style={{ display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer' }}
+          style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', cursor: 'pointer', flexShrink: 0 }}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           transition={{ type: 'spring', stiffness: 400, damping: 25 }}
@@ -72,15 +72,15 @@ export default function Navbar({
           <motion.div 
             style={{
               position: 'relative',
-              width: '46px',
-              height: '46px',
-              borderRadius: '12px',
+              width: '42px',
+              height: '42px',
+              borderRadius: '11px',
               overflow: 'hidden',
               background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 40%, #1e1b4b 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 0 28px rgba(14, 165, 233, 0.8), 0 0 55px rgba(56, 189, 248, 0.4), inset 0 0 15px rgba(56, 189, 248, 0.5)',
+              boxShadow: '0 0 25px rgba(14, 165, 233, 0.8), 0 0 50px rgba(56, 189, 248, 0.4), inset 0 0 15px rgba(56, 189, 248, 0.5)',
               border: '1.5px solid #38bdf8',
               flexShrink: 0
             }}
@@ -103,9 +103,9 @@ export default function Navbar({
           </motion.div>
 
           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
               <span style={{ 
-                fontSize: '1.25rem', 
+                fontSize: '1.15rem', 
                 fontWeight: 900, 
                 letterSpacing: '-0.02em', 
                 color: '#ffffff',
@@ -120,26 +120,26 @@ export default function Navbar({
                 }}>PAY</span>
               </span>
               <span style={{ 
-                fontSize: '10.5px', 
+                fontSize: '10px', 
                 background: 'transparent', 
                 color: '#7dd3fc', 
-                padding: '2px 8px', 
-                borderRadius: '5px', 
+                padding: '2px 6px', 
+                borderRadius: '4px', 
                 fontWeight: 800,
                 border: '1px solid rgba(56,189,248,0.7)',
-                boxShadow: '0 0 12px rgba(14,165,233,0.35)'
+                boxShadow: '0 0 10px rgba(14,165,233,0.35)'
               }}>
                 SOC v3.1
               </span>
             </div>
-            <div style={{ fontSize: '11.5px', color: 'var(--text-secondary)', letterSpacing: '0.03em', fontWeight: 600, marginTop: '2px' }}>
+            <div style={{ fontSize: '11px', color: 'var(--text-secondary)', letterSpacing: '0.02em', fontWeight: 600 }}>
               AI Payment Risk & Fraud Defense Sentinel
             </div>
           </div>
         </motion.div>
 
-        {/* STATUS PILLS: CLEAN GHOST-NEON STYLE (NO HEAVY DARK BACKGROUND) */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
+        {/* STATUS PILLS: SINGLE HORIZONTAL ROW WITH CRISP GHOST-NEON BORDERS */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'nowrap', flexShrink: 0 }}>
           
           {/* 1. EMERALD SYSTEM ONLINE (GHOST) */}
           <motion.div 
@@ -152,20 +152,21 @@ export default function Navbar({
               position: 'relative',
               display: 'flex',
               alignItems: 'center',
-              gap: '7px',
+              gap: '6px',
               fontSize: '11px',
               fontWeight: 800,
               color: '#34d399',
               background: 'transparent',
               border: '1px solid #10b981',
-              padding: '5px 12px',
-              borderRadius: '7px',
-              boxShadow: '0 0 14px rgba(16, 185, 129, 0.35)',
-              cursor: 'default'
+              padding: '4px 9px',
+              borderRadius: '6px',
+              boxShadow: '0 0 12px rgba(16, 185, 129, 0.3)',
+              cursor: 'default',
+              whiteSpace: 'nowrap'
             }}
           >
             <div className="beacon-pulse-green" />
-            <span>SYSTEM ONLINE</span>
+            <span>ONLINE</span>
             {hoveredPill === 'system' && (
               <motion.div 
                 initial={{ opacity: 0, y: 5 }}
@@ -203,20 +204,21 @@ export default function Navbar({
               position: 'relative',
               display: 'flex',
               alignItems: 'center',
-              gap: '6px',
+              gap: '5px',
               fontSize: '11px',
               fontWeight: 800,
               color: '#38bdf8',
               background: 'transparent',
               border: '1px solid #38bdf8',
-              padding: '5px 12px',
-              borderRadius: '7px',
-              boxShadow: '0 0 14px rgba(14, 165, 233, 0.4)',
-              cursor: 'default'
+              padding: '4px 9px',
+              borderRadius: '6px',
+              boxShadow: '0 0 12px rgba(14, 165, 233, 0.35)',
+              cursor: 'default',
+              whiteSpace: 'nowrap'
             }}
           >
-            <Globe size={12} className="animate-spin" style={{ animationDuration: '6s' }} />
-            <span>LIVE WS: MEMPOOL</span>
+            <Globe size={11} className="animate-spin" style={{ animationDuration: '6s' }} />
+            <span>LIVE WS</span>
             {hoveredPill === 'mempool' && (
               <motion.div 
                 initial={{ opacity: 0, y: 5 }}
@@ -254,20 +256,21 @@ export default function Navbar({
               position: 'relative',
               display: 'flex',
               alignItems: 'center',
-              gap: '6px',
+              gap: '5px',
               fontSize: '11px',
               fontWeight: 800,
               color: mode === 'SIMULATION' ? '#fbbf24' : '#60a5fa',
               background: 'transparent',
               border: `1px solid ${mode === 'SIMULATION' ? '#f59e0b' : '#3b82f6'}`,
-              padding: '5px 12px',
-              borderRadius: '7px',
-              boxShadow: mode === 'SIMULATION' ? '0 0 14px rgba(245, 158, 11, 0.35)' : '0 0 14px rgba(59, 130, 246, 0.35)',
-              cursor: 'pointer'
+              padding: '4px 9px',
+              borderRadius: '6px',
+              boxShadow: mode === 'SIMULATION' ? '0 0 12px rgba(245, 158, 11, 0.3)' : '0 0 12px rgba(59, 130, 246, 0.3)',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap'
             }}
           >
-            <Zap size={13} color={mode === 'SIMULATION' ? '#fbbf24' : '#60a5fa'} />
-            <span>{mode} MODE</span>
+            <Zap size={12} color={mode === 'SIMULATION' ? '#fbbf24' : '#60a5fa'} />
+            <span>{mode}</span>
             {hoveredPill === 'mode' && (
               <motion.div 
                 initial={{ opacity: 0, y: 5 }}
@@ -306,18 +309,19 @@ export default function Navbar({
               background: 'transparent',
               border: `1px solid ${isStreamLive ? '#38bdf8' : 'var(--border-subtle)'}`,
               color: isStreamLive ? '#38bdf8' : 'var(--text-muted)',
-              borderRadius: '7px',
-              padding: '5px 12px',
+              borderRadius: '6px',
+              padding: '4px 9px',
               fontSize: '11px',
               fontWeight: 800,
               cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '6px',
-              boxShadow: isStreamLive ? '0 0 14px rgba(14, 165, 233, 0.35)' : 'none'
+              gap: '5px',
+              boxShadow: isStreamLive ? '0 0 12px rgba(14, 165, 233, 0.3)' : 'none',
+              whiteSpace: 'nowrap'
             }}
           >
-            <Radio size={13} className={isStreamLive ? 'animate-pulse' : ''} />
+            <Radio size={12} className={isStreamLive ? 'animate-pulse' : ''} />
             <span>{isStreamLive ? 'Stream: Live' : 'Stream: Paused'}</span>
             {hoveredPill === 'stream' && (
               <motion.div 
@@ -353,19 +357,20 @@ export default function Navbar({
               position: 'relative',
               display: 'flex',
               alignItems: 'center',
-              gap: '7px',
+              gap: '6px',
               background: 'transparent',
               border: '1px solid #a855f7',
-              padding: '4px 11px',
-              borderRadius: '7px',
+              padding: '4px 9px',
+              borderRadius: '6px',
               fontSize: '11px',
               color: '#e9d5ff',
-              boxShadow: '0 0 14px rgba(168, 85, 247, 0.3)'
+              boxShadow: '0 0 12px rgba(168, 85, 247, 0.25)',
+              whiteSpace: 'nowrap'
             }}
           >
             <div style={{
-              width: '18px',
-              height: '18px',
+              width: '16px',
+              height: '16px',
               borderRadius: '50%',
               background: 'linear-gradient(135deg, #a855f7 0%, #6366f1 100%)',
               display: 'flex',
@@ -373,20 +378,17 @@ export default function Navbar({
               justifyContent: 'center',
               color: '#fff',
               fontWeight: 900,
-              fontSize: '10px'
+              fontSize: '9px'
             }}>
               C
             </div>
-            <span style={{ fontWeight: 800, color: '#fff' }}>Chief Risk Officer</span>
+            <span style={{ fontWeight: 800, color: '#fff' }}>CRO</span>
             <span className="mono" style={{ 
-              fontSize: '10px', 
-              background: 'rgba(255,255,255,0.1)', 
+              fontSize: '9.5px', 
               color: '#d8b4fe', 
-              padding: '1px 5px', 
-              borderRadius: '3px',
               fontWeight: 700 
             }}>
-              OPR_LEAD_ANALYST
+              OPR_LEAD
             </span>
           </motion.div>
 
@@ -400,19 +402,20 @@ export default function Navbar({
             style={{ 
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '6px',
-              padding: '5px 12px', 
+              gap: '5px',
+              padding: '4px 9px', 
               fontSize: '11px', 
               fontWeight: 800,
               color: '#f87171', 
               border: '1px solid #ef4444',
               background: 'transparent',
-              borderRadius: '7px',
+              borderRadius: '6px',
               cursor: 'pointer',
-              boxShadow: '0 0 12px rgba(239, 68, 68, 0.3)'
+              boxShadow: '0 0 10px rgba(239, 68, 68, 0.25)',
+              whiteSpace: 'nowrap'
             }}
           >
-            <Lock size={12} />
+            <Lock size={11} />
             <span>Sign Out</span>
           </motion.button>
 
@@ -424,7 +427,7 @@ export default function Navbar({
       <div style={{
         maxWidth: '1440px',
         margin: '0 auto',
-        padding: '0 1.5rem',
+        padding: '0 1.25rem',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
