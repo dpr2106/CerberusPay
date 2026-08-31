@@ -46,7 +46,6 @@ Evaluated on **6,000 held-out test transactions** representing real Indian BFSI 
 | **Recall** | **94.1%** | Intercepted $94.1\%$ of high-velocity fraud attack patterns. |
 | **F1-Score** | **0.951** | Balanced harmonic mean across the evaluation split. |
 | **ROC-AUC** | **0.988** | High discriminative class separability. |
-| **Prevented Fraud Value** | **₹26,19,500.00** | Net merchant loss prevented across blocked threat attacks. |
 | **False-Positive Friction Cost** | **Minimal** | Zero unnecessary friction on authenticated customer accounts. |
 
 ---
